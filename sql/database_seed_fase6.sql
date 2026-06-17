@@ -66,15 +66,6 @@ INSERT INTO attributes (name, slug, type, is_filterable, is_visible_on_product) 
   ('Garantía',  'garantia',  'text',    false, true)
 ON CONFLICT (slug) DO NOTHING;
 
--- Sample attribute values para Marca
-INSERT INTO attribute_values (attribute_id, value, slug, sort_order)
-SELECT id, 'Bianchi', 'bianchi', 1 FROM attributes WHERE slug = 'marca'
-UNION ALL
-SELECT id, 'Necta', 'necta', 2 FROM attributes WHERE slug = 'marca'
-UNION ALL
-SELECT id, 'AquaPure', 'aquapure', 3 FROM attributes WHERE slug = 'marca'
-WHERE NOT EXISTS (SELECT 1 FROM attribute_values WHERE attribute_id = (SELECT id FROM attributes WHERE slug = 'marca') AND slug = 'bianchi');
-
 INSERT INTO attribute_values (attribute_id, value, slug, sort_order)
 SELECT id, 'Bianchi', 'bianchi', 1 FROM attributes WHERE slug = 'marca'
 UNION ALL

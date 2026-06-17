@@ -16,6 +16,7 @@ interface CategoryNode {
 
 export default function Header() {
   const [user, setUser] = useState<User | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
   const [categories, setCategories] = useState<CategoryNode[]>([])
@@ -26,6 +27,14 @@ export default function Header() {
     const getUser = async () => {
       const { data } = await supabase.auth.getUser()
       setUser(data.user)
+      if (data.user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", data.user.id)
+          .single()
+        setIsAdmin(profile?.role === "admin")
+      }
       setLoading(false)
     }
     getUser()
@@ -127,6 +136,14 @@ export default function Header() {
 
         {loading ? null : user ? (
           <>
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="hidden text-sm font-medium text-gray-900 underline md:block"
+              >
+                Admin
+              </Link>
+            )}
             <Link
               href="/account"
               className="hidden text-sm font-medium text-gray-700 hover:text-gray-900 md:block"

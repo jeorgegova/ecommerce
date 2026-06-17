@@ -832,7 +832,7 @@ CREATE INDEX idx_view_history_user_viewed ON view_history(user_id, viewed_at DES
 -- 3.20 Product Views (analytics)
 CREATE INDEX idx_product_views_product_id ON product_views(product_id);
 CREATE INDEX idx_product_views_viewed_at ON product_views(viewed_at DESC);
-CREATE INDEX idx_product_views_date ON product_views(date_trunc('day', viewed_at));
+--CREATE INDEX idx_product_views_date ON product_views(date_trunc('day', viewed_at));
 
 -- 3.21 Coupons
 CREATE INDEX idx_coupons_code ON coupons(code);

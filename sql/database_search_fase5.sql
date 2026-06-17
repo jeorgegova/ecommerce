@@ -197,6 +197,7 @@ AS $$
 BEGIN
   RETURN QUERY
   -- Productos
+  (
   SELECT
     'product'::TEXT AS suggestion_type,
     p.name::TEXT AS suggestion_text,
@@ -205,9 +206,11 @@ BEGIN
   WHERE p.status = 'active'
     AND p.name ILIKE '%' || p_query || '%'
   LIMIT 5
+  )
 
   UNION ALL
 
+(
   -- Categorías
   SELECT
     'category'::TEXT,
@@ -217,6 +220,7 @@ BEGIN
   WHERE c.is_active = true
     AND c.name ILIKE '%' || p_query || '%'
   LIMIT 3
+  )
 
   ORDER BY suggestion_type, suggestion_text
   LIMIT 8;
@@ -300,3 +304,7 @@ BEGIN
   RETURN v_count;
 END;
 $$;
+
+
+CREATE UNIQUE INDEX idx_view_history_user_product ON view_history(user_id, product_id);
+CREATE UNIQUE INDEX idx_product_views_user_product ON product_views(product_id, user_id) WHERE user_id IS NOT NULL;

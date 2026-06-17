@@ -20,7 +20,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   return (
     <StoreLayout>
-      <ViewTracker productId={product.id} />
+      <ViewTracker productId={product.id} productName={product.name} productSlug={product.slug} productPrice={product.current_price} productSalePrice={product.sale_price} />
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <Link href={`/categories/${product.category_slug}`} className="text-sm text-gray-500 hover:text-gray-900">← {product.category_name}</Link>
         <div className="mt-6 grid gap-12 lg:grid-cols-2">
