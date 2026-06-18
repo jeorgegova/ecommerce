@@ -335,11 +335,15 @@ export default function ProductForm({ product }: { product?: Product }) {
             />
           </div>
           <div>
-            <label className={labelClass}>Precio Promoción</label>
+            <label className={labelClass}>
+              Precio Promoción{" "}
+              <span className="text-xs font-normal text-gray-400">(Opcional)</span>
+            </label>
             <input
               type="number"
               step="0.01"
               min="0"
+              placeholder="Dejar vacío si no aplica"
               value={form.sale_price}
               onChange={(e) => setForm((p) => ({ ...p, sale_price: e.target.value }))}
               className={inputClass}

@@ -1,14 +1,14 @@
 "use client"
 
 import { createClient } from "@/lib/supabase/client"
-import { useRouter } from "next/navigation"
+import { useAuthModal } from "@/stores/auth-modal"
 import { useEffect, useState } from "react"
 
 export default function FavoriteButton({ productId }: { productId: string }) {
   const [isFavorite, setIsFavorite] = useState(false)
   const [loading, setLoading] = useState(true)
-  const router = useRouter()
   const supabase = createClient()
+  const { openAuth } = useAuthModal()
 
   useEffect(() => {
     const check = async () => {
@@ -31,7 +31,7 @@ export default function FavoriteButton({ productId }: { productId: string }) {
   const toggle = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      router.push("/login?redirect=" + encodeURIComponent(window.location.pathname))
+      openAuth("login", window.location.pathname)
       return
     }
 

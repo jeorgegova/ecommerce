@@ -1,7 +1,9 @@
 "use client"
 
 import SearchBar from "@/components/store/SearchBar"
+import UserMenu from "@/components/layout/UserMenu"
 import { createClient } from "@/lib/supabase/client"
+import { useAuthModal } from "@/stores/auth-modal"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -16,12 +18,14 @@ interface CategoryNode {
 
 export default function Header() {
   const [user, setUser] = useState<User | null>(null)
+  const [userName, setUserName] = useState<string | undefined>(undefined)
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
   const [categories, setCategories] = useState<CategoryNode[]>([])
   const router = useRouter()
   const supabase = createClient()
+  const { openAuth } = useAuthModal()
 
   useEffect(() => {
     const getUser = async () => {
@@ -30,10 +34,11 @@ export default function Header() {
       if (data.user) {
         const { data: profile } = await supabase
           .from("profiles")
-          .select("role")
+          .select("role, full_name")
           .eq("id", data.user.id)
           .single()
         setIsAdmin(profile?.role === "admin")
+        setUserName(profile?.full_name || data.user.email?.split("@")[0])
       }
       setLoading(false)
     }
@@ -64,6 +69,10 @@ export default function Header() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null)
+      if (!session?.user) {
+        setUserName(undefined)
+        setIsAdmin(false)
+      }
     })
 
     return () => subscription.unsubscribe()
@@ -135,49 +144,143 @@ export default function Header() {
         </button>
 
         {loading ? null : user ? (
-          <>
-            {isAdmin && (
-              <Link
-                href="/admin"
-                className="hidden text-sm font-medium text-gray-900 underline md:block"
-              >
-                Admin
-              </Link>
-            )}
-            <Link
-              href="/account"
-              className="hidden text-sm font-medium text-gray-700 hover:text-gray-900 md:block"
-            >
-              Mi Cuenta
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="hidden text-sm font-medium text-gray-500 hover:text-gray-700 md:block"
-            >
-              Cerrar Sesión
-            </button>
-          </>
+          <UserMenu
+            userName={userName}
+            isAdmin={isAdmin}
+            onLogout={handleLogout}
+          />
         ) : (
           <>
-            <Link
-              href="/login"
+            <button
+              onClick={() => openAuth("login")}
               className="hidden text-sm font-medium text-gray-700 hover:text-gray-900 md:block"
             >
               Iniciar Sesión
-            </Link>
-            <Link
-              href="/register"
+            </button>
+            <button
+              onClick={() => openAuth("register")}
               className="hidden rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 md:block"
             >
               Registrarse
-            </Link>
+            </button>
           </>
         )}
       </div>
 
       {menuOpen && (
         <div className="border-t border-gray-200 px-4 py-4 md:hidden">
-          <nav className="space-y-2">
+          {user ? (
+            <div className="mb-4 flex items-center gap-3 border-b border-gray-100 pb-4">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-900 text-sm font-medium text-white">
+                {(userName || "U").charAt(0).toUpperCase()}
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">{userName || "Usuario"}</p>
+                <p className="text-xs text-gray-500">{isAdmin ? "Administrador" : "Comprador"}</p>
+              </div>
+            </div>
+          ) : (
+            <div className="mb-4 flex gap-2 border-b border-gray-100 pb-4">
+              <button
+                onClick={() => { setMenuOpen(false); openAuth("login") }}
+                className="flex-1 rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Iniciar Sesión
+              </button>
+              <button
+                onClick={() => { setMenuOpen(false); openAuth("register") }}
+                className="flex-1 rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+              >
+                Registrarse
+              </button>
+            </div>
+          )}
+
+          <nav className="space-y-1">
+            {user && (
+              <>
+                <Link
+                  href="/account/orders"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Mis Pedidos
+                </Link>
+                <Link
+                  href="/account/favorites"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Favoritos
+                </Link>
+                <Link
+                  href="/account/profile"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Mi Perfil
+                </Link>
+                <Link
+                  href="/account/addresses"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Direcciones
+                </Link>
+                {isAdmin && (
+                  <>
+                    <div className="my-2 border-t border-gray-100" />
+                    <p className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                      Administración
+                    </p>
+                    <Link
+                      href="/admin/dashboard"
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                    <Link
+                      href="/admin/products"
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Productos
+                    </Link>
+                    <Link
+                      href="/admin/orders"
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Pedidos
+                    </Link>
+                    <Link
+                      href="/admin/categories"
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Categorías
+                    </Link>
+                    <Link
+                      href="/admin/inventory"
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Inventario
+                    </Link>
+                  </>
+                )}
+                <div className="my-2 border-t border-gray-100" />
+                <button
+                  onClick={() => { setMenuOpen(false); handleLogout() }}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+                >
+                  Cerrar Sesión
+                </button>
+              </>
+            )}
+
+            <div className="my-2 border-t border-gray-100" />
             {categories.map((cat) => (
               <Link
                 key={cat.id}

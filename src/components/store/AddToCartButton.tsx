@@ -1,6 +1,7 @@
 "use client"
 
 import { createClient } from "@/lib/supabase/client"
+import { useAuthModal } from "@/stores/auth-modal"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -21,13 +22,15 @@ export default function AddToCartButton({
   const [added, setAdded] = useState(false)
   const router = useRouter()
   const supabase = createClient()
+  const { openAuth } = useAuthModal()
 
   const handleClick = async () => {
     setLoading(true)
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      router.push("/login?redirect=" + encodeURIComponent(window.location.pathname))
+      openAuth("login", window.location.pathname)
+      setLoading(false)
       return
     }
 

@@ -22,6 +22,7 @@ export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
+  const [toggling, setToggling] = useState<string | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -36,6 +37,23 @@ export default function AdminProductsPage() {
     }
     fetchProducts()
   }, [supabase])
+
+  const togglePromotion = async (product: Product) => {
+    setToggling(product.id)
+    const newSalePrice = product.sale_price ? null : Math.round(product.base_price * 0.9 * 100) / 100
+
+    const { error } = await supabase
+      .from("products")
+      .update({ sale_price: newSalePrice })
+      .eq("id", product.id)
+
+    if (!error) {
+      setProducts((prev) =>
+        prev.map((p) => (p.id === product.id ? { ...p, sale_price: newSalePrice } : p))
+      )
+    }
+    setToggling(null)
+  }
 
   const filtered = products.filter(
     (p) =>
@@ -96,6 +114,9 @@ export default function AdminProductsPage() {
               <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
                 Precio
               </th>
+              <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">
+                Promoción
+              </th>
               <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
                 Stock
               </th>
@@ -121,11 +142,30 @@ export default function AdminProductsPage() {
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-900 font-medium">
                   ${Number(product.base_price).toLocaleString("es-CO")}
-                  {product.sale_price && (
-                    <span className="ml-1 text-xs text-red-500">
-                      ${Number(product.sale_price).toLocaleString("es-CO")}
-                    </span>
-                  )}
+                </td>
+                <td className="whitespace-nowrap px-6 py-4 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => togglePromotion(product)}
+                      disabled={toggling === product.id}
+                      className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none motion-reduce:transition-none ${
+                        product.sale_price ? "bg-green-500" : "bg-gray-200"
+                      } ${toggling === product.id ? "opacity-50" : ""}`}
+                      role="switch"
+                      aria-checked={!!product.sale_price}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out motion-reduce:transition-none ${
+                          product.sale_price ? "translate-x-5" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                    {product.sale_price && (
+                      <span className="text-xs font-medium text-green-600">
+                        ${Number(product.sale_price).toLocaleString("es-CO")}
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
                   {product.stock}
@@ -149,7 +189,7 @@ export default function AdminProductsPage() {
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
+                <td colSpan={8} className="px-6 py-12 text-center text-sm text-gray-500">
                   No se encontraron productos
                 </td>
               </tr>

@@ -1,6 +1,5 @@
 "use client"
 
-import StoreLayout from "@/components/layout/StoreLayout"
 import { createClient } from "@/lib/supabase/client"
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -38,14 +37,13 @@ export default function OrderDetailPage() {
     fetchOrder()
   }, [supabase, id])
 
-  if (loading) return <StoreLayout><p className="text-center py-24 text-gray-600">Cargando...</p></StoreLayout>
-  if (!order) return <StoreLayout><p className="text-center py-24 text-gray-500">Pedido no encontrado</p></StoreLayout>
+  if (loading) return <p className="text-center py-24 text-gray-600">Cargando...</p>
+  if (!order) return <p className="text-center py-24 text-gray-500">Pedido no encontrado</p>
 
   const addr = order.shipping_address as any
 
   return (
-    <StoreLayout>
-      <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">{order.order_number}</h1>
           <span className="inline-flex rounded-full px-3 py-1 text-sm font-medium"
@@ -88,6 +86,5 @@ export default function OrderDetailPage() {
           </div>
         )}
       </div>
-    </StoreLayout>
   )
 }

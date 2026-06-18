@@ -1,6 +1,5 @@
 "use client"
 
-import StoreLayout from "@/components/layout/StoreLayout"
 import { createClient } from "@/lib/supabase/client"
 import { useEffect, useState } from "react"
 
@@ -73,11 +72,10 @@ export default function AddressesPage() {
   const inputClass = "mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
   const labelClass = "block text-sm font-medium text-gray-700"
 
-  if (loading) return <StoreLayout><p className="text-center py-12 text-gray-600">Cargando...</p></StoreLayout>
+  if (loading) return <p className="text-center py-12 text-gray-600">Cargando...</p>
 
   return (
-    <StoreLayout>
-      <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
+    <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
         <div className="flex items-center justify-between">
           <div><h1 className="text-2xl font-bold text-gray-900">Direcciones</h1><p className="mt-1 text-sm text-gray-600">Gestiona tus direcciones de envío</p></div>
           {!showForm && <button onClick={() => { resetForm(); setShowForm(true) }} className="rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">Nueva Dirección</button>}
@@ -128,6 +126,5 @@ export default function AddressesPage() {
           ))}
         </div>
       </div>
-    </StoreLayout>
-  )
-}
+    )
+  }

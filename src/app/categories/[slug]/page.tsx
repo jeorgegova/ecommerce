@@ -1,5 +1,6 @@
 import StoreLayout from "@/components/layout/StoreLayout"
 import { createClient } from "@/lib/supabase/server"
+import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
@@ -35,7 +36,13 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
             <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {products.map((product) => (
                 <Link key={product.id} href={`/products/${product.slug}`} className="group rounded-xl border border-gray-200 p-4 hover:border-gray-300">
-                  <div className="aspect-square rounded-lg bg-gray-100" />
+                  <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
+                    {product.main_image ? (
+                      <Image src={product.main_image} alt={product.name} fill className="object-cover" sizes="(max-width: 640px) 50vw, 25vw" />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-sm text-gray-400">Sin imagen</div>
+                    )}
+                  </div>
                   <h3 className="mt-3 font-medium text-gray-900 group-hover:text-gray-600">{product.name}</h3>
                   <p className="mt-1 font-semibold text-gray-900">${Number(product.current_price).toLocaleString("es-CO")}</p>
                 </Link>

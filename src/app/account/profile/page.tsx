@@ -1,6 +1,5 @@
 "use client"
 
-import StoreLayout from "@/components/layout/StoreLayout"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -53,11 +52,10 @@ export default function ProfilePage() {
 
   const inputClass = "mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
 
-  if (loading) return <StoreLayout><p className="text-center py-12 text-gray-600">Cargando...</p></StoreLayout>
+  if (loading) return <p className="text-center py-12 text-gray-600">Cargando...</p>
 
   return (
-    <StoreLayout>
-      <div className="mx-auto max-w-lg px-4 py-12 sm:px-6">
+    <div className="mx-auto max-w-lg px-4 py-12 sm:px-6">
         <h1 className="text-2xl font-bold text-gray-900">Mi Perfil</h1>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
@@ -80,6 +78,5 @@ export default function ProfilePage() {
           </button>
         </form>
       </div>
-    </StoreLayout>
   )
 }
