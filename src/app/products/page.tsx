@@ -1,11 +1,26 @@
 import StoreLayout from "@/components/layout/StoreLayout"
+import ProductCard from "@/components/store/ProductCard"
 import { createClient } from "@/lib/supabase/server"
-import Image from "next/image"
-import Link from "next/link"
 
 export default async function ProductsPage() {
   const supabase = await createClient()
   const { data: products } = await supabase.from("product_listing").select("*").order("created_at", { ascending: false })
+
+  const productIds = (products || []).map((p: any) => p.id)
+  let productImagesMap: Record<string, string[]> = {}
+  if (productIds.length > 0) {
+    const { data: allImages } = await supabase
+      .from("product_images")
+      .select("product_id, url")
+      .in("product_id", productIds)
+      .order("sort_order")
+    if (allImages) {
+      for (const img of allImages) {
+        if (!productImagesMap[img.product_id]) productImagesMap[img.product_id] = []
+        productImagesMap[img.product_id].push(img.url)
+      }
+    }
+  }
 
   return (
     <StoreLayout>
@@ -13,27 +28,21 @@ export default async function ProductsPage() {
         <h1 className="text-3xl font-bold text-gray-900">Productos</h1>
         <p className="mt-2 text-gray-600">{products?.length || 0} productos disponibles</p>
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {products?.map((product) => (
-            <Link key={product.id} href={`/products/${product.slug}`} className="group rounded-xl border border-gray-200 p-4 hover:border-gray-300 hover:shadow-sm">
-              <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
-                {product.main_image ? (
-                  <Image src={product.main_image} alt={product.name} fill className="object-cover" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-sm text-gray-400">Sin imagen</div>
-                )}
-              </div>
-              <div className="mt-4">
-                <p className="text-xs text-gray-500">{product.category_name}</p>
-                <h3 className="mt-1 font-medium text-gray-900 group-hover:text-gray-600">{product.name}</h3>
-                <div className="mt-2 flex items-center gap-2">
-                  {product.sale_price ? (
-                    <><span className="text-lg font-semibold text-gray-900">${Number(product.sale_price).toLocaleString("es-CO")}</span><span className="text-sm text-gray-400 line-through">${Number(product.base_price).toLocaleString("es-CO")}</span></>
-                  ) : (
-                    <span className="text-lg font-semibold text-gray-900">${Number(product.current_price).toLocaleString("es-CO")}</span>
-                  )}
-                </div>
-              </div>
-            </Link>
+          {products?.map((product: any) => (
+            <ProductCard
+              key={product.id}
+              product={{
+                id: product.id,
+                name: product.name,
+                slug: product.slug,
+                base_price: product.base_price,
+                sale_price: product.sale_price,
+                promotion_active: product.promotion_active,
+                current_price: product.current_price,
+                category_name: product.category_name,
+              }}
+              images={productImagesMap[product.id] || (product.main_image ? [product.main_image] : [])}
+            />
           ))}
         </div>
       </div>

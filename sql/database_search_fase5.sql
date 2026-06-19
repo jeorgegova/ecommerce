@@ -95,6 +95,7 @@ RETURNS TABLE (
   current_price   NUMERIC(12,2),
   stock           INTEGER,
   has_variants    BOOLEAN,
+  promotion_active BOOLEAN,
   main_image      TEXT,
   avg_rating      NUMERIC(3,2),
   reviews_count   INTEGER,
@@ -104,10 +105,11 @@ RETURNS TABLE (
 LANGUAGE plpgsql
 AS $$
 DECLARE
-  v_offset   INTEGER;
-  v_tsquery  TSQUERY;
-  v_has_text BOOLEAN;
-  v_total    BIGINT;
+  v_offset        INTEGER;
+  v_tsquery       TSQUERY;
+  v_has_text      BOOLEAN;
+  v_total         BIGINT;
+  v_text_filter   TEXT;
 BEGIN
   v_offset    := (p_page - 1) * p_page_size;
   v_has_text  := p_query IS NOT NULL AND p_query != '';
@@ -118,6 +120,7 @@ BEGIN
   END IF;
 
   -- Calcular total de resultados (sin paginación)
+  -- Usa full-text search + ILIKE fallback (search_vector puede ser NULL en productos antiguos)
   SELECT count(*) INTO v_total
   FROM products p
   WHERE p.status = 'active'
@@ -126,7 +129,22 @@ BEGIN
     AND (p_price_max IS NULL OR COALESCE(p.sale_price, p.base_price) <= p_price_max)
     AND (p_in_stock IS NULL OR (p_in_stock = true AND p.stock > 0) OR (p_in_stock = false AND p.stock = 0))
     AND (p_on_sale IS NULL OR (p_on_sale = true AND p.sale_price IS NOT NULL))
-    AND (NOT v_has_text OR p.search_vector @@ v_tsquery);
+    AND (NOT v_has_text
+         OR p.search_vector @@ v_tsquery
+         OR p.name ILIKE '%' || replace(p_query, '''', '''''') || '%'
+         OR p.sku ILIKE '%' || replace(p_query, '''', '''''') || '%');
+
+  -- Construir condicion de busqueda de texto para el query principal
+  IF v_has_text THEN
+    v_text_filter := format(
+      'AND (p.search_vector @@ %L OR p.name ILIKE %L OR p.sku ILIKE %L)',
+      v_tsquery,
+      '%' || p_query || '%',
+      '%' || p_query || '%'
+    );
+  ELSE
+    v_text_filter := '';
+  END IF;
 
   -- Retornar resultados paginados
   RETURN QUERY EXECUTE
@@ -142,6 +160,7 @@ BEGIN
         COALESCE(p.sale_price, p.base_price) AS current_price,
         p.stock,
         p.has_variants,
+        p.promotion_active,
         (SELECT url FROM product_images WHERE product_id = p.id AND is_main = true LIMIT 1) AS main_image,
         p.avg_rating,
         p.reviews_count,
@@ -149,6 +168,7 @@ BEGIN
         %L AS total_count
       FROM products p
       WHERE p.status = ''active''
+        %s
         %s
         %s
         %s
@@ -163,6 +183,7 @@ BEGIN
       CASE WHEN p_in_stock = true THEN 'AND p.stock > 0'
            WHEN p_in_stock = false THEN 'AND p.stock = 0' ELSE '' END,
       CASE WHEN p_on_sale = true THEN 'AND p.sale_price IS NOT NULL' ELSE '' END,
+      v_text_filter,
       CASE
         WHEN v_has_text THEN 'ts_rank(p.search_vector, ' || quote_literal(v_tsquery) || ') DESC, p.sales_count DESC'
         WHEN p_sort_by = 'price_asc'  THEN 'current_price ASC NULLS LAST'

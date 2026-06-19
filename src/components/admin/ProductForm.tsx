@@ -17,7 +17,6 @@ interface Product {
   name: string
   slug: string
   sku: string
-  internal_code: string | null
   short_description: string | null
   long_description: string | null
   technical_specs: string | null
@@ -29,6 +28,7 @@ interface Product {
   has_variants: boolean
   status: string
   is_featured: boolean
+  promotion_active: boolean
   weight: number | null
   width: number | null
   height: number | null
@@ -48,7 +48,6 @@ export default function ProductForm({ product }: { product?: Product }) {
     name: product?.name || "",
     slug: product?.slug || "",
     sku: product?.sku || "",
-    internal_code: product?.internal_code || "",
     short_description: product?.short_description || "",
     long_description: product?.long_description || "",
     technical_specs: product?.technical_specs || "",
@@ -60,6 +59,7 @@ export default function ProductForm({ product }: { product?: Product }) {
     has_variants: product?.has_variants || false,
     status: product?.status || "draft",
     is_featured: product?.is_featured || false,
+    promotion_active: product?.promotion_active || false,
     weight: product?.weight?.toString() || "",
     width: product?.width?.toString() || "",
     height: product?.height?.toString() || "",
@@ -131,7 +131,6 @@ export default function ProductForm({ product }: { product?: Product }) {
       name: form.name,
       slug: form.slug,
       sku: form.sku,
-      internal_code: form.internal_code || null,
       short_description: form.short_description || null,
       long_description: form.long_description || null,
       technical_specs: form.technical_specs || null,
@@ -143,6 +142,7 @@ export default function ProductForm({ product }: { product?: Product }) {
       has_variants: form.has_variants,
       status: form.status,
       is_featured: form.is_featured,
+      promotion_active: form.promotion_active,
       weight: form.weight || null,
       width: form.width || null,
       height: form.height || null,
@@ -216,7 +216,21 @@ export default function ProductForm({ product }: { product?: Product }) {
       )}
 
       <section>
-        <h2 className="text-lg font-semibold text-gray-900">Información Básica</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900">Información Básica</h2>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.status === "active"}
+              onChange={(e) => setForm((p) => ({ ...p, status: e.target.checked ? "active" : "draft" }))}
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-500 peer-focus:ring-2 peer-focus:ring-green-300 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
+            <span className="ml-3 text-sm font-medium text-gray-700">
+              {form.status === "active" ? "Activo" : "Borrador"}
+            </span>
+          </label>
+        </div>
         <div className="mt-4 grid gap-6 sm:grid-cols-2">
           <div>
             <label className={labelClass}>Nombre</label>
@@ -239,22 +253,13 @@ export default function ProductForm({ product }: { product?: Product }) {
             />
           </div>
           <div>
-            <label className={labelClass}>SKU</label>
+            <label className={labelClass}>SKU (Código Interno)</label>
             <input
               type="text"
               value={form.sku}
               onChange={(e) => setForm((p) => ({ ...p, sku: e.target.value }))}
               className={inputClass}
               required
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Código Interno</label>
-            <input
-              type="text"
-              value={form.internal_code}
-              onChange={(e) => setForm((p) => ({ ...p, internal_code: e.target.value }))}
-              className={inputClass}
             />
           </div>
           <div>
@@ -271,19 +276,6 @@ export default function ProductForm({ product }: { product?: Product }) {
                   {cat.displayName}
                 </option>
               ))}
-            </select>
-          </div>
-          <div>
-            <label className={labelClass}>Estado</label>
-            <select
-              value={form.status}
-              onChange={(e) => setForm((p) => ({ ...p, status: e.target.value }))}
-              className={inputClass}
-            >
-              <option value="draft">Borrador</option>
-              <option value="active">Activo</option>
-              <option value="inactive">Inactivo</option>
-              <option value="discontinued">Descontinuado</option>
             </select>
           </div>
         </div>
@@ -348,6 +340,17 @@ export default function ProductForm({ product }: { product?: Product }) {
               onChange={(e) => setForm((p) => ({ ...p, sale_price: e.target.value }))}
               className={inputClass}
             />
+            {form.sale_price && (
+              <label className="mt-2 flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.promotion_active}
+                  onChange={(e) => setForm((p) => ({ ...p, promotion_active: e.target.checked }))}
+                  className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                />
+                <span className="text-sm text-gray-600">Mostrar promoción al cliente</span>
+              </label>
+            )}
           </div>
           <div>
             <label className={labelClass}>Costo</label>

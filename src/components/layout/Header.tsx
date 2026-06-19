@@ -1,6 +1,7 @@
 "use client"
 
 import SearchBar from "@/components/store/SearchBar"
+import CartBadge from "@/components/store/CartBadge"
 import UserMenu from "@/components/layout/UserMenu"
 import { createClient } from "@/lib/supabase/client"
 import { useAuthModal } from "@/stores/auth-modal"
@@ -129,9 +130,7 @@ export default function Header() {
           <Link href="/products" className="text-sm font-medium text-gray-700 hover:text-gray-900">
             Productos
           </Link>
-          <Link href="/cart" className="text-sm font-medium text-gray-700 hover:text-gray-900">
-            Carrito
-          </Link>
+          <CartBadge className="text-gray-700 hover:text-gray-900" />
         </nav>
 
         <button
@@ -298,13 +297,11 @@ export default function Header() {
             >
               Productos
             </Link>
-            <Link
-              href="/cart"
-              className="block rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            <CartBadge
+              className="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full"
               onClick={() => setMenuOpen(false)}
-            >
-              Carrito
-            </Link>
+              showLabel
+            />
           </nav>
         </div>
       )}

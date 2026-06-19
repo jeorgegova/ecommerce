@@ -50,7 +50,7 @@ export default function CheckoutPage() {
   }, [supabase, router])
 
   const subtotal = cartItems.reduce((sum, item) => {
-    const price = item.products.sale_price || item.products.base_price
+    const price = (item.products.sale_price && item.products.promotion_active) ? item.products.sale_price : item.products.base_price
     return sum + (price + (item.product_variants?.price_adjustment || 0)) * item.quantity
   }, 0)
 
@@ -125,7 +125,12 @@ export default function CheckoutPage() {
                       {item.product_variants && <p className="text-sm text-gray-500">{item.product_variants.name}</p>}
                       <p className="text-sm text-gray-500">Cant: {item.quantity}</p>
                     </div>
-                    <p className="font-medium text-gray-900">${((item.products.sale_price || item.products.base_price) * item.quantity).toLocaleString("es-CO")}</p>
+                    <p className="font-medium text-gray-900">
+                      ${(((item.products.sale_price && item.products.promotion_active ? item.products.sale_price : null) || item.products.base_price) * item.quantity).toLocaleString("es-CO")}
+                      {item.products.sale_price && item.products.promotion_active && (
+                        <> <span className="text-xs text-gray-400 line-through font-normal">${(item.products.base_price * item.quantity).toLocaleString("es-CO")}</span></>
+                      )}
+                    </p>
                   </div>
                 ))}
               </div>

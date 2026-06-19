@@ -11,6 +11,7 @@ interface Product {
   sku: string
   base_price: number
   sale_price: number | null
+  promotion_active: boolean
   stock: number
   status: string
   is_featured: boolean
@@ -39,17 +40,17 @@ export default function AdminProductsPage() {
   }, [supabase])
 
   const togglePromotion = async (product: Product) => {
+    if (!product.sale_price) return
     setToggling(product.id)
-    const newSalePrice = product.sale_price ? null : Math.round(product.base_price * 0.9 * 100) / 100
 
     const { error } = await supabase
       .from("products")
-      .update({ sale_price: newSalePrice })
+      .update({ promotion_active: !product.promotion_active })
       .eq("id", product.id)
 
     if (!error) {
       setProducts((prev) =>
-        prev.map((p) => (p.id === product.id ? { ...p, sale_price: newSalePrice } : p))
+        prev.map((p) => (p.id === product.id ? { ...p, promotion_active: !p.promotion_active } : p))
       )
     }
     setToggling(null)
@@ -145,25 +146,29 @@ export default function AdminProductsPage() {
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-center">
                   <div className="flex items-center justify-center gap-2">
-                    <button
-                      onClick={() => togglePromotion(product)}
-                      disabled={toggling === product.id}
-                      className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none motion-reduce:transition-none ${
-                        product.sale_price ? "bg-green-500" : "bg-gray-200"
-                      } ${toggling === product.id ? "opacity-50" : ""}`}
-                      role="switch"
-                      aria-checked={!!product.sale_price}
-                    >
-                      <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out motion-reduce:transition-none ${
-                          product.sale_price ? "translate-x-5" : "translate-x-0"
-                        }`}
-                      />
-                    </button>
-                    {product.sale_price && (
-                      <span className="text-xs font-medium text-green-600">
-                        ${Number(product.sale_price).toLocaleString("es-CO")}
-                      </span>
+                    {product.sale_price ? (
+                      <>
+                        <button
+                          onClick={() => togglePromotion(product)}
+                          disabled={toggling === product.id}
+                          className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none motion-reduce:transition-none ${
+                            product.promotion_active ? "bg-green-500" : "bg-gray-200"
+                          } ${toggling === product.id ? "opacity-50" : ""}`}
+                          role="switch"
+                          aria-checked={product.promotion_active}
+                        >
+                          <span
+                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out motion-reduce:transition-none ${
+                              product.promotion_active ? "translate-x-5" : "translate-x-0"
+                            }`}
+                          />
+                        </button>
+                        <span className="text-xs font-medium text-green-600">
+                          ${Number(product.sale_price).toLocaleString("es-CO")}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-xs text-gray-400">—</span>
                     )}
                   </div>
                 </td>
