@@ -1,8 +1,7 @@
 "use client"
 
+import ProductCard from "@/components/store/ProductCard"
 import { createClient } from "@/lib/supabase/client"
-import Image from "next/image"
-import Link from "next/link"
 import { useEffect, useState } from "react"
 
 export default function HistoryPage() {
@@ -17,20 +16,31 @@ export default function HistoryPage() {
 
       const { data } = await supabase
         .from("view_history")
-        .select("*, products(id, name, slug, base_price, sale_price)")
+        .select("*, products(id, name, slug, base_price, sale_price, promotion_active)")
         .eq("user_id", user.id)
         .order("viewed_at", { ascending: false })
         .limit(50)
 
       if (data && data.length > 0) {
         const productIds = data.map((item: any) => item.product_id)
-        const { data: listed } = await supabase
-          .from("product_listing")
-          .select("id, main_image")
-          .in("id", productIds)
+        const { data: allImages } = await supabase
+          .from("product_images")
+          .select("product_id, url")
+          .in("product_id", productIds)
+          .order("sort_order")
 
-        const imageMap = new Map((listed || []).map((p: any) => [p.id, p.main_image]))
-        const enriched = data.map((item: any) => ({ ...item, mainImage: imageMap.get(item.product_id) || null }))
+        const imageMap = new Map<string, string[]>()
+        if (allImages) {
+          for (const img of allImages) {
+            if (!imageMap.has(img.product_id)) imageMap.set(img.product_id, [])
+            imageMap.get(img.product_id)!.push(img.url)
+          }
+        }
+
+        const enriched = data.map((item: any) => ({
+          ...item,
+          allImages: imageMap.get(item.product_id) || [],
+        }))
         setItems(enriched)
       } else {
         setItems(data || [])
@@ -51,18 +61,21 @@ export default function HistoryPage() {
             const p = item.products
             if (!p) return null
             return (
-              <Link key={item.id} href={`/products/${p.slug}`} className="rounded-xl border border-gray-200 p-4 hover:border-gray-300">
-                <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
-                  {item.mainImage ? (
-                    <Image src={item.mainImage} alt={p.name} fill className="object-cover" sizes="(max-width: 640px) 50vw, 33vw" />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-sm text-gray-400">Sin imagen</div>
-                  )}
-                </div>
-                <h3 className="mt-3 font-medium text-gray-900">{p.name}</h3>
-                <p className="mt-1 font-semibold text-gray-900">${Number(p.sale_price || p.base_price).toLocaleString("es-CO")}</p>
+              <div key={item.id}>
+                <ProductCard
+                  product={{
+                    id: p.id,
+                    name: p.name,
+                    slug: p.slug,
+                    base_price: p.base_price,
+                    sale_price: p.sale_price,
+                    promotion_active: p.promotion_active,
+                    current_price: (p.sale_price && p.promotion_active) ? p.sale_price : p.base_price,
+                  }}
+                  images={item.allImages || []}
+                />
                 <p className="mt-1 text-xs text-gray-400">{new Date(item.viewed_at).toLocaleDateString("es-CO")}</p>
-              </Link>
+              </div>
             )
           })}
         </div>

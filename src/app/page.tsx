@@ -1,7 +1,7 @@
 import RecentlyViewed from "@/components/store/RecentlyViewed"
+import ProductCard from "@/components/store/ProductCard"
 import StoreLayout from "@/components/layout/StoreLayout"
 import { createClient } from "@/lib/supabase/server"
-import Image from "next/image"
 import Link from "next/link"
 
 export default async function HomePage() {
@@ -12,11 +12,27 @@ export default async function HomePage() {
     supabase.from("categories").select("*").eq("is_active", true).order("sort_order", { ascending: true }).order("name", { ascending: true }),
     supabase.from("products").select("id, category_id, base_price", { count: "exact", head: false }).eq("status", "active"),
     supabase.from("products").select("id", { count: "exact", head: false }).eq("status", "active").gt("stock", 0),
-    supabase.from("products").select("id", { count: "exact", head: false }).eq("status", "active").not("sale_price", "is", null),
+    supabase.from("products").select("id", { count: "exact", head: false }).eq("status", "active").eq("promotion_active", true).not("sale_price", "is", null),
     supabase.from("products").select("id", { count: "exact", head: false }).eq("status", "active").gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
   ])
 
   const products = productsRes.data || []
+
+  const productIds = products.map((p: any) => p.id)
+  let productImagesMap: Record<string, string[]> = {}
+  if (productIds.length > 0) {
+    const { data: allImages } = await supabase
+      .from("product_images")
+      .select("product_id, url")
+      .in("product_id", productIds)
+      .order("sort_order")
+    if (allImages) {
+      for (const img of allImages) {
+        if (!productImagesMap[img.product_id]) productImagesMap[img.product_id] = []
+        productImagesMap[img.product_id].push(img.url)
+      }
+    }
+  }
   const categories = categoriesRes.data || []
   const allProducts = totalRes.data || []
   const totalCount = totalRes.count || 0
@@ -130,28 +146,22 @@ export default async function HomePage() {
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {products.map((product) => (
-                <Link key={product.id} href={`/products/${product.slug}`} className="group rounded-xl border border-gray-200 p-3 hover:border-gray-300 hover:shadow-sm transition-all">
-                  <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
-                    {product.main_image ? (
-                      <Image src={product.main_image} alt={product.name} fill className="object-cover" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw" />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-gray-400 text-xs">Sin imagen</div>
-                    )}
-                  </div>
-                  <div className="mt-3">
-                    <p className="text-xs text-gray-400">{product.category_name}</p>
-                    <h3 className="mt-0.5 text-sm font-medium text-gray-900 leading-tight line-clamp-2 group-hover:text-gray-600">{product.name}</h3>
-                    <div className="mt-1.5 flex items-baseline gap-1.5">
-                      {product.sale_price ? (
-                        <><span className="text-base font-semibold text-gray-900">${Number(product.sale_price).toLocaleString("es-CO")}</span><span className="text-xs text-gray-400 line-through">${Number(product.base_price).toLocaleString("es-CO")}</span></>
-                      ) : (
-                        <span className="text-base font-semibold text-gray-900">${Number(product.current_price).toLocaleString("es-CO")}</span>
-                      )}
-                    </div>
-                    {product.avg_rating > 0 && <p className="mt-1 text-xs text-gray-400">★ {Number(product.avg_rating).toFixed(1)}</p>}
-                  </div>
-                </Link>
+              {products.map((product: any) => (
+                <ProductCard
+                  key={product.id}
+                  product={{
+                    id: product.id,
+                    name: product.name,
+                    slug: product.slug,
+                    base_price: product.base_price,
+                    sale_price: product.sale_price,
+                    promotion_active: product.promotion_active,
+                    current_price: product.current_price,
+                    category_name: product.category_name,
+                    avg_rating: product.avg_rating,
+                  }}
+                  images={productImagesMap[product.id] || (product.main_image ? [product.main_image] : [])}
+                />
               ))}
             </div>
 

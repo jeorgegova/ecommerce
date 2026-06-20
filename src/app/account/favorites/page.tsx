@@ -1,17 +1,17 @@
 "use client"
 
 import FavoriteButton from "@/components/store/FavoriteButton"
+import ProductCard from "@/components/store/ProductCard"
 import { createClient } from "@/lib/supabase/client"
-import Image from "next/image"
-import Link from "next/link"
 import { useEffect, useState } from "react"
 
 interface Favorite {
   id: string
   product_id: string
   created_at: string
-  products: { id: string; name: string; slug: string; base_price: number; sale_price: number | null; stock: number; has_variants: boolean } | null
+  products: { id: string; name: string; slug: string; base_price: number; sale_price: number | null; promotion_active: boolean; stock: number; has_variants: boolean } | null
   mainImage: string | null
+  allImages: string[]
 }
 
 export default function FavoritesPage() {
@@ -26,19 +26,30 @@ export default function FavoritesPage() {
 
       const { data } = await supabase
         .from("favorites")
-        .select("*, products(id, name, slug, base_price, sale_price, stock, has_variants)")
+        .select("*, products(id, name, slug, base_price, sale_price, promotion_active, stock, has_variants)")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
 
       if (data && data.length > 0) {
         const productIds = data.map((f: any) => f.product_id)
-        const { data: listed } = await supabase
-          .from("product_listing")
-          .select("id, main_image")
-          .in("id", productIds)
+        const [{ data: listed }, { data: allImages }] = await Promise.all([
+          supabase.from("product_listing").select("id, main_image").in("id", productIds),
+          supabase.from("product_images").select("product_id, url").in("product_id", productIds).order("sort_order"),
+        ])
 
-        const imageMap = new Map((listed || []).map((p: any) => [p.id, p.main_image]))
-        const enriched = data.map((f: any) => ({ ...f, mainImage: imageMap.get(f.product_id) || null }))
+        const imageMap = new Map<string, string[]>()
+        if (allImages) {
+          for (const img of allImages) {
+            if (!imageMap.has(img.product_id)) imageMap.set(img.product_id, [])
+            imageMap.get(img.product_id)!.push(img.url)
+          }
+        }
+
+        const enriched = data.map((f: any) => ({
+          ...f,
+          allImages: imageMap.get(f.product_id) || [],
+          mainImage: (listed || []).find((p: any) => p.id === f.product_id)?.main_image || null,
+        }))
         setFavorites(enriched)
       } else {
         setFavorites(data || [])
@@ -66,23 +77,22 @@ export default function FavoritesPage() {
           {favorites.map((fav) => {
             if (!fav.products) return null
             const p = fav.products
-            const currentPrice = p.sale_price || p.base_price
+            const images = fav.allImages.length > 0 ? fav.allImages : (fav.mainImage ? [fav.mainImage] : [])
 
             return (
-              <div key={fav.id} className="group relative rounded-xl border border-gray-200 p-4 hover:border-gray-300">
-                <Link href={`/products/${p.slug}`}>
-                  <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
-                    {fav.mainImage ? (
-                      <Image src={fav.mainImage} alt={p.name} fill className="object-cover" sizes="(max-width: 640px) 50vw, 33vw" />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-sm text-gray-400">Sin imagen</div>
-                    )}
-                  </div>
-                  <div className="mt-3">
-                    <h3 className="font-medium text-gray-900 group-hover:text-gray-600">{p.name}</h3>
-                    <p className="mt-1 font-semibold text-gray-900">${Number(currentPrice).toLocaleString("es-CO")}</p>
-                  </div>
-                </Link>
+              <div key={fav.id} className="group relative">
+                <ProductCard
+                  product={{
+                    id: p.id,
+                    name: p.name,
+                    slug: p.slug,
+                    base_price: p.base_price,
+                    sale_price: p.sale_price,
+                    promotion_active: p.promotion_active,
+                    current_price: (p.sale_price && p.promotion_active) ? p.sale_price : p.base_price,
+                  }}
+                  images={images}
+                />
                 <div className="absolute right-4 top-4">
                   <FavoriteButton productId={p.id} />
                 </div>

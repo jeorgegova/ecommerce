@@ -218,6 +218,7 @@ CREATE TABLE products (
   status            TEXT NOT NULL DEFAULT 'draft'
                       CHECK (status IN ('draft', 'active', 'inactive', 'discontinued')),
   is_featured       BOOLEAN NOT NULL DEFAULT false,
+  promotion_active  BOOLEAN NOT NULL DEFAULT false,
   published_at      TIMESTAMPTZ,
   search_vector     TSVECTOR,
   sales_count       INTEGER NOT NULL DEFAULT 0,
@@ -933,11 +934,14 @@ SELECT
   p.short_description,
   p.base_price,
   p.sale_price,
-  COALESCE(p.sale_price, p.base_price) AS current_price,
+  COALESCE(p.sale_price, p.base_price) AS current_price_raw,
+  CASE WHEN p.promotion_active AND p.sale_price IS NOT NULL
+       THEN p.sale_price ELSE p.base_price END AS current_price,
   p.stock,
   p.has_variants,
   p.status,
   p.is_featured,
+  p.promotion_active,
   p.sales_count,
   p.views_count,
   p.avg_rating,

@@ -1,6 +1,7 @@
 "use client"
 
 import { createClient } from "@/lib/supabase/client"
+import Image from "next/image"
 import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
 
@@ -10,7 +11,7 @@ interface CartItem {
   variant_id: string | null
   quantity: number
   created_at: string
-  products: { id: string; name: string; slug: string; sku: string; base_price: number; sale_price: number | null; stock: number; has_variants: boolean }
+  products: { id: string; name: string; slug: string; sku: string; base_price: number; sale_price: number | null; promotion_active: boolean; stock: number; has_variants: boolean; product_images: { url: string; is_main: boolean }[] }
   product_variants: { id: string; name: string; sku: string; price_adjustment: number; stock: number } | null
 }
 
@@ -25,7 +26,7 @@ export default function CartContent() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setLoading(false); return }
     setUserId(user.id)
-    const { data } = await supabase.from("cart_items").select("*, products(*), product_variants(*)").eq("user_id", user.id).order("created_at")
+    const { data } = await supabase.from("cart_items").select("*, products(*, product_images(url, is_main)), product_variants(*)").eq("user_id", user.id).order("created_at")
     setItems(data || [])
     setLoading(false)
   }, [supabase])
@@ -46,7 +47,7 @@ export default function CartContent() {
   }
 
   const subtotal = items.reduce((sum, item) => {
-    const price = item.products.sale_price || item.products.base_price
+    const price = (item.products.sale_price && item.products.promotion_active) ? item.products.sale_price : item.products.base_price
     const adjustment = item.product_variants?.price_adjustment || 0
     return sum + (price + adjustment) * item.quantity
   }, 0)
@@ -66,17 +67,32 @@ export default function CartContent() {
       <div className="mt-8 grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-4">
           {items.map((item) => {
-            const price = item.products.sale_price || item.products.base_price
+            const price = (item.products.sale_price && item.products.promotion_active) ? item.products.sale_price : item.products.base_price
             const adjustment = item.product_variants?.price_adjustment || 0
             const unitPrice = price + adjustment
             return (
               <div key={item.id} className="flex gap-4 rounded-xl border border-gray-200 p-4">
-                <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100" />
+                <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                  {(() => {
+                    const images = item.products.product_images
+                    const mainImage = Array.isArray(images)
+                      ? images.find((img: any) => img.is_main)?.url || images[0]?.url || null
+                      : null
+                    return mainImage ? (
+                      <Image src={mainImage} alt={item.products.name} fill className="object-cover" sizes="96px" />
+                    ) : null
+                  })()}
+                </div>
                 <div className="flex flex-1 flex-col justify-between">
                   <div>
                     <Link href={`/products/${item.products.slug}`} className="font-medium text-gray-900 hover:text-gray-600">{item.products.name}</Link>
                     {item.product_variants && <p className="text-sm text-gray-500">{item.product_variants.name}</p>}
-                    <p className="mt-1 text-sm font-medium text-gray-900">${unitPrice.toLocaleString("es-CO")}</p>
+                    <p className="mt-1 text-sm font-medium text-gray-900">
+                      ${unitPrice.toLocaleString("es-CO")}
+                      {item.products.sale_price && item.products.promotion_active && (
+                        <> <span className="text-xs text-gray-400 line-through font-normal">${Number(item.products.base_price + adjustment).toLocaleString("es-CO")}</span></>
+                      )}
+                    </p>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
