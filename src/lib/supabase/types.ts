@@ -50,6 +50,8 @@ export interface Database {
           sale_price: number | null
           cost_price: number | null
           stock: number
+          low_stock_threshold: number
+          stock_bar_max: number
           has_variants: boolean
           status: "draft" | "active" | "inactive" | "discontinued"
           is_featured: boolean

@@ -214,6 +214,8 @@ CREATE TABLE products (
   sale_price        NUMERIC(12,2) CHECK (sale_price >= 0 AND sale_price <= base_price),
   cost_price        NUMERIC(12,2) CHECK (cost_price >= 0),
   stock             INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
+  low_stock_threshold INTEGER NOT NULL DEFAULT 5 CHECK (low_stock_threshold >= 0),
+  stock_bar_max      INTEGER NOT NULL DEFAULT 20 CHECK (stock_bar_max >= 1),
   has_variants      BOOLEAN NOT NULL DEFAULT false,
   status            TEXT NOT NULL DEFAULT 'draft'
                       CHECK (status IN ('draft', 'active', 'inactive', 'discontinued')),
