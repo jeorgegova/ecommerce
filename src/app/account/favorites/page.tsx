@@ -3,6 +3,7 @@
 import FavoriteButton from "@/components/store/FavoriteButton"
 import ProductCard from "@/components/store/ProductCard"
 import { createClient } from "@/lib/supabase/client"
+import Link from "next/link"
 import { useEffect, useState } from "react"
 
 interface Favorite {

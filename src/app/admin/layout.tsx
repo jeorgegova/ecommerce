@@ -1,13 +1,15 @@
 "use client"
 
-import Breadcrumb from "@/components/layout/Breadcrumb"
-import StoreLayout from "@/components/layout/StoreLayout"
+import AdminHeader from "@/components/admin/AdminHeader"
+import AdminSidebar from "@/components/admin/AdminSidebar"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null)
+  const [userName, setUserName] = useState<string>("")
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -21,7 +23,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("role")
+        .select("role, full_name")
         .eq("id", user.id)
         .single()
 
@@ -30,25 +32,40 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         return
       }
 
+      setUserName(profile.full_name || user.email || "")
       setIsAdmin(true)
     }
     checkAdmin()
   }, [supabase, router])
 
+  const handleLogout = useCallback(async () => {
+    await supabase.auth.signOut()
+    router.push("/login")
+  }, [supabase, router])
+
   if (isAdmin === null) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-gray-600">Verificando acceso...</p>
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-gray-900" />
+          <p className="mt-3 text-sm text-gray-500">Verificando acceso...</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <StoreLayout>
-      <Breadcrumb />
-      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-        {children}
+    <div className="min-h-screen bg-gray-50">
+      <AdminSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        userName={userName}
+        onLogout={handleLogout}
+      />
+      <div className="lg:pl-60">
+        <AdminHeader onMenuClick={() => setSidebarOpen(true)} />
+        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
-    </StoreLayout>
+    </div>
   )
 }

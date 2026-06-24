@@ -49,6 +49,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const currentPrice = product.sale_price ?? product.base_price
   const categoryName = product.categories?.name || ""
   const categorySlug = product.categories?.slug || ""
+  const mainImage = images?.find((img: any) => img.is_main)?.url || images?.[0]?.url || null
 
   return (
     <StoreLayout>
@@ -58,6 +59,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         productSlug={product.slug}
         productPrice={currentPrice}
         productSalePrice={product.sale_price}
+        productImage={mainImage}
       />
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">

@@ -3,12 +3,13 @@
 import { createClient } from "@/lib/supabase/client"
 import { useEffect, useRef } from "react"
 
-export default function ViewTracker({ productId, productName, productSlug, productPrice, productSalePrice }: {
+export default function ViewTracker({ productId, productName, productSlug, productPrice, productSalePrice, productImage }: {
   productId: string
   productName?: string
   productSlug?: string
   productPrice?: number
   productSalePrice?: number | null
+  productImage?: string | null
 }) {
   const supabase = createClient()
   const tracked = useRef(false)
@@ -37,7 +38,7 @@ export default function ViewTracker({ productId, productName, productSlug, produ
           const stored = localStorage.getItem("gogi_recent")
           let recent: any[] = stored ? JSON.parse(stored) : []
           recent = recent.filter((r: any) => r.product_id !== productId)
-          recent.unshift({ product_id: productId, product_name: productName, product_slug: productSlug, product_price: productPrice || 0, product_sale_price: productSalePrice || null, viewed_at: new Date().toISOString() })
+          recent.unshift({ product_id: productId, product_name: productName, product_slug: productSlug, product_price: productPrice || 0, product_sale_price: productSalePrice || null, product_image: productImage || null, viewed_at: new Date().toISOString() })
           localStorage.setItem("gogi_recent", JSON.stringify(recent.slice(0, 10)))
         }
       }

@@ -80,8 +80,7 @@ export default function AdminInventoryPage() {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Inventario</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="text-sm text-gray-500">
             {products.length} productos en total · {variantCount} con variantes
           </p>
         </div>
