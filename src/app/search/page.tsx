@@ -76,7 +76,13 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
       }
     }
   }
-  const { data: rawFilters } = await supabase.rpc("get_product_filters", { p_query: query, p_category_id: params.category || null })
+  const { data: rawFilters } = await supabase.rpc("get_product_filters", {
+    p_query: query, p_category_id: params.category || null,
+    p_price_min: params.min_price ? Number(params.min_price) : null,
+    p_price_max: params.max_price ? Number(params.max_price) : null,
+    p_in_stock: params.in_stock === "true" ? true : params.in_stock === "false" ? false : null,
+    p_on_sale: params.on_sale === "true" ? true : null,
+  })
   const filters = (rawFilters as unknown as FilterValue[]) || []
   const { data: categories } = await supabase.from("categories").select("*").eq("is_active", true).order("sort_order")
   const totalCount = products.length > 0 ? Number(products[0].total_count) : 0

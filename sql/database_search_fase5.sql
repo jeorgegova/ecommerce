@@ -125,10 +125,16 @@ BEGIN
   FROM products p
   WHERE p.status = 'active'
     AND (p_category_id IS NULL OR p.category_id = p_category_id)
-    AND (p_price_min IS NULL OR COALESCE(p.sale_price, p.base_price) >= p_price_min)
-    AND (p_price_max IS NULL OR COALESCE(p.sale_price, p.base_price) <= p_price_max)
+    AND (p_price_min IS NULL OR COALESCE(
+      CASE WHEN p.promotion_active THEN p.sale_price ELSE NULL END,
+      p.base_price
+    ) >= p_price_min)
+    AND (p_price_max IS NULL OR COALESCE(
+      CASE WHEN p.promotion_active THEN p.sale_price ELSE NULL END,
+      p.base_price
+    ) <= p_price_max)
     AND (p_in_stock IS NULL OR (p_in_stock = true AND p.stock > 0) OR (p_in_stock = false AND p.stock = 0))
-    AND (p_on_sale IS NULL OR (p_on_sale = true AND p.sale_price IS NOT NULL))
+    AND (p_on_sale IS NULL OR (p_on_sale = true AND p.sale_price IS NOT NULL AND p.promotion_active = true))
     AND (NOT v_has_text
          OR p.search_vector @@ v_tsquery
          OR p.name ILIKE '%' || replace(p_query, '''', '''''') || '%'
@@ -157,7 +163,7 @@ BEGIN
         p.short_description,
         p.base_price,
         p.sale_price,
-        COALESCE(p.sale_price, p.base_price) AS current_price,
+        CASE WHEN p.promotion_active AND p.sale_price IS NOT NULL THEN p.sale_price ELSE p.base_price END AS current_price,
         p.stock,
         p.has_variants,
         p.promotion_active,
@@ -175,14 +181,14 @@ BEGIN
         %s
         %s
       ORDER BY %s
-      LIMIT %L OFFSET %L',
+      LIMIT %s OFFSET %s',
       v_total,
       CASE WHEN p_category_id IS NOT NULL THEN 'AND p.category_id = ' || quote_literal(p_category_id) ELSE '' END,
-      CASE WHEN p_price_min IS NOT NULL THEN 'AND COALESCE(p.sale_price, p.base_price) >= ' || p_price_min ELSE '' END,
-      CASE WHEN p_price_max IS NOT NULL THEN 'AND COALESCE(p.sale_price, p.base_price) <= ' || p_price_max ELSE '' END,
+      CASE WHEN p_price_min IS NOT NULL THEN 'AND COALESCE(CASE WHEN p.promotion_active THEN p.sale_price ELSE NULL END, p.base_price) >= ' || p_price_min ELSE '' END,
+      CASE WHEN p_price_max IS NOT NULL THEN 'AND COALESCE(CASE WHEN p.promotion_active THEN p.sale_price ELSE NULL END, p.base_price) <= ' || p_price_max ELSE '' END,
       CASE WHEN p_in_stock = true THEN 'AND p.stock > 0'
            WHEN p_in_stock = false THEN 'AND p.stock = 0' ELSE '' END,
-      CASE WHEN p_on_sale = true THEN 'AND p.sale_price IS NOT NULL' ELSE '' END,
+      CASE WHEN p_on_sale = true THEN 'AND p.sale_price IS NOT NULL AND p.promotion_active = true' ELSE '' END,
       v_text_filter,
       CASE
         WHEN v_has_text THEN 'ts_rank(p.search_vector, ' || quote_literal(v_tsquery) || ') DESC, p.sales_count DESC'
@@ -255,7 +261,11 @@ $$;
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION get_product_filters(
   p_query       TEXT DEFAULT '',
-  p_category_id UUID DEFAULT NULL
+  p_category_id UUID DEFAULT NULL,
+  p_price_min   NUMERIC(12,2) DEFAULT NULL,
+  p_price_max   NUMERIC(12,2) DEFAULT NULL,
+  p_in_stock    BOOLEAN DEFAULT NULL,
+  p_on_sale     BOOLEAN DEFAULT NULL
 )
 RETURNS TABLE (
   attribute_id   UUID,
@@ -275,6 +285,16 @@ BEGIN
     FROM products p
     WHERE p.status = 'active'
       AND (p_category_id IS NULL OR p.category_id = p_category_id)
+      AND (p_price_min IS NULL OR COALESCE(
+        CASE WHEN p.promotion_active THEN p.sale_price ELSE NULL END,
+        p.base_price
+      ) >= p_price_min)
+      AND (p_price_max IS NULL OR COALESCE(
+        CASE WHEN p.promotion_active THEN p.sale_price ELSE NULL END,
+        p.base_price
+      ) <= p_price_max)
+      AND (p_in_stock IS NULL OR (p_in_stock = true AND p.stock > 0) OR (p_in_stock = false AND p.stock = 0))
+      AND (p_on_sale IS NULL OR (p_on_sale = true AND p.sale_price IS NOT NULL AND p.promotion_active = true))
       AND (
         p_query IS NULL OR p_query = ''
         OR p.search_vector @@ plainto_tsquery('spanish', p_query)

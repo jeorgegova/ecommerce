@@ -10,7 +10,7 @@ export default async function HomePage() {
   const [productsRes, categoriesRes, totalRes, stockRes, saleRes, newRes] = await Promise.all([
     supabase.from("product_listing").select("*").order("created_at", { ascending: false }).limit(20),
     supabase.from("categories").select("*").eq("is_active", true).order("sort_order", { ascending: true }).order("name", { ascending: true }),
-    supabase.from("products").select("id, category_id, base_price", { count: "exact", head: false }).eq("status", "active"),
+    supabase.from("products").select("id, category_id, base_price, sale_price, promotion_active", { count: "exact", head: false }).eq("status", "active"),
     supabase.from("products").select("id", { count: "exact", head: false }).eq("status", "active").gt("stock", 0),
     supabase.from("products").select("id", { count: "exact", head: false }).eq("status", "active").eq("promotion_active", true).not("sale_price", "is", null),
     supabase.from("products").select("id", { count: "exact", head: false }).eq("status", "active").gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
@@ -45,10 +45,12 @@ export default async function HomePage() {
     categoryCounts[p.category_id] = (categoryCounts[p.category_id] || 0) + 1
   }
 
-  const lowPrice = allProducts.filter((p) => p.base_price < 50000).length
-  const midPrice = allProducts.filter((p) => p.base_price >= 50000 && p.base_price <= 100000).length
-  const highPrice = allProducts.filter((p) => p.base_price > 100000 && p.base_price <= 500000).length
-  const topPrice = allProducts.filter((p) => p.base_price > 500000).length
+  const effectivePrice = (p: any) => (p.promotion_active && p.sale_price ? p.sale_price : p.base_price)
+
+  const lowPrice = allProducts.filter((p) => effectivePrice(p) < 50000).length
+  const midPrice = allProducts.filter((p) => effectivePrice(p) >= 50000 && effectivePrice(p) <= 100000).length
+  const highPrice = allProducts.filter((p) => effectivePrice(p) > 100000 && effectivePrice(p) <= 500000).length
+  const topPrice = allProducts.filter((p) => effectivePrice(p) > 500000).length
 
   const roots = categories.filter((c) => !c.parent_id)
   const getChildren = (parentId: string) => categories.filter((c) => c.parent_id === parentId)
