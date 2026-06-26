@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useCallback, useState } from "react"
+import { memo, useCallback, useEffect, useState } from "react"
 
 interface ProductCardProps {
   product: {
@@ -19,47 +19,78 @@ interface ProductCardProps {
   images: string[]
 }
 
-export default function ProductCard({ product, images }: ProductCardProps) {
+const ProductCard = memo(function ProductCard({ product, images }: ProductCardProps) {
   const [activeIdx, setActiveIdx] = useState(0)
-  const currentImage = images[activeIdx] || images[0] || null
+  const [isHovered, setIsHovered] = useState(false)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+
+  const hasImages = images.length > 0
+  const hasMultiple = images.length > 1
+
+  useEffect(() => {
+    if (isTransitioning) {
+      const timer = setTimeout(() => setIsTransitioning(false), 300)
+      return () => clearTimeout(timer)
+    }
+  }, [isTransitioning])
 
   const prev = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    if (isTransitioning) return
+    setIsTransitioning(true)
     setActiveIdx((i) => (i > 0 ? i - 1 : images.length - 1))
-  }, [images.length])
+  }, [images.length, isTransitioning])
 
   const next = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    if (isTransitioning) return
+    setIsTransitioning(true)
     setActiveIdx((i) => (i < images.length - 1 ? i + 1 : 0))
-  }, [images.length])
+  }, [images.length, isTransitioning])
 
   const salePrice = product.sale_price && product.promotion_active ? product.sale_price : null
 
   return (
     <Link
       href={`/products/${product.slug}`}
-      className="group rounded-xl border border-gray-200 p-4 hover:border-gray-300 hover:shadow-md transition-all block"
+      className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 ease-in-out overflow-hidden border border-gray-200 block"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
-        {currentImage ? (
-          <Image
-            src={currentImage}
-            alt={product.name}
-            fill
-            className="object-contain p-2"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          />
+      <div className="relative overflow-hidden">
+        {hasImages ? (
+          <div className="relative w-full aspect-square bg-gray-100">
+            {images.map((img, idx) => (
+              <Image
+                key={idx}
+                src={img}
+                alt={product.name}
+                fill
+                className={`object-contain p-2 transition-all duration-500 ease-in-out ${
+                  idx === activeIdx
+                    ? "opacity-100 translate-x-0"
+                    : idx < activeIdx
+                      ? "opacity-0 -translate-x-full"
+                      : "opacity-0 translate-x-full"
+                }`}
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                priority={idx === 0}
+              />
+            ))}
+          </div>
         ) : (
-          <div className="flex h-full items-center justify-center text-gray-400 text-sm">Sin imagen</div>
+          <div className="w-full aspect-square bg-gray-100 flex items-center justify-center">
+            <span className="text-gray-400 text-sm">Sin imagen</span>
+          </div>
         )}
 
-        {images.length > 1 && (
+        {isHovered && hasMultiple && (
           <>
             <button
               onClick={prev}
-              className="absolute left-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-white/80 text-gray-700 shadow opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+              className="absolute left-1.5 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-all duration-300 opacity-0 group-hover:opacity-100"
               aria-label="Anterior"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -68,7 +99,7 @@ export default function ProductCard({ product, images }: ProductCardProps) {
             </button>
             <button
               onClick={next}
-              className="absolute right-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-white/80 text-gray-700 shadow opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-all duration-300 opacity-0 group-hover:opacity-100"
               aria-label="Siguiente"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -76,13 +107,16 @@ export default function ProductCard({ product, images }: ProductCardProps) {
               </svg>
             </button>
 
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-              {images.slice(0, 5).map((_, i) => (
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 transition-all duration-300 opacity-0 group-hover:opacity-100">
+              {images.map((_, idx) => (
                 <button
-                  key={i}
-                  onClick={(e) => { e.preventDefault(); setActiveIdx(i) }}
-                  className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                    i === activeIdx ? "bg-white shadow" : "bg-white/50 hover:bg-white/80"
+                  key={idx}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setActiveIdx(idx)
+                  }}
+                  className={`h-1.5 w-1.5 rounded-full transition-all duration-300 ${
+                    idx === activeIdx ? "bg-white" : "bg-white/50"
                   }`}
                 />
               ))}
@@ -91,7 +125,7 @@ export default function ProductCard({ product, images }: ProductCardProps) {
         )}
       </div>
 
-      <div className="mt-3">
+      <div className="p-3">
         {product.category_name && (
           <p className="text-xs text-gray-400 mb-0.5 truncate">{product.category_name}</p>
         )}
@@ -122,4 +156,6 @@ export default function ProductCard({ product, images }: ProductCardProps) {
       </div>
     </Link>
   )
-}
+})
+
+export default ProductCard
