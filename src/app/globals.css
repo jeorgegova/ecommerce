@@ -1,10 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  --animate-fade-in: fadeIn 0.2s ease-out;
-  --animate-slide-up: slideUp 0.3s ease-out;
-  --animate-scale-in: scaleIn 0.25s ease-out;
-  --animate-slide-down: slideDown 0.3s ease-out;
+  --animate-fade-in: fadeIn 0.3s ease-out;
+  --animate-slide-up: slideUp 0.35s ease-out;
+  --animate-scale-in: scaleIn 0.2s ease-out;
+  --animate-slide-down: slideDown 0.25s ease-out;
+  --animate-chip-in: chipIn 0.2s ease-out;
+  --animate-nav-in: navIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-card-in: cardIn 0.4s ease-out;
+  --animate-shimmer: shimmer 1.5s ease-in-out infinite;
 }
 
 @keyframes fadeIn {
@@ -13,34 +17,72 @@
 }
 
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes chipIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes navIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@layer base {
+  :root {
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  * {
+    -webkit-tap-highlight-color: transparent;
   }
+
+  html {
+    overscroll-behavior: none;
+    scroll-behavior: smooth;
+  }
+
+  ::selection {
+    background-color: rgba(0, 0, 0, 0.08);
+  }
+}
+
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+@utility touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+@utility shimmer-bg {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
 }

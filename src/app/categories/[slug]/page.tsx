@@ -1,5 +1,6 @@
 import StoreLayout from "@/components/layout/StoreLayout"
 import ProductCard from "@/components/store/ProductCard"
+import MobileFilterChips from "@/components/store/MobileFilterChips"
 import { createClient } from "@/lib/supabase/server"
 import Link from "next/link"
 import { notFound } from "next/navigation"
@@ -12,6 +13,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
 
   const { data: children } = await supabase.from("categories").select("*").eq("parent_id", category.id).eq("is_active", true).order("sort_order")
   const { data: products } = await supabase.from("product_listing").select("*").eq("category_id", category.id)
+  const { data: allCategories } = await supabase.from("categories").select("*").eq("is_active", true).order("sort_order")
 
   const productIds = (products || []).map((p: any) => p.id)
   let productImagesMap: Record<string, string[]> = {}
@@ -29,15 +31,29 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
     }
   }
 
+  const roots = (allCategories || []).filter((c) => !c.parent_id)
+
+  const mobileChips = [
+    { label: "Todas", href: "/categories", active: false },
+    ...roots.map((cat) => ({
+      label: cat.name,
+      href: `/categories/${cat.slug}`,
+      active: cat.slug === slug,
+    })),
+    { label: "En oferta", href: "/search?on_sale=true", active: false },
+  ]
+
   return (
     <StoreLayout>
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <MobileFilterChips chips={mobileChips} />
+
+      <div className="mx-auto max-w-7xl px-4 py-4 lg:px-6 lg:py-12 lg:px-8">
         <Link href="/categories" className="text-sm text-gray-500 hover:text-gray-900">← Categorías</Link>
-        <h1 className="mt-2 text-3xl font-bold text-gray-900">{category.name}</h1>
+        <h1 className="mt-1 text-xl font-bold text-gray-900 lg:mt-2 lg:text-3xl">{category.name}</h1>
         {children && children.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-lg font-semibold text-gray-900">Subcategorías</h2>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-4 lg:mt-8">
+            <h2 className="text-base font-semibold text-gray-900 lg:text-lg">Subcategorías</h2>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:mt-4 lg:gap-4 lg:grid-cols-3">
               {children.map((child) => (
                 <Link key={child.id} href={`/categories/${child.slug}`} className="rounded-lg border border-gray-200 p-4 hover:border-gray-300">
                   <h3 className="font-medium text-gray-900">{child.name}</h3>
@@ -46,10 +62,10 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
             </div>
           </div>
         )}
-        <div className="mt-8">
-          <h2 className="text-lg font-semibold text-gray-900">Productos</h2>
+        <div className="mt-4 lg:mt-8">
+          <h2 className="text-base font-semibold text-gray-900 lg:text-lg">Productos</h2>
           {products && products.length > 0 ? (
-            <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:mt-4 lg:gap-6 lg:grid-cols-4">
               {products.map((product: any) => (
                 <ProductCard
                   key={product.id}
@@ -67,7 +83,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
               ))}
             </div>
           ) : (
-            <p className="mt-4 text-gray-500">No hay productos en esta categoría.</p>
+            <p className="mt-3 text-gray-500 lg:mt-4">No hay productos en esta categoría.</p>
           )}
         </div>
       </div>

@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import Providers from "@/components/providers"
 import "./globals.css"
@@ -18,14 +18,22 @@ export const metadata: Metadata = {
   description: "Tu tienda de confianza",
 }
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
+  themeColor: "#111827",
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-white text-gray-900">
+    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className="flex flex-col bg-white text-gray-900 max-lg:h-dvh max-lg:overflow-hidden">
         <Providers>{children}</Providers>
       </body>
     </html>

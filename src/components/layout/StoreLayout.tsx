@@ -1,12 +1,14 @@
 import Footer from "@/components/layout/Footer"
 import Header from "@/components/layout/Header"
+import MobileBottomNav from "@/components/layout/MobileBottomNav"
 
 export default function StoreLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Header />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 max-lg:overflow-y-auto">{children}</main>
       <Footer />
+      <MobileBottomNav />
     </>
   )
 }

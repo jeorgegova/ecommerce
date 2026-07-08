@@ -2,6 +2,8 @@ import StoreLayout from "@/components/layout/StoreLayout"
 import SortSelect from "@/components/store/SortSelect"
 import ProductCard from "@/components/store/ProductCard"
 import FilterModal from "@/components/store/FilterModal"
+import MobileFilterChips from "@/components/store/MobileFilterChips"
+import DynamicSearchInput from "@/components/store/DynamicSearchInput"
 import RecentlyViewed from "@/components/store/RecentlyViewed"
 import { createClient } from "@/lib/supabase/server"
 import Link from "next/link"
@@ -22,7 +24,6 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const page = Math.max(1, Number(params.page) || 1)
   const supabase = await createClient()
 
-  // Parse attribute filters from f_* params
   const attributeFilters: Record<string, string> = {}
   for (const [key, value] of Object.entries(params)) {
     if (key.startsWith("f_") && typeof value === "string" && value) {
@@ -38,7 +39,6 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     p_sort_by: sort, p_page: page, p_page_size: 20,
   })
 
-  // Fallback ILIKE si la búsqueda full-text no encuentra nada
   if ((!rawProducts || rawProducts.length === 0) && query) {
     const { data: fallbackProducts } = await supabase
       .from("products")
@@ -71,7 +71,6 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 
   const products = (rawProducts as unknown as SearchProduct[]) || []
 
-  // Batch-fetch all images for the displayed products (for hover swap effect)
   const productIds = products.map((p) => p.id)
   let productImagesMap: Record<string, string[]> = {}
   if (productIds.length > 0) {
@@ -126,7 +125,6 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     return `/search?${p.toString()}`
   }
 
-  // Price distribution for filter counts
   let priceRanges: { label: string; href: string; count: number; active: boolean }[] = []
   {
     const { data: priceRows } = await supabase.from("products").select("base_price, sale_price, promotion_active").eq("status", "active")
@@ -155,7 +153,6 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     })
   }
 
-  // Group dynamic attribute filters
   const attributeGroups: { name: string; slug: string; values: { value: string; valueSlug: string; count: number }[] }[] = []
   const groupMap = new Map<string, { name: string; slug: string; values: { value: string; valueSlug: string; count: number }[] }>()
   for (const f of filters) {
@@ -168,25 +165,28 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     attributeGroups.push(g)
   }
 
+  const mobileCategoryChips = categories?.map((c) => ({
+    label: c.name,
+    href: buildSearchUrl({ category: c.id }),
+    active: params.category === c.id,
+  })) || []
+
+  const mobileFilterChips = [
+    { label: "Todas", href: buildSearchUrl({ category: "" }), active: !params.category },
+    ...mobileCategoryChips.slice(0, 8),
+    ...(params.in_stock === "true" ? [{ label: "En stock", href: buildSearchUrl({ in_stock: "" }), active: true }] : [{ label: "En stock", href: buildSearchUrl({ in_stock: "true" }), active: false }]),
+    ...(params.on_sale === "true" ? [{ label: "Ofertas", href: buildSearchUrl({ on_sale: "" }), active: true }] : [{ label: "Ofertas", href: buildSearchUrl({ on_sale: "true" }), active: false }]),
+  ]
+
   return (
     <StoreLayout>
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {query && <h1 className="text-2xl font-bold text-gray-900 mb-6">Resultados para &ldquo;{query}&rdquo;</h1>}
+      {query && <h1 className="mx-auto max-w-7xl px-4 pt-4 text-xl font-bold text-gray-900 lg:px-6 lg:pt-8 lg:px-8 lg:text-2xl lg:mb-6">Resultados para &ldquo;{query}&rdquo;</h1>}
 
-        <div className="flex items-center gap-3 lg:hidden mb-4">
-          <form action="/search" className="flex-1 min-w-0">
-            <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-              </svg>
-              <input
-                name="q"
-                defaultValue={query}
-                placeholder="Buscar productos..."
-                className="block w-full rounded-full border border-gray-200 bg-white pl-9 pr-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
-              />
-            </div>
-          </form>
+      <MobileFilterChips chips={mobileFilterChips} />
+
+      <div className="mx-auto max-w-7xl px-4 py-4 lg:px-6 lg:py-8 lg:px-8">
+        <div className="mb-3 flex items-center gap-3 lg:hidden">
+          <DynamicSearchInput initialQuery={query} currentParams={currentParams} />
           <FilterModal
             query={query}
             activeCategoryId={params.category || null}
@@ -199,7 +199,10 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
             priceRanges={priceRanges}
             attributeGroups={attributeGroups}
           />
+        </div>
+        <div className="mb-3 flex items-center gap-3 lg:hidden">
           <SortSelect currentSort={sort} currentParams={currentParams} />
+          <p className="ml-auto text-xs text-gray-500">{totalCount.toLocaleString("es-CO")} resultados</p>
         </div>
 
         <div className="flex gap-8">
@@ -260,12 +263,12 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
             </div>
           </aside>
           <div className="flex-1">
-            <div className="mb-6 flex items-center justify-between">
+            <div className="mb-4 hidden items-center justify-between lg:mb-6 lg:flex">
               <p className="text-sm text-gray-600">{totalCount.toLocaleString("es-CO")} resultados</p>
               <SortSelect currentSort={sort} currentParams={currentParams} />
             </div>
             {products.length > 0 ? (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2 lg:gap-6 lg:grid-cols-3">
                 {products.map((product) => (
                   <ProductCard
                     key={product.id}
@@ -296,7 +299,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           </div>
         </div>
 
-        <div className="mt-16 border-t border-gray-100 pt-10">
+        <div className="mt-16 border-t border-gray-100 pt-10 hidden lg:block">
           <RecentlyViewed />
         </div>
       </div>
