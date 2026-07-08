@@ -25,6 +25,8 @@ interface Product {
   sale_price: number | null
   cost_price: number | null
   stock: number
+  low_stock_threshold: number
+  stock_bar_max: number
   has_variants: boolean
   status: string
   is_featured: boolean
@@ -56,6 +58,8 @@ export default function ProductForm({ product }: { product?: Product }) {
     sale_price: product?.sale_price?.toString() || "",
     cost_price: product?.cost_price?.toString() || "",
     stock: product?.stock?.toString() || "0",
+    low_stock_threshold: product?.low_stock_threshold?.toString() || "5",
+    stock_bar_max: product?.stock_bar_max?.toString() || "20",
     has_variants: product?.has_variants || false,
     status: product?.status || "draft",
     is_featured: product?.is_featured || false,
@@ -139,6 +143,8 @@ export default function ProductForm({ product }: { product?: Product }) {
       sale_price: form.sale_price || null,
       cost_price: form.cost_price || null,
       stock: form.stock,
+      low_stock_threshold: form.low_stock_threshold,
+      stock_bar_max: form.stock_bar_max,
       has_variants: form.has_variants,
       status: form.status,
       is_featured: form.is_featured,
@@ -370,8 +376,53 @@ export default function ProductForm({ product }: { product?: Product }) {
               min="0"
               value={form.stock}
               onChange={(e) => setForm((p) => ({ ...p, stock: e.target.value }))}
+              disabled={isEdit}
               className={inputClass}
             />
+            {isEdit && (
+              <p className="mt-1 text-[11px] text-gray-400">
+                El stock se gestiona desde la sección de inventario más abajo.
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-6 border-t border-gray-100 pt-4">
+          <h3 className="text-sm font-medium text-gray-700">Umbrales de inventario</h3>
+          <p className="mt-1 text-xs text-gray-400">
+            Específicos para este producto. Controlan las alertas y la barra visual de stock.
+          </p>
+          <div className="mt-3 grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-xs font-medium text-gray-600">
+                Stock bajo ≤
+              </label>
+              <input
+                type="number"
+                min={0}
+                value={form.low_stock_threshold}
+                onChange={(e) => setForm((p) => ({ ...p, low_stock_threshold: e.target.value }))}
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+              />
+              <p className="mt-1 text-[11px] text-gray-400">
+                Por debajo de este valor se muestra alerta naranja.
+              </p>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600">
+                Tope barra visual
+              </label>
+              <input
+                type="number"
+                min={1}
+                value={form.stock_bar_max}
+                onChange={(e) => setForm((p) => ({ ...p, stock_bar_max: e.target.value }))}
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+              />
+              <p className="mt-1 text-[11px] text-gray-400">
+                La barra de progreso se llena al llegar a este valor.
+              </p>
+            </div>
           </div>
         </div>
       </section>

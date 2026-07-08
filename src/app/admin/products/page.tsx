@@ -78,8 +78,7 @@ export default function AdminProductsPage() {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Productos</h1>
-          <p className="mt-1 text-sm text-gray-600">{products.length} productos</p>
+          <p className="text-sm text-gray-500">{products.length} productos</p>
         </div>
         <Link
           href="/admin/products/new"

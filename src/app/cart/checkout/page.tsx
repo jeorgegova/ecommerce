@@ -11,7 +11,7 @@ interface CartItem {
   product_id: string
   variant_id: string | null
   quantity: number
-  products: { id: string; name: string; slug: string; base_price: number; sale_price: number | null; stock: number }
+  products: { id: string; name: string; slug: string; base_price: number; sale_price: number | null; promotion_active: boolean; stock: number }
   product_variants: { id: string; name: string; price_adjustment: number } | null
 }
 

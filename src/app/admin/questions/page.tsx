@@ -36,8 +36,7 @@ export default function AdminQuestionsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900">Preguntas</h1>
-      <p className="mt-1 text-sm text-gray-600">{questions.length} preguntas</p>
+      <p className="text-sm text-gray-500">{questions.length} preguntas</p>
       <div className="mt-6 space-y-4">
         {questions.map((q: any) => (
           <div key={q.id} className={`rounded-xl border p-4 ${q.status === "pending" ? "border-yellow-200 bg-yellow-50" : "border-gray-200"}`}>

@@ -42,8 +42,7 @@ export default function AdminOrdersPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900">Pedidos</h1>
-      <p className="mt-1 text-sm text-gray-600">{orders.length} pedidos</p>
+      <p className="text-sm text-gray-500">{orders.length} pedidos</p>
 
       <div className="mt-8 overflow-hidden rounded-xl border border-gray-200">
         <table className="min-w-full divide-y divide-gray-200">

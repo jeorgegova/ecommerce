@@ -31,8 +31,7 @@ export default function AdminReviewsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900">Reseñas</h1>
-      <p className="mt-1 text-sm text-gray-600">{reviews.length} reseñas</p>
+      <p className="text-sm text-gray-500">{reviews.length} reseñas</p>
       <div className="mt-6 space-y-4">
         {reviews.map((r: any) => (
           <div key={r.id} className={`rounded-xl border p-4 ${r.is_approved ? "border-gray-200" : "border-yellow-200 bg-yellow-50"}`}>

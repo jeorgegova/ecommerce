@@ -75,8 +75,7 @@ export default function AdminImportPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900">Importación Masiva</h1>
-      <p className="mt-1 text-sm text-gray-600">Sube archivos CSV para crear/actualizar productos</p>
+      <p className="text-sm text-gray-500">Sube archivos CSV para crear/actualizar productos</p>
 
       <div className="mt-6">
         <label className="flex cursor-pointer items-center gap-4 rounded-xl border-2 border-dashed border-gray-300 p-8 hover:border-gray-400">
