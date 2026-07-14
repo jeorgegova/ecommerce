@@ -42,7 +42,7 @@ export default function OrdersPage() {
       ) : orders.length === 0 ? (
         <div className="mt-12 text-center">
           <p className="text-gray-500">No tienes pedidos aún</p>
-          <Link href="/products" className="mt-4 inline-block rounded-full bg-gray-900 px-6 py-2.5 text-sm font-medium text-white hover:bg-gray-800">Ver productos</Link>
+
         </div>
       ) : (
         <div className="mt-8 space-y-4">

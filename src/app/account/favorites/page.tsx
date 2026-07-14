@@ -61,7 +61,7 @@ export default function FavoritesPage() {
   }, [supabase])
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
+    <div className="mx-auto max-w-7xl px-4 py-4 lg:px-6 lg:py-12">
       <h1 className="text-2xl font-bold text-gray-900">Favoritos</h1>
 
       {loading ? (
@@ -74,8 +74,8 @@ export default function FavoritesPage() {
           </Link>
         </div>
       ) : (
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {favorites.map((fav) => {
+        <div className="mt-8 grid grid-cols-3 gap-1.5 sm:gap-2 lg:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+          {favorites.map((fav, i) => {
             if (!fav.products) return null
             const p = fav.products
             const images = fav.allImages.length > 0 ? fav.allImages : (fav.mainImage ? [fav.mainImage] : [])
@@ -94,7 +94,7 @@ export default function FavoritesPage() {
                   }}
                   images={images}
                 />
-                <div className="absolute right-4 top-4">
+                <div className="absolute right-1.5 top-1.5 z-10 lg:right-3 lg:top-3">
                   <FavoriteButton productId={p.id} />
                 </div>
               </div>

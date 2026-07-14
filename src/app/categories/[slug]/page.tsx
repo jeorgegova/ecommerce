@@ -53,7 +53,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
         {children && children.length > 0 && (
           <div className="mt-4 lg:mt-8">
             <h2 className="text-base font-semibold text-gray-900 lg:text-lg">Subcategorías</h2>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:mt-4 lg:gap-4 lg:grid-cols-3">
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:mt-4 lg:gap-4 lg:grid-cols-4">
               {children.map((child) => (
                 <Link key={child.id} href={`/categories/${child.slug}`} className="rounded-lg border border-gray-200 p-4 hover:border-gray-300">
                   <h3 className="font-medium text-gray-900">{child.name}</h3>
@@ -65,7 +65,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
         <div className="mt-4 lg:mt-8">
           <h2 className="text-base font-semibold text-gray-900 lg:text-lg">Productos</h2>
           {products && products.length > 0 ? (
-            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:mt-4 lg:gap-6 lg:grid-cols-4">
+            <div className="mt-3 grid grid-cols-3 gap-1.5 sm:gap-2 lg:mt-4 lg:gap-5 lg:grid-cols-3 xl:grid-cols-4">
               {products.map((product: any) => (
                 <ProductCard
                   key={product.id}

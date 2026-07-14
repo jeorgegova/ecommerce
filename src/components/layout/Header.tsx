@@ -13,6 +13,18 @@ import type { User } from "@supabase/supabase-js"
 
 interface CategoryNode { id: string; name: string; slug: string; children: CategoryNode[] }
 
+const MotoIcon = () => (
+  <svg className="h-7 w-7 text-colombia-blue stroke-colombia-blue transition-transform group-hover:scale-110 duration-300" viewBox="0 0 24 24" strokeWidth="1.5" fill="none">
+    <circle cx="5" cy="17" r="2.5" className="stroke-colombia-blue" strokeWidth="2" />
+    <circle cx="19" cy="17" r="2.5" className="stroke-colombia-blue" strokeWidth="2" />
+    <path d="M5 17h14" className="stroke-colombia-red" strokeWidth="2" />
+    <path d="M7.5 17l2-5h5.5l2 5" className="stroke-colombia-blue" strokeWidth="2" />
+    <path d="M9.5 12L8 8H6" className="stroke-colombia-blue" strokeWidth="2" />
+    <path d="M15 12l-1-4h-4" className="stroke-colombia-blue" strokeWidth="2" />
+    <path d="M14 8l1-2.5h2" className="stroke-colombia-yellow" strokeWidth="2" />
+  </svg>
+)
+
 export default function Header() {
   const [user, setUser] = useState<User | null>(null)
   const [userName, setUserName] = useState<string | undefined>(undefined)
@@ -63,8 +75,21 @@ export default function Header() {
   return (
     <header className={`sticky top-0 border-b border-gray-100 bg-white/90 backdrop-blur-xl supports-[backdrop-filter]:bg-white/80 ${menuOpen ? "z-50" : "z-40"}`}>
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:h-16 lg:gap-5 lg:px-8">
-        <Link href="/" className="flex-shrink-0 text-xl font-bold tracking-tight text-gray-900 lg:text-2xl hover:opacity-80 transition-opacity">
-          GoGi
+        <Link href="/" className="group flex-shrink-0 flex items-center gap-2 hover:opacity-90 transition-opacity">
+          <div className="relative flex items-center justify-center p-1.5 bg-gray-50 rounded-xl border border-gray-100 shadow-xs">
+            <MotoIcon />
+            <div className="absolute -bottom-1 -right-1 flex gap-0.5 px-1 py-0.5 rounded-md bg-white border border-gray-100 shadow-xs">
+              <span className="h-1.5 w-1.5 bg-colombia-yellow rounded-full animate-pulse" />
+              <span className="h-1.5 w-1.5 bg-colombia-blue rounded-full" />
+              <span className="h-1.5 w-1.5 bg-colombia-red rounded-full" />
+            </div>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-base font-extrabold tracking-tight text-gray-900 leading-none lg:text-lg flex items-center gap-1">
+              GoGi <span className="text-[10px] font-semibold text-col-blue-dark bg-colombia-yellow/35 px-1.5 py-0.5 rounded-full border border-colombia-yellow/50">Motos</span>
+            </span>
+            <span className="text-[8px] font-bold text-gray-500 uppercase tracking-wider leading-none mt-1">Repuestos Importados 🇨🇴</span>
+          </div>
         </Link>
 
         <div className="flex-1 max-w-xl mx-auto">
@@ -73,18 +98,18 @@ export default function Header() {
 
         <nav className="hidden items-center gap-6 lg:flex">
           <div className="relative group">
-            <button className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors py-1">
+            <button className="text-sm font-medium text-gray-600 hover:text-colombia-blue transition-colors py-1">
               Categorías
             </button>
             {categories.length > 0 && (
               <div className="absolute left-0 top-full z-50 hidden w-56 rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl shadow-gray-100 group-hover:block animate-scale-in origin-top-left">
                 {categories.map((cat) => (
                   <div key={cat.id} className="relative group/sub">
-                    <Link href={`/categories/${cat.slug}`} className="block rounded-xl px-3 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">{cat.name}</Link>
+                    <Link href={`/categories/${cat.slug}`} className="block rounded-xl px-3 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-colombia-blue transition-colors">{cat.name}</Link>
                     {cat.children.length > 0 && (
                       <div className="absolute left-full top-0 hidden w-56 rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl shadow-gray-100 group-hover/sub:block ml-1">
                         {cat.children.map((child) => (
-                          <Link key={child.id} href={`/categories/${child.slug}`} className="block rounded-xl px-3 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">{child.name}</Link>
+                          <Link key={child.id} href={`/categories/${child.slug}`} className="block rounded-xl px-3 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-colombia-blue transition-colors">{child.name}</Link>
                         ))}
                       </div>
                     )}
@@ -93,25 +118,16 @@ export default function Header() {
               </div>
             )}
           </div>
-          <Link href="/products" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Productos</Link>
-          <CartBadge className="text-gray-600 hover:text-gray-900 transition-colors" />
+          
+          <CartBadge className="text-gray-600 hover:text-colombia-blue transition-colors" />
         </nav>
-
-        <div className="ml-auto flex items-center gap-2 lg:hidden">
-          <CartBadge className="touch-target flex items-center justify-center text-gray-700" />
-          <button className="touch-target flex items-center justify-center text-gray-700" onClick={() => setMenuOpen(!menuOpen)}>
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={menuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
-            </svg>
-          </button>
-        </div>
 
         {loading ? null : user ? (
           <div className="hidden lg:block"><UserMenu userName={userName} isAdmin={isAdmin} onLogout={handleLogout} /></div>
         ) : (
           <>
-            <button onClick={() => openAuth("login")} className="hidden text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors lg:block">Iniciar Sesión</button>
-            <button onClick={() => openAuth("register")} className="hidden rounded-full bg-gray-900 px-5 py-2 text-sm font-medium text-white hover:bg-gray-800 transition-all duration-200 hover:shadow-md lg:block">Registrarse</button>
+            <button onClick={() => openAuth("login")} className="hidden text-sm font-medium text-gray-600 hover:text-colombia-blue transition-colors lg:block">Iniciar Sesión</button>
+            <button onClick={() => openAuth("register")} className="hidden rounded-full bg-colombia-blue px-5 py-2 text-sm font-medium text-white hover:bg-col-blue-dark border border-colombia-yellow/50 transition-all duration-200 hover:shadow-md lg:block">Registrarse</button>
           </>
         )}
       </div>

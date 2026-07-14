@@ -106,27 +106,29 @@ const sections = [
 export default function AdminPage() {
   return (
     <div className="mx-auto max-w-4xl">
-      <div className="mb-8">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400">Panel de Administración</h2>
-        <p className="mt-1 text-2xl font-bold text-gray-900">¿Qué quieres gestionar?</p>
+      <div className="mb-5 lg:mb-8">
+        <h2 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 lg:text-xs">Panel de Administración</h2>
+        <p className="mt-0.5 text-lg font-bold text-gray-900 lg:mt-1 lg:text-2xl">¿Qué quieres gestionar?</p>
       </div>
 
-      <div className="space-y-8">
+      <div className="space-y-5 lg:space-y-8">
         {sections.map((section) => (
           <div key={section.title}>
-            <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-gray-400">{section.title}</h3>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 lg:mb-3 lg:text-[11px]">{section.title}</h3>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:gap-3 lg:grid-cols-3">
               {section.items.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="group rounded-xl border border-gray-200 bg-white p-5 transition-all hover:border-gray-300 hover:shadow-sm"
+                  className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 transition-all hover:border-gray-300 hover:shadow-sm lg:flex-col lg:items-start lg:p-5"
                 >
-                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-gray-50 text-gray-500 group-hover:bg-gray-900 group-hover:text-white transition-colors">
+                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gray-50 text-gray-500 transition-colors group-hover:bg-gray-900 group-hover:text-white lg:h-9 lg:w-9">
                     {item.icon}
                   </div>
-                  <h4 className="text-sm font-semibold text-gray-900">{item.label}</h4>
-                  <p className="mt-0.5 text-[13px] text-gray-500">{item.description}</p>
+                  <div>
+                    <h4 className="text-xs font-semibold text-gray-900 lg:text-sm">{item.label}</h4>
+                    <p className="hidden text-[11px] text-gray-500 lg:block lg:mt-0.5 lg:text-[13px]">{item.description}</p>
+                  </div>
                 </Link>
               ))}
             </div>

@@ -82,6 +82,12 @@ export default function AuthModal() {
           animating ? "translate-y-0 scale-100 opacity-100" : "translate-y-8 scale-[0.97] opacity-0"
         }`}
       >
+        <div className="h-1.5 w-full flex">
+          <div className="h-full w-1/2 bg-colombia-yellow" />
+          <div className="h-full w-1/4 bg-colombia-blue" />
+          <div className="h-full w-1/4 bg-colombia-red" />
+        </div>
+
         <button
           onClick={closeAuth}
           className="absolute top-5 right-5 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-all duration-200 hover:bg-gray-200 hover:text-gray-600"
@@ -92,12 +98,19 @@ export default function AuthModal() {
           </svg>
         </button>
 
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden select-none">
-          <svg className="absolute -top-10 -right-10 h-40 w-40 text-gray-100 rotate-12" viewBox="0 0 24 24" fill="currentColor"><path d="M2.25 2.25a.75.75 0 000 1.5h1.386c.17 0 .318.114.362.278l2.558 9.592a3.752 3.752 0 00-2.806 3.63c0 .414.336.75.75.75h15.75a.75.75 0 000-1.5H5.378A2.25 2.25 0 017.5 15h11.218a2.25 2.25 0 002.163-1.684l2.25-8.25A2.25 2.25 0 0020.97 2.25H5.256l-.624-2.34A1.862 1.862 0 003.636.75H2.25zM9.75 19.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm6.75 0a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"/></svg>
-          <svg className="absolute -bottom-8 -left-8 h-36 w-36 text-gray-100 -rotate-12" viewBox="0 0 24 24" fill="currentColor"><path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z"/></svg>
-          <svg className="absolute top-1/2 right-0 h-24 w-24 text-gray-100 translate-x-1/2 -translate-y-1/2 rotate-12" viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clipRule="evenodd" /></svg>
-          <svg className="absolute bottom-1/4 right-1/4 h-20 w-20 text-gray-100 rotate-45" viewBox="0 0 24 24" fill="currentColor"><path d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zm0 9.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zm0 9.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
-          <svg className="absolute top-1/4 left-0 h-16 w-16 text-gray-100 -translate-x-1/2 rotate-6" viewBox="0 0 24 24" fill="currentColor"><path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden select-none opacity-[0.04]">
+          <svg className="absolute -top-10 -right-10 h-40 w-40 text-gray-900 rotate-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 2v4M12 18v4M4 12h4M16 12h4M6.34 6.34l2.83 2.83M14.83 14.83l2.83 2.83M6.34 17.66l2.83-2.83M14.83 9.17l2.83-2.83" />
+          </svg>
+          <svg className="absolute -bottom-8 -left-8 h-36 w-36 text-gray-900 -rotate-45" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+          </svg>
+          <svg className="absolute top-1/2 right-0 h-28 w-28 text-gray-900 translate-x-1/3 -translate-y-1/2 rotate-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="5" cy="18" r="3" />
+            <circle cx="19" cy="18" r="3" />
+            <path d="M5 18l3-6 4 1 3-5h3l1.5 2h-2.5l-3 4-2-1-3 5" />
+          </svg>
         </div>
 
         <div className="relative z-[1] px-8 pb-8 pt-10">
@@ -127,9 +140,9 @@ export default function AuthModal() {
   )
 }
 
-const inputClass = "block w-full rounded-2xl border-0 bg-gray-50 px-4 py-3.5 text-[15px] text-gray-900 placeholder:text-gray-400 focus:bg-gray-100 focus:outline-none focus:ring-0 transition-colors duration-200"
+const inputClass = "block w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-[15px] text-gray-900 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-colombia-yellow/40 focus:border-colombia-blue transition-all duration-200"
 
-const inputErrorClass = "block w-full rounded-2xl border-0 bg-red-50 px-4 py-3.5 text-[15px] text-gray-900 placeholder:text-gray-400 focus:bg-red-100 focus:outline-none focus:ring-0 transition-colors duration-200"
+const inputErrorClass = "block w-full rounded-2xl border border-red-300 bg-red-50 px-4 py-3.5 text-[15px] text-gray-900 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-500 transition-all duration-200"
 
 function LoginForm({
   supabase, router, redirectTo, registeredMessage, onRegisterClick, onForgotClick, onSuccess,
@@ -155,11 +168,18 @@ function LoginForm({
   return (
     <div>
       <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-900">
-          <span className="text-lg font-bold text-white">G</span>
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-colombia-blue border border-colombia-yellow/45 shadow-sm">
+          <svg className="h-7 w-7 text-colombia-yellow stroke-colombia-yellow" viewBox="0 0 24 24" strokeWidth="2" fill="none">
+            <circle cx="5" cy="17" r="2.5" />
+            <circle cx="19" cy="17" r="2.5" />
+            <path d="M5 17h14" className="stroke-colombia-red" />
+            <path d="M7.5 17l2-5h5.5l2 5" />
+            <path d="M9.5 12L8 8H6" />
+            <path d="M15 12l-1-4h-4" />
+          </svg>
         </div>
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">Iniciar sesión</h2>
-        <p className="mt-1.5 text-[15px] text-gray-500">Bienvenido de vuelta a GoGi</p>
+        <p className="mt-1.5 text-[15px] text-gray-500">Bienvenido de vuelta a GoGi Motos</p>
       </div>
 
       {registeredMessage && (
@@ -193,20 +213,20 @@ function LoginForm({
 
         <div className="flex justify-end">
           <button type="button" onClick={onForgotClick}
-            className="text-[13px] font-medium text-gray-400 hover:text-gray-700 transition-colors">
+            className="text-[13px] font-medium text-gray-400 hover:text-colombia-blue transition-colors">
             ¿Olvidaste tu contraseña?
           </button>
         </div>
 
         <button type="submit" disabled={isSubmitting}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 py-3.5 text-[15px] font-semibold text-white shadow-sm transition-all duration-200 hover:bg-gray-800 hover:shadow-md active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40">
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-colombia-blue py-3.5 text-[15px] font-semibold text-white shadow-sm transition-all duration-200 hover:bg-col-blue-dark border border-colombia-yellow/30 hover:shadow-md active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40">
           {isSubmitting ? <><Spinner /> Iniciando sesión...</> : "Iniciar sesión"}
         </button>
       </form>
 
       <p className="mt-6 text-center text-[14px] text-gray-400">
         ¿No tienes cuenta?{" "}
-        <button onClick={onRegisterClick} className="font-semibold text-gray-900 hover:underline underline-offset-2 transition-colors">
+        <button onClick={onRegisterClick} className="font-semibold text-colombia-blue hover:underline underline-offset-2 transition-colors">
           Crear cuenta
         </button>
       </p>
@@ -235,11 +255,18 @@ function RegisterForm({
   return (
     <div>
       <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-900">
-          <span className="text-lg font-bold text-white">G</span>
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-colombia-blue border border-colombia-yellow/45 shadow-sm">
+          <svg className="h-7 w-7 text-colombia-yellow stroke-colombia-yellow" viewBox="0 0 24 24" strokeWidth="2" fill="none">
+            <circle cx="5" cy="17" r="2.5" />
+            <circle cx="19" cy="17" r="2.5" />
+            <path d="M5 17h14" className="stroke-colombia-red" />
+            <path d="M7.5 17l2-5h5.5l2 5" />
+            <path d="M9.5 12L8 8H6" />
+            <path d="M15 12l-1-4h-4" />
+          </svg>
         </div>
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">Crear cuenta</h2>
-        <p className="mt-1.5 text-[15px] text-gray-500">Únete a GoGi hoy</p>
+        <p className="mt-1.5 text-[15px] text-gray-500">Únete a GoGi Motos hoy</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -274,14 +301,14 @@ function RegisterForm({
         </div>
 
         <button type="submit" disabled={isSubmitting}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 py-3.5 text-[15px] font-semibold text-white shadow-sm transition-all duration-200 hover:bg-gray-800 hover:shadow-md active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40">
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-colombia-blue py-3.5 text-[15px] font-semibold text-white shadow-sm transition-all duration-200 hover:bg-col-blue-dark border border-colombia-yellow/30 hover:shadow-md active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40">
           {isSubmitting ? <><Spinner /> Creando cuenta...</> : "Crear cuenta"}
         </button>
       </form>
 
       <p className="mt-6 text-center text-[14px] text-gray-400">
         ¿Ya tienes cuenta?{" "}
-        <button onClick={onLoginClick} className="font-semibold text-gray-900 hover:underline underline-offset-2 transition-colors">
+        <button onClick={onLoginClick} className="font-semibold text-colombia-blue hover:underline underline-offset-2 transition-colors">
           Iniciar sesión
         </button>
       </p>
@@ -317,7 +344,7 @@ function ForgotPasswordForm({
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">Revisa tu correo</h2>
         <p className="mt-2 text-[15px] text-gray-500">Te enviamos un enlace para restablecer tu contraseña.</p>
         <button onClick={onLoginClick}
-          className="mt-8 inline-flex items-center gap-1.5 text-[15px] font-semibold text-gray-900 hover:underline underline-offset-2 transition-colors">
+          className="mt-8 inline-flex items-center gap-1.5 text-[15px] font-semibold text-colombia-blue hover:underline underline-offset-2 transition-colors">
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
@@ -330,8 +357,8 @@ function ForgotPasswordForm({
   return (
     <div>
       <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100">
-          <svg className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-colombia-blue border border-colombia-yellow/45 shadow-sm">
+          <svg className="h-6 w-6 text-colombia-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
           </svg>
         </div>
@@ -353,13 +380,13 @@ function ForgotPasswordForm({
         </div>
 
         <button type="submit" disabled={isSubmitting}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 py-3.5 text-[15px] font-semibold text-white shadow-sm transition-all duration-200 hover:bg-gray-800 hover:shadow-md active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40">
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-colombia-blue py-3.5 text-[15px] font-semibold text-white shadow-sm transition-all duration-200 hover:bg-col-blue-dark border border-colombia-yellow/30 hover:shadow-md active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40">
           {isSubmitting ? <><Spinner /> Enviando...</> : "Enviar enlace"}
         </button>
       </form>
 
       <p className="mt-6 text-center text-[14px] text-gray-400">
-        <button onClick={onLoginClick} className="font-semibold text-gray-900 hover:underline underline-offset-2 transition-colors">
+        <button onClick={onLoginClick} className="font-semibold text-colombia-blue hover:underline underline-offset-2 transition-colors">
           Volver a iniciar sesión
         </button>
       </p>

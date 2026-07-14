@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useMemo } from "react"
 
@@ -16,7 +17,7 @@ const pathLabels: Record<string, string> = {
   new: "Nuevo",
 }
 
-export default function AdminHeader({ onMenuClick }: { onMenuClick: () => void }) {
+export default function AdminHeader() {
   const pathname = usePathname()
 
   const breadcrumbs = useMemo(() => {
@@ -36,22 +37,12 @@ export default function AdminHeader({ onMenuClick }: { onMenuClick: () => void }
   return (
     <header className="sticky top-0 z-20 border-b border-gray-200 bg-white">
       <div className="flex h-14 items-center gap-4 px-4 lg:px-6">
-        <button
-          onClick={onMenuClick}
-          className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 lg:hidden"
-          aria-label="Abrir menú"
-        >
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-          </svg>
-        </button>
-
         <div className="flex-1 min-w-0">
           {breadcrumbs.length > 1 && (
             <nav className="flex items-center gap-1 text-[11px] text-gray-400">
               {breadcrumbs.slice(0, -1).map((crumb) => (
                 <span key={crumb.href} className="flex items-center gap-1">
-                  <span>{crumb.label}</span>
+                  <Link href={crumb.href} className="text-gray-400 transition-colors hover:text-gray-600">{crumb.label}</Link>
                   <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                   </svg>

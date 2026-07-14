@@ -9,6 +9,13 @@
   --animate-nav-in: navIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   --animate-card-in: cardIn 0.4s ease-out;
   --animate-shimmer: shimmer 1.5s ease-in-out infinite;
+  
+  --color-colombia-yellow: #FFC72C;
+  --color-colombia-blue: #003893;
+  --color-colombia-red: #CE1126;
+  --color-col-yellow-dark: #E0AB00;
+  --color-col-blue-dark: #002666;
+  --color-col-red-dark: #A50A1C;
 }
 
 @keyframes fadeIn {

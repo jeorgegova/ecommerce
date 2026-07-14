@@ -354,36 +354,37 @@ export default function EditProductPage() {
 
       <div className="mt-8">
         <h3 className="text-sm font-semibold text-gray-900">Historial de Movimientos</h3>
-        <div className="mt-3 overflow-hidden rounded-xl border border-gray-200">
+        <div className="mt-3 overflow-x-auto rounded-xl border border-gray-200">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-2 text-left text-xs font-medium uppercase text-gray-500">Tipo</th>
-                <th className="px-4 py-2 text-right text-xs font-medium uppercase text-gray-500">Cantidad</th>
-                <th className="px-4 py-2 text-right text-xs font-medium uppercase text-gray-500">Stock Anterior</th>
-                <th className="px-4 py-2 text-right text-xs font-medium uppercase text-gray-500">Stock Nuevo</th>
-                <th className="px-4 py-2 text-left text-xs font-medium uppercase text-gray-500">Notas</th>
-                <th className="px-4 py-2 text-left text-xs font-medium uppercase text-gray-500">Usuario</th>
-                <th className="px-4 py-2 text-right text-xs font-medium uppercase text-gray-500">Fecha</th>
+                <th className="px-2 py-1.5 text-left text-[10px] font-medium uppercase text-gray-500 sm:px-4 sm:py-2 sm:text-xs">Tipo</th>
+                <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase text-gray-500 sm:px-4 sm:py-2 sm:text-xs">Cantidad</th>
+                <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase text-gray-500 sm:px-4 sm:py-2 sm:text-xs">Stock Ant.</th>
+                <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase text-gray-500 sm:px-4 sm:py-2 sm:text-xs">Stock Nuevo</th>
+                <th className="hidden sm:table-cell px-4 py-2 text-left text-xs font-medium uppercase text-gray-500">Notas</th>
+                <th className="hidden sm:table-cell px-4 py-2 text-left text-xs font-medium uppercase text-gray-500">Usuario</th>
+                <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase text-gray-500 sm:px-4 sm:py-2 sm:text-xs">Fecha</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white text-sm">
+            <tbody className="divide-y divide-gray-200 bg-white text-xs sm:text-sm">
               {movements.map((m) => (
                 <tr key={m.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-2">
-                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${typeColor[m.movement_type] || "bg-gray-50 text-gray-700"}`}>
+                  <td className="px-2 py-1.5 sm:px-4 sm:py-2">
+                    <span className={`inline-flex rounded-full px-1.5 py-0.5 text-[9px] font-medium sm:px-2 sm:py-0.5 sm:text-xs ${typeColor[m.movement_type] || "bg-gray-50 text-gray-700"}`}>
                       {m.movement_type}
                     </span>
                   </td>
-                  <td className={`px-4 py-2 text-right font-medium ${m.quantity > 0 ? "text-green-600" : "text-red-600"}`}>
+                  <td className={`px-2 py-1.5 text-right font-medium sm:px-4 sm:py-2 ${m.quantity > 0 ? "text-green-600" : "text-red-600"}`}>
                     {m.quantity > 0 ? "+" : ""}{m.quantity}
                   </td>
-                  <td className="px-4 py-2 text-right text-gray-600">{m.stock_before}</td>
-                  <td className="px-4 py-2 text-right text-gray-600">{m.stock_after}</td>
-                  <td className="px-4 py-2 text-gray-500 max-w-[200px] truncate">{m.notes || "—"}</td>
-                  <td className="px-4 py-2 text-gray-500">{m.profiles?.full_name || "—"}</td>
-                  <td className="whitespace-nowrap px-4 py-2 text-right text-gray-500">
-                    {new Date(m.created_at).toLocaleDateString("es-CO", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                  <td className="px-2 py-1.5 text-right text-gray-600 sm:px-4 sm:py-2">{m.stock_before}</td>
+                  <td className="px-2 py-1.5 text-right text-gray-600 sm:px-4 sm:py-2">{m.stock_after}</td>
+                  <td className="hidden sm:table-cell px-4 py-2 text-gray-500 max-w-[200px] truncate">{m.notes || "—"}</td>
+                  <td className="hidden sm:table-cell px-4 py-2 text-gray-500">{m.profiles?.full_name || "—"}</td>
+                  <td className="whitespace-nowrap px-2 py-1.5 text-right text-gray-500 sm:px-4 sm:py-2 leading-tight">
+                    <span className="block text-[10px] sm:text-xs">{new Date(m.created_at).toLocaleDateString("es-CO", { day: "2-digit", month: "2-digit", year: "numeric" })}</span>
+                    <span className="block text-[9px] text-gray-400 sm:text-[11px]">{new Date(m.created_at).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}</span>
                   </td>
                 </tr>
               ))}

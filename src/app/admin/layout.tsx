@@ -2,6 +2,7 @@
 
 import AdminHeader from "@/components/admin/AdminHeader"
 import AdminSidebar from "@/components/admin/AdminSidebar"
+import MobileBottomNav from "@/components/layout/MobileBottomNav"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
@@ -63,9 +64,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         onLogout={handleLogout}
       />
       <div className="lg:pl-60">
-        <AdminHeader onMenuClick={() => setSidebarOpen(true)} />
-        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
+        <AdminHeader />
+        <main className="p-4 sm:p-6 lg:p-8 pb-32">{children}</main>
       </div>
+      <MobileBottomNav />
     </div>
   )
 }

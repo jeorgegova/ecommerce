@@ -51,12 +51,12 @@ export default function HistoryPage() {
   }, [supabase])
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
+    <div className="mx-auto max-w-7xl px-4 py-4 lg:px-6 lg:py-12">
       <h1 className="text-2xl font-bold text-gray-900">Vistos Recientemente</h1>
       {loading ? <p className="mt-8 text-gray-600">Cargando...</p> : items.length === 0 ? (
         <p className="mt-12 text-center text-gray-500">No has visto productos aún</p>
       ) : (
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid grid-cols-3 gap-1.5 sm:gap-2 lg:gap-5 lg:grid-cols-3 xl:grid-cols-4">
           {items.map((item: any) => {
             const p = item.products
             if (!p) return null

@@ -208,38 +208,242 @@ export default function ProductFilterEngine({
 
   return (
     <div>
-      <div className="lg:hidden">
-        <div className="flex items-center gap-3 px-3 pb-1.5">
-          <div className="flex items-center gap-1.5">
-            <svg className="h-3.5 w-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      {/* Filtros Móviles */}
+      <div className="lg:hidden px-3 pb-3">
+        <div className="flex gap-2 items-center overflow-x-auto scrollbar-hide py-1">
+          {/* Botón principal de Filtros que abre el Drawer */}
+          <button
+            onClick={() => {
+              const drawer = document.getElementById("mobile-filter-drawer")
+              if (drawer) drawer.classList.remove("translate-y-full")
+            }}
+            className={`inline-flex flex-shrink-0 touch-target items-center gap-1.5 rounded-full px-4 py-2 text-[12px] font-bold transition-all duration-200 active:scale-95 bg-colombia-yellow text-col-blue-dark border border-colombia-yellow/50 shadow-sm`}
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
             </svg>
-            <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">Filtros</span>
-          </div>
-          {filterCount > 0 && (
-            <span className="inline-flex items-center justify-center h-4 min-w-[16px] rounded-full bg-gray-900 px-1.5 text-[10px] font-semibold text-white tabular-nums">{filterCount}</span>
+            Filtros
+            {filterCount > 0 && (
+              <span className="flex items-center justify-center h-4 w-4 rounded-full bg-colombia-red text-[9px] font-bold text-white leading-none">
+                {filterCount}
+              </span>
+            )}
+          </button>
+
+          {/* Chips rápidos de estado activo para fácil lectura y remoción */}
+          {filterCount === 0 ? (
+            <span className="text-xs text-gray-400 italic px-1 flex-shrink-0">
+              Sin filtros seleccionados
+            </span>
+          ) : (
+            <>
+              {categoryId && (
+                <button
+                  onClick={() => applyFilter(() => setCategoryId(null))}
+                  className="inline-flex flex-shrink-0 items-center gap-1 bg-colombia-blue/10 text-colombia-blue rounded-full px-3 py-1.5 text-[11px] font-medium border border-colombia-blue/20"
+                >
+                  {initialCategories.find(c => c.id === categoryId)?.name || "Categoría"}
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+
+              {(minPrice !== null || maxPrice !== null) && (
+                <button
+                  onClick={() => applyFilter(() => { setMinPrice(null); setMaxPrice(null) })}
+                  className="inline-flex flex-shrink-0 items-center gap-1 bg-colombia-blue/10 text-colombia-blue rounded-full px-3 py-1.5 text-[11px] font-medium border border-colombia-blue/20"
+                >
+                  Precio
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+
+              {inStock && (
+                <button
+                  onClick={() => applyFilter(() => setInStock(false))}
+                  className="inline-flex flex-shrink-0 items-center gap-1 bg-colombia-blue/10 text-colombia-blue rounded-full px-3 py-1.5 text-[11px] font-medium border border-colombia-blue/20"
+                >
+                  En Stock
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+
+              {onSale && (
+                <button
+                  onClick={() => applyFilter(() => setOnSale(false))}
+                  className="inline-flex flex-shrink-0 items-center gap-1 bg-colombia-blue/10 text-colombia-blue rounded-full px-3 py-1.5 text-[11px] font-medium border border-colombia-blue/20"
+                >
+                  En Oferta
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+
+              {filterCount > 0 && (
+                <button
+                  onClick={clearFilters}
+                  className="text-[11px] font-medium text-colombia-red hover:underline ml-auto flex-shrink-0 px-2"
+                >
+                  Limpiar
+                </button>
+              )}
+            </>
           )}
         </div>
-        <div className="scrollbar-hide flex gap-1.5 overflow-x-auto px-3 pb-3" onClick={(e) => {
-          const chip = (e.target as HTMLElement).closest("[data-chip-index]") as HTMLElement | null
-          if (chip) handleChipClick(parseInt(chip.getAttribute("data-chip-index") || "0"), chip.textContent || "")
-        }}>
-          {mobileChips.map((chip, i) => (
-            <button key={i} data-chip-index={i}
-              className={`inline-flex flex-shrink-0 touch-target items-center gap-1.5 rounded-full px-3.5 py-2 text-[12px] font-medium transition-all duration-200 active:scale-95 ${
-                chip.active
-                  ? "bg-gray-900 text-white shadow-sm shadow-gray-300"
-                  : "bg-gray-100 text-gray-600 active:bg-gray-200 hover:bg-gray-200"
-              }`}>
-              {chip.label}
-              <span className={`text-[10px] tabular-nums ${chip.active ? "text-white/70" : "text-gray-400"}`}>{chip.count.toLocaleString("es-CO")}</span>
-              {chip.active && (
-                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+
+        {/* Drawer Bottom Sheet para Filtros */}
+        <div
+          id="mobile-filter-drawer"
+          className="fixed inset-0 z-100 transform translate-y-full transition-transform duration-300 ease-out bg-black/40 backdrop-blur-xs flex flex-col justify-end"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              e.currentTarget.classList.add("translate-y-full")
+            }
+          }}
+        >
+          <div className="bg-white rounded-t-3xl max-h-[85vh] overflow-y-auto flex flex-col shadow-2xl pb-safe">
+            {/* Cabecera del Drawer */}
+            <div className="sticky top-0 bg-white border-b border-gray-100 px-5 py-4 flex items-center justify-between z-10">
+              <div className="flex items-center gap-2">
+                <span className="text-base font-bold text-gray-900">Filtros de Búsqueda</span>
+                {filterCount > 0 && (
+                  <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-colombia-blue px-1.5 text-[10px] font-extrabold text-white">
+                    {filterCount}
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={() => {
+                  const drawer = document.getElementById("mobile-filter-drawer")
+                  if (drawer) drawer.classList.add("translate-y-full")
+                }}
+                className="p-1 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                 </svg>
+              </button>
+            </div>
+
+            {/* Contenido de los Filtros (Ordenar se quitó de aquí para no duplicar) */}
+            <div className="p-5 space-y-6">
+
+              {/* Categorías */}
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-colombia-blue mb-2.5">Categorías de Repuestos</p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => applyFilter(() => { setCategoryId(null); setPage(1) })}
+                    className={`px-3 py-2 text-xs font-semibold rounded-xl border transition-all ${
+                      !categoryId
+                        ? "bg-colombia-blue text-white border-colombia-blue shadow-sm"
+                        : "bg-gray-50 text-gray-600 border-gray-200"
+                    }`}
+                  >
+                    Todas ({totalCount})
+                  </button>
+                  {roots.map((cat) => {
+                    const count = filterStats.categoryCounts[cat.id] || 0
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => applyFilter(() => { setCategoryId(categoryId === cat.id ? null : cat.id); setPage(1) })}
+                        className={`px-3 py-2 text-xs font-semibold rounded-xl border transition-all ${
+                          categoryId === cat.id
+                            ? "bg-colombia-blue text-white border-colombia-blue shadow-sm"
+                            : "bg-gray-50 text-gray-600 border-gray-200"
+                        }`}
+                      >
+                        {cat.name} ({count})
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Rango de Precios */}
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-colombia-blue mb-2.5">Rango de Precio</p>
+                <div className="space-y-2">
+                  {priceRanges.map((r) => (
+                    <button
+                      key={r.label}
+                      onClick={() => applyFilter(() => { setMinPrice(r.min); setMaxPrice(r.max); setPage(1) })}
+                      className={`w-full flex items-center justify-between px-4 py-3 text-xs font-semibold rounded-xl border transition-all ${
+                        r.active
+                          ? "bg-colombia-yellow/10 text-col-blue-dark border-colombia-yellow font-bold"
+                          : "bg-gray-50 text-gray-600 border-gray-200"
+                      }`}
+                    >
+                      <span>{r.label}</span>
+                      <span className="text-[10px] text-gray-400">({r.count})</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Disponibilidad */}
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-colombia-blue mb-2.5">Disponibilidad</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => applyFilter(() => { setInStock(!inStock); setPage(1) })}
+                    className={`flex items-center justify-center gap-2 px-4 py-3 text-xs font-semibold rounded-xl border transition-all ${
+                      inStock
+                        ? "bg-colombia-yellow/10 text-col-blue-dark border-colombia-yellow"
+                        : "bg-gray-50 text-gray-600 border-gray-200"
+                    }`}
+                  >
+                    <span className={`h-2.5 w-2.5 rounded-full ${inStock ? "bg-green-500" : "bg-gray-300"}`} />
+                    En Stock ({filterStats.stockCount})
+                  </button>
+
+                  <button
+                    onClick={() => applyFilter(() => { setOnSale(!onSale); setPage(1) })}
+                    className={`flex items-center justify-center gap-2 px-4 py-3 text-xs font-semibold rounded-xl border transition-all ${
+                      onSale
+                        ? "bg-colombia-yellow/10 text-col-blue-dark border-colombia-yellow"
+                        : "bg-gray-50 text-gray-600 border-gray-200"
+                    }`}
+                  >
+                    <span className={`h-2.5 w-2.5 rounded-full ${onSale ? "bg-red-500 animate-pulse" : "bg-gray-300"}`} />
+                    Ofertas ({filterStats.saleCount})
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer del Drawer */}
+            <div className="sticky bottom-0 bg-white border-t border-gray-100 p-4 flex gap-3 z-10">
+              {filterCount > 0 && (
+                <button
+                  onClick={() => {
+                    clearFilters()
+                    const drawer = document.getElementById("mobile-filter-drawer")
+                    if (drawer) drawer.classList.add("translate-y-full")
+                  }}
+                  className="flex-1 py-3 text-xs font-bold rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-700 transition-colors"
+                >
+                  Limpiar Todo
+                </button>
               )}
-            </button>
-          ))}
+              <button
+                onClick={() => {
+                  const drawer = document.getElementById("mobile-filter-drawer")
+                  if (drawer) drawer.classList.add("translate-y-full")
+                }}
+                className="flex-2 py-3 bg-col-blue-dark text-white text-xs font-bold rounded-xl hover:bg-colombia-blue transition-colors text-center shadow-md shadow-colombia-blue/10"
+              >
+                Aplicar Filtros ({totalCount})
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -297,13 +501,28 @@ export default function ProductFilterEngine({
         </aside>
 
         <div className="flex-1 min-w-0 px-2 lg:px-0">
-          <div className="mb-4 flex items-end justify-between lg:mb-6">
-            <h1 className="text-xl font-bold tracking-tight text-gray-900 lg:text-2xl">
-              {effectiveSearch ? `"${effectiveSearch}"` : "Productos"}
-            </h1>
-            <p className="text-[13px] text-gray-400 tabular-nums">
-              {totalCount.toLocaleString("es-CO")} resultado{totalCount !== 1 ? "s" : ""}
-            </p>
+          <div className="mb-4 flex items-center justify-between gap-2 lg:mb-6">
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-xl font-bold tracking-tight text-gray-900 truncate lg:text-2xl">
+                {effectiveSearch ? `"${effectiveSearch}"` : "Productos"}
+              </h1>
+              <p className="text-[10px] sm:text-[13px] text-gray-400 tabular-nums">
+                {totalCount.toLocaleString("es-CO")} resultado{totalCount !== 1 ? "s" : ""}
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <span className="hidden sm:inline text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Ordenar:</span>
+              <select
+                value={sort}
+                onChange={(e) => applyFilter(() => { setSort(e.target.value as SortOption); setPage(1) })}
+                className="rounded-xl border border-gray-200 bg-white px-2.5 py-1.5 text-[11px] sm:text-xs text-gray-600 focus:border-gray-300 focus:outline-none cursor-pointer transition-colors"
+              >
+                {sortOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {products.length === 0 && !fetching ? (

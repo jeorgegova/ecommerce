@@ -26,7 +26,7 @@ export default async function ProductsPage() {
   const roots = (categories || []).filter((c) => !c.parent_id)
 
   const mobileChips = [
-    { label: "Todos", href: "/products", active: true },
+
     ...roots.map((cat) => ({
       label: cat.name,
       href: `/categories/${cat.slug}`,
@@ -43,7 +43,7 @@ export default async function ProductsPage() {
       <div className="mx-auto max-w-7xl px-4 py-4 lg:px-6 lg:py-12 lg:px-8">
         <h1 className="text-xl font-bold text-gray-900 lg:text-3xl">Productos</h1>
         <p className="mt-0.5 text-xs text-gray-600 lg:mt-2 lg:text-base">{products?.length || 0} productos disponibles</p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:mt-8 lg:gap-6 lg:grid-cols-4">
+        <div className="mt-4 grid grid-cols-3 gap-1.5 sm:gap-2 lg:mt-8 lg:gap-5 lg:grid-cols-3 xl:grid-cols-4">
           {products?.map((product: any) => (
             <ProductCard
               key={product.id}
