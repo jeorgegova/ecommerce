@@ -99,6 +99,16 @@ const sections = [
           </svg>
         ),
       },
+      {
+        href: "/admin/banners",
+        label: "Banners",
+        description: "Gestiona los banners promocionales",
+        icon: (
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6.75c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6.75A1.125 1.125 0 012.25 10.875v-3.75zM5.25 18.75h13.5M5.25 18.75v-3.75M18.75 18.75v-3.75M20.25 15.75H3.75a1.125 1.125 0 01-1.125-1.125v-3.75" />
+          </svg>
+        ),
+      },
     ],
   },
 ]
