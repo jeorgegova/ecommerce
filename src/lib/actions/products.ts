@@ -1,6 +1,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { deleteProductStorageImages } from "@/lib/utils/storage"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
@@ -190,6 +191,9 @@ export async function deleteProduct(id: string) {
     .single()
 
   if (profile?.role !== "admin") throw new Error("No autorizado")
+
+  // Eliminar archivos del storage antes de borrar el producto
+  await deleteProductStorageImages(supabase, id)
 
   const { error } = await supabase.from("products").delete().eq("id", id)
 

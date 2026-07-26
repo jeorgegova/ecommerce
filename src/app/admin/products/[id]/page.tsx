@@ -46,7 +46,26 @@ export default function EditProductPage() {
   }, [supabase, id, router])
 
   const handleDelete = async () => {
-    if (!confirm("¿Eliminar este producto?")) return
+    if (!confirm("¿Eliminar este producto? Esta acción no se puede deshacer.")) return
+
+    // 1. Obtener imágenes y eliminarlas del storage
+    const { data: imgs } = await supabase.from("product_images").select("url").eq("product_id", id)
+    if (imgs && imgs.length > 0) {
+      const paths = imgs
+        .map((img) => {
+          try {
+            const url = new URL(img.url)
+            const match = url.pathname.match(/\/object\/public\/[^/]+\/(.+)/)
+            return match ? match[1] : null
+          } catch { return null }
+        })
+        .filter(Boolean) as string[]
+      if (paths.length > 0) {
+        await supabase.storage.from("products").remove(paths)
+      }
+    }
+
+    // 2. Eliminar el producto (la BD elimina product_images por CASCADE)
     const { error } = await supabase.from("products").delete().eq("id", id)
     if (error) alert(error.message)
     else router.push("/admin/products")

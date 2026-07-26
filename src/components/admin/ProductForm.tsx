@@ -2,6 +2,7 @@
 
 import ImageUpload from "@/components/admin/ImageUpload"
 import { createClient } from "@/lib/supabase/client"
+import { deleteStorageFiles } from "@/lib/utils/storage"
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useCallback } from "react"
 
@@ -186,26 +187,47 @@ export default function ProductForm({ product }: { product?: Product }) {
 
     if (productId) {
       if (isEdit) {
-        await supabase.from("product_images").delete().eq("product_id", productId)
+        // 1. Obtener las URLs actuales y eliminar los archivos del storage
+        const { data: existingImages } = await supabase
+          .from("product_images")
+          .select("url")
+          .eq("product_id", productId)
+
+        if (existingImages && existingImages.length > 0) {
+          await deleteStorageFiles(supabase, "products", existingImages.map((img) => img.url))
+        }
+
+        // 2. Borrar los registros de la BD
+        const { error: delErr } = await supabase.from("product_images").delete().eq("product_id", productId)
+        if (delErr) {
+          console.error("Failed to delete existing image records:", delErr)
+        }
       }
 
       if (images.length > 0) {
-        const { error: imgErr } = await supabase.from("product_images").insert(
-          images.map((img) => ({
-            product_id: productId,
-            url: img.url,
-            alt: img.alt,
-            is_main: img.is_main,
-            sort_order: img.sort_order,
-            width: img.width || null,
-            height: img.height || null,
-            file_size: img.file_size || null,
-          }))
-        )
+        const hasMain = images.some((img) => img.is_main)
+        const formattedImages = images.map((img, idx) => ({
+          product_id: productId,
+          url: img.url,
+          alt: img.alt || form.name,
+          is_main: hasMain ? (img.is_main ?? false) : idx === 0,
+          sort_order: img.sort_order ?? idx,
+          width: img.width != null ? Math.round(img.width) : null,
+          height: img.height != null ? Math.round(img.height) : null,
+          file_size: img.file_size != null ? Math.round(img.file_size) : null,
+        }))
 
-        if (imgErr) console.error("Failed to save images:", imgErr)
+        const { error: imgErr } = await supabase.from("product_images").insert(formattedImages)
+
+        if (imgErr) {
+          console.error("Failed to save images:", imgErr)
+          setError(`El producto se guardó, pero falló la vinculación de imágenes: ${imgErr.message}`)
+          setSaving(false)
+          return
+        }
       }
     }
+
 
     router.push("/admin/products")
     router.refresh()
