@@ -139,7 +139,7 @@ const ProductCard = memo(function ProductCard({ product, images }: ProductCardPr
         {product.category_name && (
           <p className="mb-0.5 hidden text-[10px] font-medium text-gray-400 uppercase tracking-wide lg:block">{product.category_name}</p>
         )}
-        <h3 className="flex-1 text-[11px] font-medium text-gray-900 leading-[1.3] line-clamp-2 group-hover:text-gray-700 transition-colors lg:text-sm lg:leading-snug">
+        <h3 className="min-h-[2.6em] text-[11px] font-medium text-gray-900 leading-[1.3] line-clamp-2 group-hover:text-gray-700 transition-colors lg:min-h-[2.75em] lg:text-sm lg:leading-snug">
           {product.name}
         </h3>
 

@@ -17,11 +17,37 @@ export default function ProductGallery({ images }: { images: ProductImage[] }) {
   const [lightboxIdx, setLightboxIdx] = useState(0)
   const [zoom, setZoom] = useState(false)
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 })
+  const [direction, setDirection] = useState<"left" | "right" | null>(null)
+  const [animating, setAnimating] = useState(false)
   const mainRef = useRef<HTMLDivElement>(null)
 
   const sorted = [...images].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
-
   const current = sorted[selected] || sorted[0]
+
+  const goTo = useCallback((idx: number, dir: "left" | "right" | null) => {
+    if (animating) return
+    setAnimating(true)
+    setDirection(dir)
+    setSelected(idx)
+    setTimeout(() => {
+      setDirection(null)
+      setAnimating(false)
+    }, 300)
+  }, [animating])
+
+  const prev = useCallback((e?: React.MouseEvent) => {
+    e?.preventDefault()
+    e?.stopPropagation()
+    const idx = selected > 0 ? selected - 1 : sorted.length - 1
+    goTo(idx, "left")
+  }, [selected, sorted.length, goTo])
+
+  const next = useCallback((e?: React.MouseEvent) => {
+    e?.preventDefault()
+    e?.stopPropagation()
+    const idx = selected < sorted.length - 1 ? selected + 1 : 0
+    goTo(idx, "right")
+  }, [selected, sorted.length, goTo])
 
   const openLightbox = (idx: number) => {
     setLightboxIdx(idx)
@@ -52,13 +78,16 @@ export default function ProductGallery({ images }: { images: ProductImage[] }) {
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (!lightboxOpen) return
-      if (e.key === "ArrowLeft") lbPrev()
-      else if (e.key === "ArrowRight") lbNext()
-      else if (e.key === "Escape") closeLightbox()
+      if (lightboxOpen) {
+        if (e.key === "ArrowLeft") lbPrev()
+        else if (e.key === "ArrowRight") lbNext()
+        else if (e.key === "Escape") closeLightbox()
+      } else {
+        if (e.key === "ArrowLeft") prev()
+        else if (e.key === "ArrowRight") next()
+      }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [lightboxOpen, sorted.length]
+    [lightboxOpen, prev, next]
   )
 
   useEffect(() => {
@@ -79,21 +108,99 @@ export default function ProductGallery({ images }: { images: ProductImage[] }) {
       <div className="space-y-4">
         <div
           ref={mainRef}
-          className="group relative aspect-square overflow-hidden rounded-2xl bg-gray-100 cursor-zoom-in"
+          className="group/main relative aspect-square overflow-hidden rounded-2xl bg-gray-100"
           onMouseEnter={() => setZoom(true)}
-          onMouseLeave={() => setZoom(false)}
+          onMouseLeave={() => {
+            setZoom(false)
+            setDirection(null)
+          }}
           onMouseMove={handleMainMouseMove}
           onClick={() => openLightbox(selected)}
         >
           <Image
+            key={current.url}
             src={current.url}
             alt={current.alt || ""}
             fill
-            className={`object-contain transition-transform duration-200 ${zoom ? "scale-[2]" : "scale-100"}`}
-            style={zoom ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : undefined}
+            className={`object-contain ${zoom ? "cursor-zoom-in" : "cursor-default"}`}
+            style={{
+              transition: zoom ? "transform 0.15s ease-out" : "none",
+              transform: zoom ? `scale(2)` : "scale(1)",
+              transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
+            }}
             sizes="(max-width: 768px) 100vw, 50vw"
-            priority
+            priority={selected === 0}
           />
+
+          {/* Slide indicator */}
+          {direction && (
+            <div
+              key={selected}
+              className={`absolute inset-0 z-10 transition-all duration-300 ${
+                direction === "left" ? "translate-x-full opacity-0" : "-translate-x-full opacity-0"
+              }`}
+            >
+              <Image
+                src={sorted[selected > 0 ? selected - 1 : sorted.length - 1]?.url || current.url}
+                alt=""
+                fill
+                className="object-contain opacity-20"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            </div>
+          )}
+
+          {/* Navigation arrows */}
+          {sorted.length > 1 && (
+            <>
+              <button
+                onClick={prev}
+                className="absolute left-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-gray-700 shadow-sm backdrop-blur-sm transition-all hover:bg-white hover:shadow-md active:scale-90 lg:h-10 lg:w-10 lg:left-3"
+                aria-label="Imagen anterior"
+              >
+                <svg className="h-4 w-4 lg:h-5 lg:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                onClick={next}
+                className="absolute right-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-gray-700 shadow-sm backdrop-blur-sm transition-all hover:bg-white hover:shadow-md active:scale-90 lg:h-10 lg:w-10 lg:right-3"
+                aria-label="Imagen siguiente"
+              >
+                <svg className="h-4 w-4 lg:h-5 lg:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </>
+          )}
+
+          {/* Dot indicators */}
+          {sorted.length > 1 && (
+            <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 gap-1.5">
+              {sorted.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    goTo(idx, idx > selected ? "right" : idx < selected ? "left" : null)
+                  }}
+                  className={`rounded-full transition-all duration-300 ${
+                    idx === selected
+                      ? "h-1.5 w-5 bg-white shadow-sm"
+                      : "h-1.5 w-1.5 bg-white/50 hover:bg-white/80"
+                  }`}
+                  aria-label={`Imagen ${idx + 1}`}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Image counter */}
+          {sorted.length > 1 && (
+            <span className="absolute right-3 top-3 z-20 rounded-full bg-black/50 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
+              {selected + 1}/{sorted.length}
+            </span>
+          )}
         </div>
 
         {sorted.length > 1 && (
@@ -101,7 +208,7 @@ export default function ProductGallery({ images }: { images: ProductImage[] }) {
             {sorted.map((img, i) => (
               <button
                 key={img.id || i}
-                onClick={() => setSelected(i)}
+                onClick={() => goTo(i, i > selected ? "right" : i < selected ? "left" : null)}
                 className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-colors ${
                   i === selected ? "border-gray-900" : "border-transparent hover:border-gray-300"
                 }`}

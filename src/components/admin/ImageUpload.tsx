@@ -2,7 +2,7 @@
 
 import { compressImage } from "@/lib/utils/image"
 import Image from "next/image"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 interface ImageItem {
   id?: string
@@ -17,7 +17,7 @@ interface ImageItem {
 
 interface ImageUploadProps {
   images: ImageItem[]
-  onChange: (images: ImageItem[]) => void
+  onChange: (images: ImageItem[] | ((prev: ImageItem[]) => ImageItem[])) => void
   bucket?: string
   folder?: string
 }
@@ -30,15 +30,20 @@ export default function ImageUpload({
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number; fileName: string } | null>(null)
+  const [uploadErrors, setUploadErrors] = useState<string[]>([])
+
+  const imagesRef = useRef(images)
+  useEffect(() => { imagesRef.current = images }, [images])
 
   const handleFiles = useCallback(
     async (files: FileList) => {
       setUploading(true)
+      setUploadErrors([])
       const fileArray = Array.from(files)
-
       const supabase = (await import("@/lib/supabase/client")).createClient()
-
       const newImages: ImageItem[] = []
+      const failedFiles: string[] = []
+      const baseLength = imagesRef.current.length
 
       for (let i = 0; i < fileArray.length; i++) {
         const file = fileArray[i]
@@ -66,29 +71,33 @@ export default function ImageUpload({
           newImages.push({
             url: urlData.publicUrl,
             alt: file.name.replace(/\.[^.]+$/, ""),
-            is_main: images.length === 0 && newImages.length === 0,
-            sort_order: images.length + newImages.length,
+            is_main: baseLength === 0 && newImages.length === 0,
+            sort_order: baseLength + newImages.length,
             width: Math.round(width),
             height: Math.round(height),
             file_size: Math.round(compressed.size),
           })
         } catch (err) {
           console.error("Failed to upload", file.name, err)
+          failedFiles.push(file.name)
         }
       }
 
-      onChange([...images, ...newImages])
+      if (failedFiles.length > 0) {
+        setUploadErrors(failedFiles)
+      }
+
+      onChange((prev) => [...prev, ...newImages])
       setUploading(false)
       setUploadProgress(null)
     },
-    [images, onChange, bucket, folder]
+    [onChange, bucket, folder]
   )
 
   const removeImage = async (index: number) => {
-    const removed = images[index]
+    const removed = imagesRef.current[index]
 
-    // Si la imagen ya fue subida al storage, eliminarla
-    if (removed.url) {
+    if (removed?.url) {
       try {
         const supabase = (await import("@/lib/supabase/client")).createClient()
         const match = new URL(removed.url).pathname.match(/\/object\/public\/[^/]+\/(.+)/)
@@ -100,17 +109,18 @@ export default function ImageUpload({
       }
     }
 
-    const updated = images.filter((_, i) => i !== index)
-    if (updated.length > 0 && !updated.some((img) => img.is_main)) {
-      updated[0].is_main = true
-    }
-    onChange(updated)
+    onChange((prev) => {
+      const updated = prev.filter((_, i) => i !== index)
+      if (updated.length > 0 && !updated.some((img) => img.is_main)) {
+        updated[0].is_main = true
+      }
+      return updated
+    })
   }
 
-
   const setMain = (index: number) => {
-    onChange(
-      images.map((img, i) => ({
+    onChange((prev) =>
+      prev.map((img, i) => ({
         ...img,
         is_main: i === index,
       }))
@@ -118,10 +128,12 @@ export default function ImageUpload({
   }
 
   const moveImage = (from: number, to: number) => {
-    const updated = [...images]
-    const [moved] = updated.splice(from, 1)
-    updated.splice(to, 0, moved)
-    onChange(updated.map((img, i) => ({ ...img, sort_order: i })))
+    onChange((prev) => {
+      const updated = [...prev]
+      const [moved] = updated.splice(from, 1)
+      updated.splice(to, 0, moved)
+      return updated.map((img, i) => ({ ...img, sort_order: i }))
+    })
   }
 
   return (
@@ -162,6 +174,22 @@ export default function ImageUpload({
               />
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Errores de subida */}
+      {uploadErrors.length > 0 && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+          <p className="text-sm font-medium text-red-700">
+            {uploadErrors.length === 1
+              ? "1 archivo falló al subir:"
+              : `${uploadErrors.length} archivos fallaron al subir:`}
+          </p>
+          <ul className="mt-1 list-inside list-disc text-xs text-red-600">
+            {uploadErrors.map((name, i) => (
+              <li key={i} className="truncate">{name}</li>
+            ))}
+          </ul>
         </div>
       )}
 

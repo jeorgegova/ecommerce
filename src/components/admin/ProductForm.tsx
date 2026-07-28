@@ -217,11 +217,31 @@ export default function ProductForm({ product }: { product?: Product }) {
           file_size: img.file_size != null ? Math.round(img.file_size) : null,
         }))
 
-        const { error: imgErr } = await supabase.from("product_images").insert(formattedImages)
+        try {
+          const { error: imgErr } = await supabase.from("product_images").insert(formattedImages)
 
-        if (imgErr) {
-          console.error("Failed to save images:", imgErr)
-          setError(`El producto se guardó, pero falló la vinculación de imágenes: ${imgErr.message}`)
+          if (imgErr) {
+            console.error("Failed to save images:", imgErr)
+            setError(`El producto se guardó, pero falló la vinculación de imágenes: ${imgErr.message}`)
+            setSaving(false)
+            return
+          }
+
+          const { data: verifyImages } = await supabase
+            .from("product_images")
+            .select("id")
+            .eq("product_id", productId)
+            .limit(1)
+
+          if (!verifyImages || verifyImages.length === 0) {
+            console.error("ProductImages insert returned no error but images not found after insert")
+            setError("El producto se guardó, pero las imágenes no se vincularon. Intenta de nuevo.")
+            setSaving(false)
+            return
+          }
+        } catch (insertErr) {
+          console.error("Unexpected error saving images:", insertErr)
+          setError(`Error inesperado al vincular imágenes: ${insertErr instanceof Error ? insertErr.message : "Error desconocido"}`)
           setSaving(false)
           return
         }
