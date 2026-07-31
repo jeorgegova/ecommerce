@@ -4,7 +4,7 @@ import KPICard, { KPICardSkeleton } from "./KPICard"
 import { useKPIs } from "@/lib/dashboard/hooks"
 
 export default function KPIGrid() {
-  const { data: kpis, isLoading } = useKPIs(30)
+  const { data: kpis, isLoading } = useKPIs()
 
   if (isLoading) {
     return (

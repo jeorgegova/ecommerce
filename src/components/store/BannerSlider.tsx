@@ -48,11 +48,12 @@ export default function BannerSlider() {
         href={banner.link_url || "#"}
         className="relative block aspect-[3/1] w-full sm:aspect-[4/1] lg:aspect-[5/1]"
       >
-        <img
-          src={banner.image_url}
-          alt={banner.title || "Banner promocional"}
-          className="hidden h-full w-full object-cover sm:block"
-        />
+          <img
+            src={banner.image_url}
+            alt={banner.title || "Banner promocional"}
+            className="hidden h-full w-full object-cover sm:block"
+            fetchPriority="high"
+          />
         {banner.mobile_image_url && (
           <img
             src={banner.mobile_image_url}

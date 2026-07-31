@@ -18,14 +18,13 @@ function getSupabase() {
   return createClient()
 }
 
-export async function fetchKPIs(period: number = 30): Promise<KPIItem[]> {
+export async function fetchKPIs(from: string, to: string): Promise<KPIItem[]> {
   const supabase = getSupabase()
-  const { data, error } = await supabase.rpc("get_dashboard_kpis", { p_days: period })
+  const { data, error } = await supabase.rpc("get_dashboard_kpis_range", { p_from: from, p_to: to })
 
   if (error || !data) return []
 
   const kpis = data as Record<string, { value: number; previous: number; label: string }>
-  const sparklineData = await fetchSparklines(period)
 
   return Object.entries(kpis).map(([metric, kpi]) => ({
     metric,
@@ -33,7 +32,7 @@ export async function fetchKPIs(period: number = 30): Promise<KPIItem[]> {
     previous: Number(kpi.previous),
     label: kpi.label,
     growthPercent: computeGrowthPercent(Number(kpi.value), Number(kpi.previous)),
-    sparklineData: sparklineData[metric] || [],
+    sparklineData: [],
   }))
 }
 
@@ -93,12 +92,14 @@ export async function fetchQuickSummary(): Promise<QuickSummary | null> {
 }
 
 export async function fetchTopProducts(
-  days: number = 30,
+  from: string,
+  to: string,
   limit: number = 10
 ): Promise<TopProduct[]> {
   const supabase = getSupabase()
-  const { data, error } = await supabase.rpc("get_dashboard_top_products", {
-    p_days: days,
+  const { data, error } = await supabase.rpc("get_dashboard_top_products_range", {
+    p_from: from,
+    p_to: to,
     p_limit: limit,
   })
 

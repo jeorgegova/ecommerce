@@ -155,10 +155,10 @@ export default function AdminProductsPage() {
                       <>
                         <span className="text-xs text-gray-500">Oferta</span>
                         <button onClick={(e) => { e.stopPropagation(); togglePromotion(product) }} disabled={toggling === product.id}
-                          className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none motion-reduce:transition-none ${
+                          className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ${
                             product.promotion_active ? "bg-green-500" : "bg-gray-200"
-                          } ${toggling === product.id ? "opacity-50" : ""}`} role="switch" aria-checked={product.promotion_active} title={product.promotion_active ? "Desactivar promoción" : "Activar promoción"}>
-                          <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out motion-reduce:transition-none ${
+                          } ${toggling === product.id ? "opacity-50" : ""}`} role="switch" aria-checked={product.promotion_active}>
+                          <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ${
                             product.promotion_active ? "translate-x-5" : "translate-x-0"}`} />
                         </button>
                         <span className="text-xs font-medium text-green-600">${Number(product.sale_price).toLocaleString("es-CO")}</span>

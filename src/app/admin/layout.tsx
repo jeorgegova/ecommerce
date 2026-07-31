@@ -64,8 +64,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         onLogout={handleLogout}
       />
       <div className="lg:pl-60">
-        <AdminHeader />
-        <main className="p-4 sm:p-6 lg:p-8 pb-32">{children}</main>
+        <AdminHeader onMenuClick={() => setSidebarOpen(true)} />
+        <main className="p-4 sm:p-6 lg:p-8 pb-24">{children}</main>
       </div>
       <MobileBottomNav />
     </div>

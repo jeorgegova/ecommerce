@@ -25,7 +25,7 @@ export default function ViewTracker({ productId, productName, productSlug, produ
         try {
           await supabase.from("view_history").upsert(
             { user_id: user.id, product_id: productId, viewed_at: new Date().toISOString() },
-            { onConflict: "user_id, product_id", ignoreDuplicates: true }
+            { onConflict: "user_id, product_id", ignoreDuplicates: false }
           )
         } catch {}
 

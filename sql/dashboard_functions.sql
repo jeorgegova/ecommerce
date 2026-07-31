@@ -95,7 +95,8 @@ BEGIN
     WHEN '30d' THEN 30
     WHEN '90d' THEN 90
     WHEN '180d' THEN 180
-    WHEN '365d' OR '1y' THEN 365
+    WHEN '365d' THEN 365
+    WHEN '1y' THEN 365
     ELSE 30
   END;
   since_date := date_trunc('day', now())::DATE - (days - 1);
@@ -176,7 +177,7 @@ BEGIN
   LEFT JOIN categories c ON c.id = p.category_id
   LEFT JOIN order_items oi ON oi.product_id = p.id
   LEFT JOIN orders o ON o.id = oi.order_id
-    AND o.created_at >= date_trunc('day', now()) - (p_days || ' days')::interval
+    AND o.created_at >= date_trunc('day', now()) - (p_days::text || ' days')::interval
     AND o.status NOT IN ('cancelled')
   WHERE p.status = 'active'
   GROUP BY p.id, p.name, c.name, p.stock

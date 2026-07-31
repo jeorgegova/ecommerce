@@ -40,6 +40,27 @@ function Spinner() {
   )
 }
 
+function translateAuthError(message: string): string {
+  const translations: Record<string, string> = {
+    "Invalid login credentials": "Correo o contraseña incorrectos",
+    "Invalid email or password": "Correo o contraseña incorrectos",
+    "Email not confirmed": "Debes verificar tu correo electrónico antes de iniciar sesión",
+    "User not found": "No existe una cuenta con este correo",
+    "User already registered": "Este correo electrónico ya está registrado",
+    "Password should be at least 6 characters": "La contraseña debe tener al menos 6 caracteres",
+    "Signup requires a valid email": "Ingresa un correo electrónico válido",
+    "Unable to validate email address: invalid format": "El formato del correo no es válido",
+    "For security purposes, you can only request this once every 60 seconds": "Por seguridad, espera 60 segundos antes de intentar de nuevo",
+    "Email rate limit exceeded": "Demasiados intentos. Intenta de nuevo más tarde",
+    "Email link is invalid or has expired": "El enlace de verificación no es válido o ya expiró",
+    "Token has expired or is invalid": "El enlace expiró. Solicita uno nuevo",
+  }
+  for (const [key, value] of Object.entries(translations)) {
+    if (message.toLowerCase().includes(key.toLowerCase())) return value
+  }
+  return message
+}
+
 export default function AuthModal() {
   const { isOpen, view, redirectTo, registeredMessage, closeAuth, setAuthView, setRegisteredMessage } = useAuthModal()
   const router = useRouter()
@@ -159,7 +180,7 @@ function LoginForm({
 
   const onSubmit = async (data: LoginForm) => {
     const { error } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password })
-    if (error) { setError("root", { message: error.message }); return }
+    if (error) { setError("root", { message: translateAuthError(error.message) }); return }
     onSuccess()
     router.refresh()
     if (redirectTo) router.push(redirectTo)
@@ -248,7 +269,7 @@ function RegisterForm({
       email: data.email, password: data.password,
       options: { data: { full_name: data.fullName } },
     })
-    if (error) { setError("root", { message: error.message }); return }
+    if (error) { setError("root", { message: translateAuthError(error.message) }); return }
     onSuccess()
   }
 
@@ -329,7 +350,7 @@ function ForgotPasswordForm({
     const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
       redirectTo: `${window.location.origin}/reset-password`,
     })
-    if (error) { setError("root", { message: error.message }); return }
+    if (error) { setError("root", { message: translateAuthError(error.message) }); return }
     setSent(true)
   }
 

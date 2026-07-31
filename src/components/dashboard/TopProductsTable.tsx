@@ -5,7 +5,7 @@ import { useTopProducts } from "@/lib/dashboard/hooks"
 import { formatCompactCurrency, formatNumber, getInitials } from "@/lib/dashboard/utils"
 
 export default function TopProductsTable() {
-  const { data: products, isLoading } = useTopProducts(30, 10)
+  const { data: products, isLoading } = useTopProducts(10)
 
   if (isLoading) {
     return (

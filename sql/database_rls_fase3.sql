@@ -323,6 +323,9 @@ CREATE POLICY "view_history_insert_own" ON view_history
 CREATE POLICY "view_history_select_admin" ON view_history
   FOR SELECT USING (is_admin());
 
+CREATE POLICY "view_history_update_own" ON view_history
+  FOR UPDATE USING (is_owner(user_id));
+
 -- ---------------------------------------------------------------------------
 -- 3.21 product_views
 -- ---------------------------------------------------------------------------
@@ -331,6 +334,9 @@ CREATE POLICY "product_views_insert_anon" ON product_views
 
 CREATE POLICY "product_views_select_admin" ON product_views
   FOR SELECT USING (is_admin());
+
+CREATE POLICY "product_views_update_own" ON product_views
+  FOR UPDATE USING (user_id IS NULL OR is_owner(user_id));
 
 -- ---------------------------------------------------------------------------
 -- 3.22 coupons

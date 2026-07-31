@@ -12,11 +12,13 @@ import {
   fetchBusinessMetrics,
 } from "./services"
 import type { ChartPeriod } from "./types"
+import { useDashboardDate } from "./date-context"
 
-export function useKPIs(period: number = 30) {
+export function useKPIs() {
+  const { fromDate, toDate } = useDashboardDate()
   return useQuery({
-    queryKey: ["dashboard", "kpis", period],
-    queryFn: () => fetchKPIs(period),
+    queryKey: ["dashboard", "kpis", fromDate, toDate],
+    queryFn: () => fetchKPIs(fromDate, toDate),
     staleTime: 60_000,
   })
 }
@@ -37,10 +39,11 @@ export function useQuickSummary() {
   })
 }
 
-export function useTopProducts(days: number = 30, limit: number = 10) {
+export function useTopProducts(limit: number = 10) {
+  const { fromDate, toDate } = useDashboardDate()
   return useQuery({
-    queryKey: ["dashboard", "topProducts", days, limit],
-    queryFn: () => fetchTopProducts(days, limit),
+    queryKey: ["dashboard", "topProducts", fromDate, toDate, limit],
+    queryFn: () => fetchTopProducts(fromDate, toDate, limit),
     staleTime: 60_000,
   })
 }
