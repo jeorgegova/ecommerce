@@ -14,6 +14,7 @@ const pathLabels: Record<string, string> = {
   reviews: "Reseñas",
   questions: "Preguntas",
   import: "Importar",
+  banners: "Banners",
   new: "Nuevo",
 }
 

@@ -5,16 +5,20 @@ import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
 const bannerSchema = z.object({
-  title: z.string().optional(),
-  subtitle: z.string().optional(),
+  title: z.string().nullable().optional(),
+  subtitle: z.string().nullable().optional(),
   image_url: z.string().min(1, "Imagen requerida"),
-  mobile_image_url: z.string().optional(),
-  link_url: z.string().optional(),
-  link_text: z.string().optional(),
-  is_active: z.boolean().default(true),
+  mobile_image_url: z.string().nullable().optional(),
+  link_url: z.string().nullable().optional(),
+  link_text: z.string().nullable().optional(),
+  is_active: z.preprocess((v) => {
+    if (v === null || v === undefined) return false
+    if (v === "false" || v === false) return false
+    return true
+  }, z.boolean()),
   sort_order: z.coerce.number().int().default(0),
-  starts_at: z.string().optional().nullable(),
-  ends_at: z.string().optional().nullable(),
+  starts_at: z.string().nullable().optional(),
+  ends_at: z.string().nullable().optional(),
 })
 
 export type BannerFormData = z.infer<typeof bannerSchema>
@@ -58,13 +62,13 @@ export async function createBanner(formData: FormData) {
   if (profile?.role !== "admin") throw new Error("No autorizado")
 
   const raw = {
-    title: (formData.get("title") as string) || undefined,
-    subtitle: (formData.get("subtitle") as string) || undefined,
+    title: (formData.get("title") as string)?.trim() || null,
+    subtitle: (formData.get("subtitle") as string)?.trim() || null,
     image_url: formData.get("image_url") as string,
-    mobile_image_url: (formData.get("mobile_image_url") as string) || undefined,
-    link_url: (formData.get("link_url") as string) || undefined,
-    link_text: (formData.get("link_text") as string) || undefined,
-    is_active: formData.get("is_active") !== "false",
+    mobile_image_url: (formData.get("mobile_image_url") as string)?.trim() || null,
+    link_url: (formData.get("link_url") as string)?.trim() || null,
+    link_text: (formData.get("link_text") as string)?.trim() || null,
+    is_active: formData.get("is_active"),
     sort_order: formData.get("sort_order") || 0,
     starts_at: (formData.get("starts_at") as string) || null,
     ends_at: (formData.get("ends_at") as string) || null,
@@ -99,13 +103,13 @@ export async function updateBanner(id: string, formData: FormData) {
   if (profile?.role !== "admin") throw new Error("No autorizado")
 
   const raw = {
-    title: (formData.get("title") as string) || undefined,
-    subtitle: (formData.get("subtitle") as string) || undefined,
+    title: (formData.get("title") as string)?.trim() || null,
+    subtitle: (formData.get("subtitle") as string)?.trim() || null,
     image_url: formData.get("image_url") as string,
-    mobile_image_url: (formData.get("mobile_image_url") as string) || undefined,
-    link_url: (formData.get("link_url") as string) || undefined,
-    link_text: (formData.get("link_text") as string) || undefined,
-    is_active: formData.get("is_active") !== "false",
+    mobile_image_url: (formData.get("mobile_image_url") as string)?.trim() || null,
+    link_url: (formData.get("link_url") as string)?.trim() || null,
+    link_text: (formData.get("link_text") as string)?.trim() || null,
+    is_active: formData.get("is_active"),
     sort_order: formData.get("sort_order") || 0,
     starts_at: (formData.get("starts_at") as string) || null,
     ends_at: (formData.get("ends_at") as string) || null,

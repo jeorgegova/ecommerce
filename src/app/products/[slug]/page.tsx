@@ -3,6 +3,7 @@ import ProductGallery from "@/components/store/ProductGallery"
 import ViewTracker from "@/components/store/ViewTracker"
 import AddToCartButton from "@/components/store/AddToCartButton"
 import FavoriteButton from "@/components/store/FavoriteButton"
+import QuestionSection from "@/components/store/QuestionSection"
 import { createClient } from "@/lib/supabase/server"
 import { headers } from "next/headers"
 import Image from "next/image"
@@ -46,6 +47,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     .eq("is_approved", true)
     .order("created_at", { ascending: false })
     .limit(20)
+
+  const { data: questions } = await supabase
+    .from("questions")
+    .select("*")
+    .eq("product_id", product.id)
+    .order("created_at", { ascending: false })
 
   const currentPrice = product.promotion_active && product.sale_price ? product.sale_price : product.base_price
   const categoryName = product.categories?.name || ""
@@ -245,6 +252,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </div>
           </div>
         )}
+
+        <QuestionSection productId={product.id} initialQuestions={questions || []} />
       </div>
     </StoreLayout>
   )

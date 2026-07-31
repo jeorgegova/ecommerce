@@ -92,7 +92,7 @@ export default function EditBannerPage() {
         <div className="rounded-xl border border-gray-200 bg-white p-6 space-y-5">
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">
-              Título
+              Título <span className="font-normal text-gray-300">(Opcional)</span>
             </label>
             <input
               name="title"
@@ -104,7 +104,7 @@ export default function EditBannerPage() {
 
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">
-              Subtítulo
+              Subtítulo <span className="font-normal text-gray-300">(Opcional)</span>
             </label>
             <input
               name="subtitle"
@@ -160,7 +160,7 @@ export default function EditBannerPage() {
             </div>
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">
-                Texto del botón
+                Texto del botón <span className="font-normal text-gray-300">(Opcional)</span>
               </label>
               <input
                 name="link_text"

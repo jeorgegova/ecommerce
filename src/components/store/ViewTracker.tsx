@@ -22,17 +22,23 @@ export default function ViewTracker({ productId, productName, productSlug, produ
       const { data: { user } } = await supabase.auth.getUser()
 
       if (user) {
-        await supabase.from("view_history").upsert(
-          { user_id: user.id, product_id: productId, viewed_at: new Date().toISOString() },
-          { onConflict: "user_id, product_id", ignoreDuplicates: false }
-        )
+        try {
+          await supabase.from("view_history").upsert(
+            { user_id: user.id, product_id: productId, viewed_at: new Date().toISOString() },
+            { onConflict: "user_id, product_id", ignoreDuplicates: true }
+          )
+        } catch {}
 
-        await supabase.from("product_views").upsert(
-          { product_id: productId, user_id: user.id, viewed_at: new Date().toISOString() },
-          { onConflict: "product_id, user_id", ignoreDuplicates: false }
-        )
+        try {
+          await supabase.from("product_views").upsert(
+            { product_id: productId, user_id: user.id, viewed_at: new Date().toISOString() },
+            { onConflict: "product_id, user_id", ignoreDuplicates: true }
+          )
+        } catch {}
       } else {
-        await supabase.from("product_views").insert({ product_id: productId })
+        try {
+          await supabase.from("product_views").insert({ product_id: productId })
+        } catch {}
 
         if (productName && productSlug) {
           const stored = localStorage.getItem("gogi_recent")

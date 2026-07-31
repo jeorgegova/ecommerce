@@ -427,7 +427,7 @@ CREATE POLICY "reviews_manage_admin" ON reviews
 -- ---------------------------------------------------------------------------
 CREATE POLICY "questions_select_public" ON questions
   FOR SELECT USING (
-    (status = 'answered' AND is_public = true) OR is_owner(user_id) OR is_admin()
+    is_public = true OR is_owner(user_id) OR is_admin()
   );
 
 CREATE POLICY "questions_insert_own" ON questions

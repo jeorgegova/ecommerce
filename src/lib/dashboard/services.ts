@@ -22,10 +22,7 @@ export async function fetchKPIs(period: number = 30): Promise<KPIItem[]> {
   const supabase = getSupabase()
   const { data, error } = await supabase.rpc("get_dashboard_kpis", { p_days: period })
 
-  if (error || !data) {
-    console.error("Error fetching KPIs:", error)
-    return []
-  }
+  if (error || !data) return []
 
   const kpis = data as Record<string, { value: number; previous: number; label: string }>
   const sparklineData = await fetchSparklines(period)
@@ -63,10 +60,7 @@ export async function fetchChartData(period: ChartPeriod = "30d"): Promise<Chart
     p_period: period,
   })
 
-  if (error || !data) {
-    console.error("Error fetching chart data:", error)
-    return []
-  }
+  if (error || !data) return []
 
   return (data as ChartDataPoint[]).map((d) => ({
     ...d,
@@ -82,7 +76,6 @@ export async function fetchQuickSummary(): Promise<QuickSummary | null> {
   const { data, error } = await supabase.rpc("get_dashboard_quick_summary")
 
   if (error || !data) {
-    console.error("Error fetching quick summary:", error)
     return null
   }
 
@@ -110,7 +103,6 @@ export async function fetchTopProducts(
   })
 
   if (error || !data) {
-    console.error("Error fetching top products:", error)
     return []
   }
 
@@ -127,7 +119,6 @@ export async function fetchLowStock(): Promise<LowStockProduct[]> {
   const { data, error } = await supabase.rpc("get_dashboard_low_stock")
 
   if (error || !data) {
-    console.error("Error fetching low stock:", error)
     return []
   }
 
@@ -145,7 +136,6 @@ export async function fetchRecentOrders(limit: number = 8): Promise<RecentOrder[
   })
 
   if (error || !data) {
-    console.error("Error fetching recent orders:", error)
     return []
   }
 
@@ -163,7 +153,6 @@ export async function fetchTopCustomers(limit: number = 5): Promise<TopCustomer[
   })
 
   if (error || !data) {
-    console.error("Error fetching top customers:", error)
     return []
   }
 
@@ -181,7 +170,6 @@ export async function fetchRecentActivity(limit: number = 15): Promise<ActivityI
   })
 
   if (error || !data) {
-    console.error("Error fetching recent activity:", error)
     return []
   }
 
@@ -193,7 +181,6 @@ export async function fetchNotifications(): Promise<Notification[]> {
   const { data, error } = await supabase.rpc("get_dashboard_notifications")
 
   if (error || !data) {
-    console.error("Error fetching notifications:", error)
     return []
   }
 
@@ -205,7 +192,6 @@ export async function fetchBusinessMetrics(): Promise<BusinessMetrics | null> {
   const { data, error } = await supabase.rpc("get_dashboard_business_metrics")
 
   if (error || !data) {
-    console.error("Error fetching business metrics:", error)
     return null
   }
 

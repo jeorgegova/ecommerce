@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import Providers from "@/components/providers"
+import BackgroundPattern from "@/components/store/BackgroundPattern"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -34,6 +35,7 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
       <body className="flex flex-col min-h-screen bg-white text-gray-900">
+        <BackgroundPattern />
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -62,7 +62,7 @@ export default function ProductForm({ product }: { product?: Product }) {
     low_stock_threshold: product?.low_stock_threshold?.toString() || "5",
     stock_bar_max: product?.stock_bar_max?.toString() || "20",
     has_variants: product?.has_variants || false,
-    status: product?.status || "draft",
+    status: product?.status || "active",
     is_featured: product?.is_featured || false,
     promotion_active: product?.promotion_active || false,
     weight: product?.weight?.toString() || "",
