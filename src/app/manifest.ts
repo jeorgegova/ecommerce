@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next"
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "GoGi",
-    short_name: "GoGi",
+    name: "WIl",
+    short_name: "Wil",
     description: "Tu tienda de confianza",
     start_url: "/",
     display: "standalone",

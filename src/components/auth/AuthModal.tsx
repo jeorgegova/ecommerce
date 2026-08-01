@@ -94,14 +94,12 @@ export default function AuthModal() {
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${
-        animating ? "bg-black/40 backdrop-blur-md" : "bg-transparent"
-      }`}
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${animating ? "bg-black/40 backdrop-blur-md" : "bg-transparent"
+        }`}
     >
       <div
-        className={`relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl shadow-black/10 transition-all duration-400 ${
-          animating ? "translate-y-0 scale-100 opacity-100" : "translate-y-8 scale-[0.97] opacity-0"
-        }`}
+        className={`relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl shadow-black/10 transition-all duration-400 ${animating ? "translate-y-0 scale-100 opacity-100" : "translate-y-8 scale-[0.97] opacity-0"
+          }`}
       >
         <div className="h-1.5 w-full flex">
           <div className="h-full w-1/2 bg-colombia-yellow" />
@@ -200,7 +198,7 @@ function LoginForm({
           </svg>
         </div>
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">Iniciar sesión</h2>
-        <p className="mt-1.5 text-[15px] text-gray-500">Bienvenido de vuelta a GoGi Motos</p>
+        <p className="mt-1.5 text-[15px] text-gray-500">Bienvenido de vuelta a Wil Motos</p>
       </div>
 
       {registeredMessage && (
@@ -287,7 +285,7 @@ function RegisterForm({
           </svg>
         </div>
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">Crear cuenta</h2>
-        <p className="mt-1.5 text-[15px] text-gray-500">Únete a GoGi Motos hoy</p>
+        <p className="mt-1.5 text-[15px] text-gray-500">Únete a Wil Motos hoy</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
