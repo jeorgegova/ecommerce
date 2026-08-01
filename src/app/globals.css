@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@theme {
+@theme inline {
   --animate-fade-in: fadeIn 0.3s ease-out;
   --animate-slide-up: slideUp 0.35s ease-out;
   --animate-scale-in: scaleIn 0.2s ease-out;
@@ -10,12 +10,12 @@
   --animate-card-in: cardIn 0.4s ease-out;
   --animate-shimmer: shimmer 1.5s ease-in-out infinite;
   
-  --color-colombia-yellow: #FFC72C;
-  --color-colombia-blue: #003893;
-  --color-colombia-red: #CE1126;
-  --color-col-yellow-dark: #E0AB00;
-  --color-col-blue-dark: #002666;
-  --color-col-red-dark: #A50A1C;
+  --color-brand-gold: #6B7280;
+  --color-brand-blue: #374151;
+  --color-brand-red: #6B7280;
+  --color-brand-gold-dark: #4B5563;
+  --color-brand-blue-dark: #1F2937;
+  --color-brand-red-dark: #4B5563;
 }
 
 @keyframes fadeIn {
@@ -60,6 +60,12 @@
 
 @layer base {
   :root {
+    --brand-gold: #6B7280;
+    --brand-blue: #374151;
+    --brand-red: #6B7280;
+    --brand-gold-dark: #4B5563;
+    --brand-blue-dark: #1F2937;
+    --brand-red-dark: #4B5563;
     --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
   }
 

@@ -25,7 +25,7 @@ function formatDate(dateStr: string) {
   })
 }
 
-function colombiaDate() {
+function localeDate() {
   return new Date().toLocaleDateString("es-CO").replace(/\//g, "-")
 }
 
@@ -76,7 +76,7 @@ export async function exportSalesPDF() {
   doc.setFont("Helvetica", "bold")
   doc.text(`Total: ${formatCOP(total)}`, 14, finalY + 12)
 
-  downloadBlob(doc.output("blob"), `ventas-${colombiaDate()}.pdf`)
+  downloadBlob(doc.output("blob"), `ventas-${localeDate()}.pdf`)
 }
 
 export async function exportMonthlyReport() {
@@ -136,7 +136,7 @@ export async function exportMonthlyReport() {
     })
   }
 
-  downloadBlob(doc.output("blob"), `reporte-mensual-${colombiaDate()}.pdf`)
+  downloadBlob(doc.output("blob"), `reporte-mensual-${localeDate()}.pdf`)
 }
 
 // ───── Excel ─────
@@ -161,7 +161,7 @@ export async function exportSalesExcel() {
   const wb = XLSX.utils.book_new()
   const ws = XLSX.utils.json_to_sheet(data)
   XLSX.utils.book_append_sheet(wb, ws, "Ventas")
-  XLSX.writeFile(wb, `ventas-${colombiaDate()}.xlsx`)
+  XLSX.writeFile(wb, `ventas-${localeDate()}.xlsx`)
 }
 
 export async function exportOrdersExcel() {
@@ -188,7 +188,7 @@ export async function exportOrdersExcel() {
   const wb = XLSX.utils.book_new()
   const ws = XLSX.utils.json_to_sheet(data)
   XLSX.utils.book_append_sheet(wb, ws, "Pedidos")
-  XLSX.writeFile(wb, `pedidos-${colombiaDate()}.xlsx`)
+  XLSX.writeFile(wb, `pedidos-${localeDate()}.xlsx`)
 }
 
 export async function exportInventoryExcel() {
@@ -215,5 +215,5 @@ export async function exportInventoryExcel() {
   const wb = XLSX.utils.book_new()
   const ws = XLSX.utils.json_to_sheet(data)
   XLSX.utils.book_append_sheet(wb, ws, "Inventario")
-  XLSX.writeFile(wb, `inventario-${colombiaDate()}.xlsx`)
+  XLSX.writeFile(wb, `inventario-${localeDate()}.xlsx`)
 }

@@ -3,8 +3,10 @@
 import { createClient } from "@/lib/supabase/client"
 import { useAuthModal } from "@/stores/auth-modal"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { motion, AnimatePresence } from "framer-motion"
+import { Mail, Lock, User, Eye, EyeOff, ArrowLeft, CheckCircle2, AlertCircle, ShieldCheck, ChevronRight, X, Loader2, LogIn, UserPlus, KeyRound } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -31,15 +33,6 @@ type LoginForm = z.infer<typeof loginSchema>
 type RegisterForm = z.infer<typeof registerSchema>
 type ForgotForm = z.infer<typeof forgotSchema>
 
-function Spinner() {
-  return (
-    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-    </svg>
-  )
-}
-
 function translateAuthError(message: string): string {
   const translations: Record<string, string> = {
     "Invalid login credentials": "Correo o contraseña incorrectos",
@@ -61,21 +54,30 @@ function translateAuthError(message: string): string {
   return message
 }
 
+const stagger = {
+  hidden: { opacity: 0, y: 12 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.06, duration: 0.4, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
+  }),
+}
+
+const inputBase = "w-full h-14 rounded-2xl border bg-white/80 backdrop-blur-sm px-4 pl-11 text-[15px] text-gray-900 placeholder:text-gray-400 outline-none transition-all duration-200 hover:border-gray-300 focus:border-gray-400 focus:bg-white focus:ring-4 focus:ring-gray-400/10 shadow-sm"
+const inputError = "w-full h-14 rounded-2xl border-2 border-red-300 bg-red-50/50 px-4 pl-11 text-[15px] text-gray-900 placeholder:text-gray-400 outline-none transition-all duration-200 focus:border-red-400 focus:ring-4 focus:ring-red-200 shadow-sm"
+
 export default function AuthModal() {
   const { isOpen, view, redirectTo, registeredMessage, closeAuth, setAuthView, setRegisteredMessage } = useAuthModal()
   const router = useRouter()
   const supabase = createClient()
   const [visible, setVisible] = useState(false)
-  const [animating, setAnimating] = useState(false)
 
   useEffect(() => {
     if (isOpen) {
       setVisible(true)
-      requestAnimationFrame(() => setAnimating(true))
       document.body.style.overflow = "hidden"
     } else {
-      setAnimating(false)
-      const timer = setTimeout(() => setVisible(false), 300)
+      const timer = setTimeout(() => setVisible(false), 350)
       document.body.style.overflow = ""
       return () => clearTimeout(timer)
     }
@@ -93,75 +95,133 @@ export default function AuthModal() {
   if (!visible) return null
 
   return (
-    <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${animating ? "bg-black/40 backdrop-blur-md" : "bg-transparent"
-        }`}
-    >
-      <div
-        className={`relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl shadow-black/10 transition-all duration-400 ${animating ? "translate-y-0 scale-100 opacity-100" : "translate-y-8 scale-[0.97] opacity-0"
-          }`}
-      >
-        <div className="h-1.5 w-full flex">
-          <div className="h-full w-1/2 bg-colombia-yellow" />
-          <div className="h-full w-1/4 bg-colombia-blue" />
-          <div className="h-full w-1/4 bg-colombia-red" />
-        </div>
-
-        <button
-          onClick={closeAuth}
-          className="absolute top-5 right-5 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-all duration-200 hover:bg-gray-200 hover:text-gray-600"
-          aria-label="Cerrar"
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.25 }}
         >
-          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-br from-gray-100 via-gray-50/50 to-white"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          />
 
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden select-none opacity-[0.04]">
-          <svg className="absolute -top-10 -right-10 h-40 w-40 text-gray-900 rotate-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 2v4M12 18v4M4 12h4M16 12h4M6.34 6.34l2.83 2.83M14.83 14.83l2.83 2.83M6.34 17.66l2.83-2.83M14.83 9.17l2.83-2.83" />
-          </svg>
-          <svg className="absolute -bottom-8 -left-8 h-36 w-36 text-gray-900 -rotate-45" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-          </svg>
-          <svg className="absolute top-1/2 right-0 h-28 w-28 text-gray-900 translate-x-1/3 -translate-y-1/2 rotate-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="5" cy="18" r="3" />
-            <circle cx="19" cy="18" r="3" />
-            <path d="M5 18l3-6 4 1 3-5h3l1.5 2h-2.5l-3 4-2-1-3 5" />
-          </svg>
-        </div>
-
-        <div className="relative z-[1] px-8 pb-8 pt-10">
-          <div key={view} className="animate-slide-down">
-            {view === "login" && (
-              <LoginForm
-                supabase={supabase} router={router} redirectTo={redirectTo}
-                registeredMessage={registeredMessage}
-                onRegisterClick={() => { setAuthView("register"); setRegisteredMessage(false) }}
-                onForgotClick={() => setAuthView("forgot-password")}
-                onSuccess={() => closeAuth()}
-              />
-            )}
-            {view === "register" && (
-              <RegisterForm supabase={supabase}
-                onLoginClick={() => setAuthView("login")}
-                onSuccess={() => { setRegisteredMessage(true); setAuthView("login") }}
-              />
-            )}
-            {view === "forgot-password" && (
-              <ForgotPasswordForm supabase={supabase} onLoginClick={() => setAuthView("login")} />
-            )}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-gray-300/10 blur-3xl" />
+            <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-gray-200/10 blur-3xl" />
+            <div className="absolute top-1/3 right-1/4 w-64 h-64 rounded-full bg-gray-300/5 blur-3xl" />
+            <div className="absolute top-1/2 left-1/3 w-48 h-48 rounded-full bg-gray-200/10 blur-2xl" />
+            <svg className="absolute top-0 right-0 opacity-[0.03]" width="400" height="400" viewBox="0 0 400 400">
+              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-gray-900" />
+              </pattern>
+              <rect width="400" height="400" fill="url(#grid)" />
+            </svg>
           </div>
-        </div>
-      </div>
-    </div>
+
+          <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" onClick={closeAuth} />
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 20 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="relative z-50 w-full max-w-5xl overflow-hidden rounded-[28px] bg-white/90 backdrop-blur-xl shadow-2xl shadow-black/10 ring-1 ring-white/20 border border-white/50"
+          >
+            <div className="flex min-h-[580px]">
+              <div className="hidden lg:flex lg:w-[42%] relative overflow-hidden bg-gradient-to-br from-gray-800 via-gray-900 to-gray-950">
+                <div className="absolute inset-0 opacity-20">
+                  <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-white/20 blur-3xl -translate-y-1/2 translate-x-1/4" />
+                  <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-gray-300/20 blur-3xl translate-y-1/3 -translate-x-1/4" />
+                  <svg className="absolute inset-0 opacity-10" width="100%" height="100%">
+                    <pattern id="dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+                      <circle cx="2" cy="2" r="1" fill="white" />
+                    </pattern>
+                    <rect width="100%" height="100%" fill="url(#dots)" />
+                  </svg>
+                </div>
+
+                <div className="relative z-10 flex flex-col justify-between p-10 w-full">
+                  <div>
+                    <motion.img
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2, duration: 0.5 }}
+                      src="/logoVendingShop.png"
+                      alt="VendingShop"
+                      className="h-10 w-10 object-contain brightness-0 invert mb-6"
+                    />
+                    <motion.h2
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3, duration: 0.5 }}
+                      className="text-3xl font-bold tracking-tight text-white leading-tight"
+                    >
+                      Tu tienda de repuestos
+                      <br />
+                      para máquinas vending
+                    </motion.h2>
+                    <motion.p
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4, duration: 0.5 }}
+                      className="mt-3 text-gray-400 text-[15px] leading-relaxed"
+                    >
+                      Todo lo que necesitas para mantener tus máquinas funcionando al máximo.
+                    </motion.p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-1 relative">
+                <button
+                  onClick={closeAuth}
+                  className="absolute top-4 right-4 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/80 text-gray-400 backdrop-blur-sm transition-all duration-200 hover:bg-gray-200 hover:text-gray-600 hover:scale-105"
+                  aria-label="Cerrar"
+                >
+                  <X className="h-4 w-4" strokeWidth={2.5} />
+                </button>
+
+                <div className="h-full overflow-y-auto">
+                  <div className="px-6 py-10 sm:px-10 sm:py-12">
+                    <AnimatePresence mode="wait">
+                      {view === "login" && (
+                        <LoginForm
+                          key="login"
+                          supabase={supabase} router={router} redirectTo={redirectTo}
+                          registeredMessage={registeredMessage}
+                          onRegisterClick={() => { setAuthView("register"); setRegisteredMessage(false) }}
+                          onForgotClick={() => setAuthView("forgot-password")}
+                          onSuccess={() => closeAuth()}
+                        />
+                      )}
+                      {view === "register" && (
+                        <RegisterForm
+                          key="register"
+                          supabase={supabase}
+                          onLoginClick={() => setAuthView("login")}
+                          onSuccess={() => { setRegisteredMessage(true); setAuthView("login") }}
+                        />
+                      )}
+                      {view === "forgot-password" && (
+                        <ForgotPasswordForm key="forgot" supabase={supabase} onLoginClick={() => setAuthView("login")} />
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }
-
-const inputClass = "block w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-[15px] text-gray-900 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-colombia-yellow/40 focus:border-colombia-blue transition-all duration-200"
-
-const inputErrorClass = "block w-full rounded-2xl border border-red-300 bg-red-50 px-4 py-3.5 text-[15px] text-gray-900 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-500 transition-all duration-200"
 
 function LoginForm({
   supabase, router, redirectTo, registeredMessage, onRegisterClick, onForgotClick, onSuccess,
@@ -175,6 +235,7 @@ function LoginForm({
   onSuccess: () => void
 }) {
   const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) })
+  const [showPassword, setShowPassword] = useState(false)
 
   const onSubmit = async (data: LoginForm) => {
     const { error } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password })
@@ -185,71 +246,135 @@ function LoginForm({
   }
 
   return (
-    <div>
-      <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-colombia-blue border border-colombia-yellow/45 shadow-sm">
-          <svg className="h-7 w-7 text-colombia-yellow stroke-colombia-yellow" viewBox="0 0 24 24" strokeWidth="2" fill="none">
-            <circle cx="5" cy="17" r="2.5" />
-            <circle cx="19" cy="17" r="2.5" />
-            <path d="M5 17h14" className="stroke-colombia-red" />
-            <path d="M7.5 17l2-5h5.5l2 5" />
-            <path d="M9.5 12L8 8H6" />
-            <path d="M15 12l-1-4h-4" />
-          </svg>
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.3 }}
+    >
+      <motion.div className="mb-6 flex items-center gap-3 lg:hidden">
+        <img src="/logoVendingShop.png" alt="VendingShop" className="h-8 w-8 object-contain" />
+        <span className="text-lg font-extrabold tracking-tight text-gray-900">VendingShop</span>
+      </motion.div>
+
+      <motion.div custom={0} variants={stagger} initial="hidden" animate="visible" className="mb-8">
+        <div className="flex items-center gap-3 mb-1">
+          <h1 className="text-[26px] font-bold tracking-tight text-gray-900">Bienvenido nuevamente</h1>
         </div>
-        <h2 className="text-2xl font-bold tracking-tight text-gray-900">Iniciar sesión</h2>
-        <p className="mt-1.5 text-[15px] text-gray-500">Bienvenido de vuelta a vendingShop</p>
-      </div>
+        <p className="text-[15px] text-gray-500 leading-relaxed">
+          Accede para administrar tu tienda y continuar donde lo dejaste.
+        </p>
+      </motion.div>
 
       {registeredMessage && (
-        <div className="mb-6 animate-slide-down rounded-2xl bg-green-50 px-4 py-3 text-center text-[14px] font-medium text-green-700">
-          Cuenta creada. Ya puedes iniciar sesión.
-        </div>
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          className="mb-5 rounded-2xl bg-emerald-50 border border-emerald-100 px-4 py-3.5"
+        >
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-emerald-500" />
+            <p className="text-[14px] font-medium text-emerald-800">Cuenta creada con éxito. Ya puedes iniciar sesión.</p>
+          </div>
+        </motion.div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)}>
         {errors.root && (
-          <div className="animate-slide-down rounded-2xl bg-red-50 px-4 py-3 text-center text-[14px] font-medium text-red-600">
-            {errors.root.message}
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-5 rounded-2xl bg-red-50 border border-red-100 px-4 py-3"
+          >
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 flex-shrink-0 text-red-500" />
+              <p className="text-[14px] font-medium text-red-700">{errors.root.message}</p>
+            </div>
+          </motion.div>
         )}
 
-        <div>
-          <input
-            type="email" placeholder="Correo electrónico" {...register("email")}
-            className={errors.email ? inputErrorClass : inputClass}
-          />
-          {errors.email && <p className="mt-1.5 px-1 text-[13px] text-red-500">{errors.email.message}</p>}
-        </div>
+        <div className="space-y-4">
+          <motion.div custom={1} variants={stagger} initial="hidden" animate="visible">
+            <label className="block text-[13px] font-semibold text-gray-700 mb-2">Correo electrónico</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Mail className="h-[18px] w-[18px] text-gray-400" />
+              </div>
+              <input
+                type="email" placeholder="tu@correo.com" {...register("email")}
+                className={errors.email ? inputError : inputBase}
+              />
+            </div>
+            {errors.email && <p className="mt-1.5 pl-1 text-[12px] text-red-500 font-medium">{errors.email.message}</p>}
+          </motion.div>
 
-        <div>
-          <input
-            type="password" placeholder="Contraseña" {...register("password")}
-            className={errors.password ? inputErrorClass : inputClass}
-          />
-          {errors.password && <p className="mt-1.5 px-1 text-[13px] text-red-500">{errors.password.message}</p>}
-        </div>
+          <motion.div custom={2} variants={stagger} initial="hidden" animate="visible">
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-[13px] font-semibold text-gray-700">Contraseña</label>
+              <button type="button" onClick={onForgotClick}
+                className="text-[12px] font-semibold text-gray-700 hover:text-gray-900 transition-colors">
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Lock className="h-[18px] w-[18px] text-gray-400" />
+              </div>
+              <input
+                type={showPassword ? "text" : "password"} placeholder="••••••••" {...register("password")}
+                className={errors.password ? inputError : `${inputBase} pr-12`}
+              />
+              <button type="button" onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {showPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
+              </button>
+            </div>
+            {errors.password && <p className="mt-1.5 pl-1 text-[12px] text-red-500 font-medium">{errors.password.message}</p>}
+          </motion.div>
 
-        <div className="flex justify-end">
-          <button type="button" onClick={onForgotClick}
-            className="text-[13px] font-medium text-gray-400 hover:text-colombia-blue transition-colors">
-            ¿Olvidaste tu contraseña?
-          </button>
+          <motion.div custom={3} variants={stagger} initial="hidden" animate="visible">
+            <button type="submit" disabled={isSubmitting}
+              className="relative mt-2 flex w-full h-14 items-center justify-center gap-2.5 rounded-2xl bg-gray-900 text-[15px] font-semibold text-white shadow-lg shadow-gray-900/20 transition-all duration-300 hover:bg-gray-800 hover:shadow-xl hover:shadow-gray-900/25 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+              {isSubmitting ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> Iniciando sesión...</>
+              ) : (
+                <><LogIn className="h-4 w-4" /> Iniciar sesión</>
+              )}
+            </button>
+          </motion.div>
         </div>
-
-        <button type="submit" disabled={isSubmitting}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-colombia-blue py-3.5 text-[15px] font-semibold text-white shadow-sm transition-all duration-200 hover:bg-col-blue-dark border border-colombia-yellow/30 hover:shadow-md active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40">
-          {isSubmitting ? <><Spinner /> Iniciando sesión...</> : "Iniciar sesión"}
-        </button>
       </form>
 
-      <p className="mt-6 text-center text-[14px] text-gray-400">
-        ¿No tienes cuenta?{" "}
-        <button onClick={onRegisterClick} className="font-semibold text-colombia-blue hover:underline underline-offset-2 transition-colors">
-          Crear cuenta
-        </button>
-      </p>
-    </div>
+      <motion.div custom={4} variants={stagger} initial="hidden" animate="visible" className="mt-8">
+        <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-5">
+          <p className="text-[14px] text-gray-600 mb-3">
+            <span className="font-semibold text-gray-900">¿Nuevo en la plataforma?</span>
+          </p>
+          <p className="text-[13px] text-gray-500 mb-4">
+            Crea tu cuenta gratis y comienza a vender repuestos para máquinas vending.
+          </p>
+          <button onClick={onRegisterClick}
+            className="flex w-full h-12 items-center justify-center gap-2 rounded-2xl border-2 border-gray-200 bg-white text-[14px] font-semibold text-gray-700 transition-all duration-200 hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm">
+            <UserPlus className="h-4 w-4" />
+            Crear cuenta gratis
+            <ChevronRight className="h-4 w-4 ml-1" />
+          </button>
+        </div>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8 }}
+        className="mt-6 flex items-center justify-center gap-1.5 text-[12px] text-gray-400"
+      >
+        <ShieldCheck className="h-3.5 w-3.5" />
+        Tus datos están protegidos mediante cifrado SSL
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -261,6 +386,8 @@ function RegisterForm({
   onSuccess: () => void
 }) {
   const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm<RegisterForm>({ resolver: zodResolver(registerSchema) })
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
 
   const onSubmit = async (data: RegisterForm) => {
     const { error } = await supabase.auth.signUp({
@@ -272,66 +399,136 @@ function RegisterForm({
   }
 
   return (
-    <div>
-      <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-colombia-blue border border-colombia-yellow/45 shadow-sm">
-          <svg className="h-7 w-7 text-colombia-yellow stroke-colombia-yellow" viewBox="0 0 24 24" strokeWidth="2" fill="none">
-            <circle cx="5" cy="17" r="2.5" />
-            <circle cx="19" cy="17" r="2.5" />
-            <path d="M5 17h14" className="stroke-colombia-red" />
-            <path d="M7.5 17l2-5h5.5l2 5" />
-            <path d="M9.5 12L8 8H6" />
-            <path d="M15 12l-1-4h-4" />
-          </svg>
-        </div>
-        <h2 className="text-2xl font-bold tracking-tight text-gray-900">Crear cuenta</h2>
-        <p className="mt-1.5 text-[15px] text-gray-500">Únete a vendingShop hoy</p>
-      </div>
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.3 }}
+    >
+      <motion.div className="mb-6 flex items-center gap-3 lg:hidden">
+        <img src="/logoVendingShop.png" alt="VendingShop" className="h-8 w-8 object-contain" />
+        <span className="text-lg font-extrabold tracking-tight text-gray-900">VendingShop</span>
+      </motion.div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <motion.div custom={0} variants={stagger} initial="hidden" animate="visible" className="mb-8">
+        <h1 className="text-[26px] font-bold tracking-tight text-gray-900 mb-1">Crear cuenta</h1>
+        <p className="text-[15px] text-gray-500 leading-relaxed">
+          Únete a VendingShop y comienza a comprar repuestos para tus máquinas.
+        </p>
+      </motion.div>
+
+      <form onSubmit={handleSubmit(onSubmit)}>
         {errors.root && (
-          <div className="animate-slide-down rounded-2xl bg-red-50 px-4 py-3 text-center text-[14px] font-medium text-red-600">
-            {errors.root.message}
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-5 rounded-2xl bg-red-50 border border-red-100 px-4 py-3"
+          >
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 flex-shrink-0 text-red-500" />
+              <p className="text-[14px] font-medium text-red-700">{errors.root.message}</p>
+            </div>
+          </motion.div>
         )}
 
-        <div>
-          <input type="text" placeholder="Nombre completo" {...register("fullName")}
-            className={errors.fullName ? inputErrorClass : inputClass} />
-          {errors.fullName && <p className="mt-1.5 px-1 text-[13px] text-red-500">{errors.fullName.message}</p>}
-        </div>
+        <div className="space-y-4">
+          <motion.div custom={1} variants={stagger} initial="hidden" animate="visible">
+            <label className="block text-[13px] font-semibold text-gray-700 mb-2">Nombre completo</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <User className="h-[18px] w-[18px] text-gray-400" />
+              </div>
+              <input type="text" placeholder="Tu nombre completo" {...register("fullName")}
+                className={errors.fullName ? inputError : inputBase} />
+            </div>
+            {errors.fullName && <p className="mt-1.5 pl-1 text-[12px] text-red-500 font-medium">{errors.fullName.message}</p>}
+          </motion.div>
 
-        <div>
-          <input type="email" placeholder="Correo electrónico" {...register("email")}
-            className={errors.email ? inputErrorClass : inputClass} />
-          {errors.email && <p className="mt-1.5 px-1 text-[13px] text-red-500">{errors.email.message}</p>}
-        </div>
+          <motion.div custom={2} variants={stagger} initial="hidden" animate="visible">
+            <label className="block text-[13px] font-semibold text-gray-700 mb-2">Correo electrónico</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Mail className="h-[18px] w-[18px] text-gray-400" />
+              </div>
+              <input type="email" placeholder="tu@correo.com" {...register("email")}
+                className={errors.email ? inputError : inputBase} />
+            </div>
+            {errors.email && <p className="mt-1.5 pl-1 text-[12px] text-red-500 font-medium">{errors.email.message}</p>}
+          </motion.div>
 
-        <div>
-          <input type="password" placeholder="Contraseña" {...register("password")}
-            className={errors.password ? inputErrorClass : inputClass} />
-          {errors.password && <p className="mt-1.5 px-1 text-[13px] text-red-500">{errors.password.message}</p>}
-        </div>
+          <motion.div custom={3} variants={stagger} initial="hidden" animate="visible">
+            <label className="block text-[13px] font-semibold text-gray-700 mb-2">Contraseña</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Lock className="h-[18px] w-[18px] text-gray-400" />
+              </div>
+              <input
+                type={showPassword ? "text" : "password"} placeholder="Mínimo 6 caracteres" {...register("password")}
+                className={errors.password ? inputError : `${inputBase} pr-12`}
+              />
+              <button type="button" onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {showPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
+              </button>
+            </div>
+            {errors.password && <p className="mt-1.5 pl-1 text-[12px] text-red-500 font-medium">{errors.password.message}</p>}
+          </motion.div>
 
-        <div>
-          <input type="password" placeholder="Confirmar contraseña" {...register("confirmPassword")}
-            className={errors.confirmPassword ? inputErrorClass : inputClass} />
-          {errors.confirmPassword && <p className="mt-1.5 px-1 text-[13px] text-red-500">{errors.confirmPassword.message}</p>}
-        </div>
+          <motion.div custom={4} variants={stagger} initial="hidden" animate="visible">
+            <label className="block text-[13px] font-semibold text-gray-700 mb-2">Confirmar contraseña</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Lock className="h-[18px] w-[18px] text-gray-400" />
+              </div>
+              <input
+                type={showConfirm ? "text" : "password"} placeholder="Repite la contraseña" {...register("confirmPassword")}
+                className={errors.confirmPassword ? inputError : `${inputBase} pr-12`}
+              />
+              <button type="button" onClick={() => setShowConfirm(!showConfirm)}
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label={showConfirm ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {showConfirm ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
+              </button>
+            </div>
+            {errors.confirmPassword && <p className="mt-1.5 pl-1 text-[12px] text-red-500 font-medium">{errors.confirmPassword.message}</p>}
+          </motion.div>
 
-        <button type="submit" disabled={isSubmitting}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-colombia-blue py-3.5 text-[15px] font-semibold text-white shadow-sm transition-all duration-200 hover:bg-col-blue-dark border border-colombia-yellow/30 hover:shadow-md active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40">
-          {isSubmitting ? <><Spinner /> Creando cuenta...</> : "Crear cuenta"}
-        </button>
+          <motion.div custom={5} variants={stagger} initial="hidden" animate="visible">
+            <button type="submit" disabled={isSubmitting}
+              className="relative mt-2 flex w-full h-14 items-center justify-center gap-2.5 rounded-2xl bg-gray-900 text-[15px] font-semibold text-white shadow-lg shadow-gray-900/20 transition-all duration-300 hover:bg-gray-800 hover:shadow-xl hover:shadow-gray-900/25 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+              {isSubmitting ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> Creando cuenta...</>
+              ) : (
+                <><UserPlus className="h-4 w-4" /> Crear cuenta</>
+              )}
+            </button>
+          </motion.div>
+        </div>
       </form>
 
-      <p className="mt-6 text-center text-[14px] text-gray-400">
-        ¿Ya tienes cuenta?{" "}
-        <button onClick={onLoginClick} className="font-semibold text-colombia-blue hover:underline underline-offset-2 transition-colors">
-          Iniciar sesión
-        </button>
-      </p>
-    </div>
+      <motion.div custom={6} variants={stagger} initial="hidden" animate="visible" className="mt-8 text-center">
+        <p className="text-[14px] text-gray-500">
+          ¿Ya tienes cuenta?{" "}
+          <button onClick={onLoginClick} className="font-semibold text-gray-700 hover:text-gray-900 transition-colors">
+            Iniciar sesión
+          </button>
+        </p>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8 }}
+        className="mt-6 flex items-center justify-center gap-1.5 text-[12px] text-gray-400"
+      >
+        <ShieldCheck className="h-3.5 w-3.5" />
+        Tus datos están protegidos mediante cifrado SSL
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -352,63 +549,93 @@ function ForgotPasswordForm({
     setSent(true)
   }
 
-  if (sent) {
-    return (
-      <div className="text-center">
-        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-green-50">
-          <svg className="h-7 w-7 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-          </svg>
-        </div>
-        <h2 className="text-2xl font-bold tracking-tight text-gray-900">Revisa tu correo</h2>
-        <p className="mt-2 text-[15px] text-gray-500">Te enviamos un enlace para restablecer tu contraseña.</p>
-        <button onClick={onLoginClick}
-          className="mt-8 inline-flex items-center gap-1.5 text-[15px] font-semibold text-colombia-blue hover:underline underline-offset-2 transition-colors">
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Volver a iniciar sesión
-        </button>
-      </div>
-    )
-  }
-
   return (
-    <div>
-      <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-colombia-blue border border-colombia-yellow/45 shadow-sm">
-          <svg className="h-6 w-6 text-colombia-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
-          </svg>
-        </div>
-        <h2 className="text-2xl font-bold tracking-tight text-gray-900">Recuperar contraseña</h2>
-        <p className="mt-1.5 text-[15px] text-gray-500">Te enviaremos un enlace de recuperación</p>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {errors.root && (
-          <div className="animate-slide-down rounded-2xl bg-red-50 px-4 py-3 text-center text-[14px] font-medium text-red-600">
-            {errors.root.message}
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.3 }}
+    >
+      {sent ? (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center text-center py-8"
+        >
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 border border-emerald-100 mb-5">
+            <CheckCircle2 className="h-8 w-8 text-emerald-500" />
           </div>
-        )}
+          <h2 className="text-[22px] font-bold tracking-tight text-gray-900">Revisa tu correo</h2>
+          <p className="mt-2 text-[15px] text-gray-500 max-w-sm">
+            Te enviamos un enlace para restablecer tu contraseña. Si no lo encuentras, revisa tu carpeta de spam.
+          </p>
+          <button onClick={onLoginClick}
+            className="mt-8 inline-flex items-center gap-2 text-[15px] font-semibold text-gray-700 hover:text-gray-900 transition-colors">
+            <ArrowLeft className="h-4 w-4" />
+            Volver a iniciar sesión
+          </button>
+        </motion.div>
+      ) : (
+        <>
+          <motion.div className="mb-6 flex items-center gap-3 lg:hidden">
+            <img src="/logoVendingShop.png" alt="VendingShop" className="h-8 w-8 object-contain" />
+            <span className="text-lg font-extrabold tracking-tight text-gray-900">VendingShop</span>
+          </motion.div>
 
-        <div>
-          <input type="email" placeholder="Correo electrónico" {...register("email")}
-            className={errors.email ? inputErrorClass : inputClass} />
-          {errors.email && <p className="mt-1.5 px-1 text-[13px] text-red-500">{errors.email.message}</p>}
-        </div>
+          <motion.div custom={0} variants={stagger} initial="hidden" animate="visible" className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <button onClick={onLoginClick}
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors">
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+              <KeyRound className="h-6 w-6 text-gray-700" />
+            </div>
+            <h1 className="text-[26px] font-bold tracking-tight text-gray-900 mb-1">Recuperar contraseña</h1>
+            <p className="text-[15px] text-gray-500 leading-relaxed">
+              Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.
+            </p>
+          </motion.div>
 
-        <button type="submit" disabled={isSubmitting}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-colombia-blue py-3.5 text-[15px] font-semibold text-white shadow-sm transition-all duration-200 hover:bg-col-blue-dark border border-colombia-yellow/30 hover:shadow-md active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40">
-          {isSubmitting ? <><Spinner /> Enviando...</> : "Enviar enlace"}
-        </button>
-      </form>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            {errors.root && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-5 rounded-2xl bg-red-50 border border-red-100 px-4 py-3"
+              >
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 flex-shrink-0 text-red-500" />
+                  <p className="text-[14px] font-medium text-red-700">{errors.root.message}</p>
+                </div>
+              </motion.div>
+            )}
 
-      <p className="mt-6 text-center text-[14px] text-gray-400">
-        <button onClick={onLoginClick} className="font-semibold text-colombia-blue hover:underline underline-offset-2 transition-colors">
-          Volver a iniciar sesión
-        </button>
-      </p>
-    </div>
+            <motion.div custom={1} variants={stagger} initial="hidden" animate="visible">
+              <label className="block text-[13px] font-semibold text-gray-700 mb-2">Correo electrónico</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Mail className="h-[18px] w-[18px] text-gray-400" />
+                </div>
+                <input type="email" placeholder="tu@correo.com" {...register("email")}
+                  className={errors.email ? inputError : inputBase} />
+              </div>
+              {errors.email && <p className="mt-1.5 pl-1 text-[12px] text-red-500 font-medium">{errors.email.message}</p>}
+            </motion.div>
+
+            <motion.div custom={2} variants={stagger} initial="hidden" animate="visible">
+              <button type="submit" disabled={isSubmitting}
+                className="relative mt-6 flex w-full h-14 items-center justify-center gap-2.5 rounded-2xl bg-gray-900 text-[15px] font-semibold text-white shadow-lg shadow-gray-900/20 transition-all duration-300 hover:bg-gray-800 hover:shadow-xl hover:shadow-gray-900/25 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                {isSubmitting ? (
+                  <><Loader2 className="h-4 w-4 animate-spin" /> Enviando...</>
+                ) : (
+                  "Enviar enlace de recuperación"
+                )}
+              </button>
+            </motion.div>
+          </form>
+        </>
+      )}
+    </motion.div>
   )
 }
