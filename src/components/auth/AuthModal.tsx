@@ -198,7 +198,7 @@ function LoginForm({
           </svg>
         </div>
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">Iniciar sesión</h2>
-        <p className="mt-1.5 text-[15px] text-gray-500">Bienvenido de vuelta a Wil Motos</p>
+        <p className="mt-1.5 text-[15px] text-gray-500">Bienvenido de vuelta a vendingShop</p>
       </div>
 
       {registeredMessage && (
@@ -285,7 +285,7 @@ function RegisterForm({
           </svg>
         </div>
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">Crear cuenta</h2>
-        <p className="mt-1.5 text-[15px] text-gray-500">Únete a Wil Motos hoy</p>
+        <p className="mt-1.5 text-[15px] text-gray-500">Únete a vendingShop hoy</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

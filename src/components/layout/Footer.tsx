@@ -40,7 +40,7 @@ export default function Footer() {
                 </svg>
               </div>
               <span className="text-base font-extrabold tracking-tight text-white leading-none">
-                Wil <span className="text-xs font-semibold text-colombia-yellow">Motos</span>
+                vending <span className="text-xs font-semibold text-colombia-yellow">Shop</span>
               </span>
             </Link>
             <p className="text-xs text-gray-400 leading-relaxed">
@@ -75,7 +75,7 @@ export default function Footer() {
               <path d="M5 17h14" className="stroke-colombia-red" strokeWidth="2" />
               <path d="M7.5 17l2-5h5.5l2 5" className="stroke-colombia-blue" strokeWidth="2" />
             </svg>
-            <span className="text-sm font-extrabold text-white">Wil Motos</span>
+            <span className="text-sm font-extrabold text-white">vendingShop</span>
             <span className="flex h-2.5 w-4 overflow-hidden rounded-xs border border-gray-800 ml-1">
               <span className="h-full w-1/2 bg-colombia-yellow" />
               <span className="h-full w-1/4 bg-colombia-blue" />
@@ -97,13 +97,13 @@ export default function Footer() {
           </div>
 
           <p className="text-[10px] text-gray-600">
-            &copy; {new Date().getFullYear()} Wil Motos. Todos los derechos reservados.
+            &copy; {new Date().getFullYear()} VendingShop. Todos los derechos reservados.
           </p>
         </div>
 
         {/* Borde inferior para Desktop */}
         <div className="hidden md:flex mt-12 border-t border-gray-900 pt-8 items-center justify-between">
-          <p className="text-[13px] text-gray-500">&copy; {new Date().getFullYear()} Wil Motos. Todos los derechos reservados.</p>
+          <p className="text-[13px] text-gray-500">&copy; {new Date().getFullYear()} VendingShop. Todos los derechos reservados.</p>
           <div className="flex items-center gap-2">
             <span className="text-[13px] text-gray-500">Importado desde Colombia</span>
             <span className="flex h-2.5 w-4 overflow-hidden rounded-xs border border-gray-800">

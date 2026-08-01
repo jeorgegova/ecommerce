@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "WIl Motos",
+  title: "VendingShop",
   description: "Tu tienda de confianza",
 }
 
