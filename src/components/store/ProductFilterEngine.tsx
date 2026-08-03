@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/client"
 import ProductCard from "@/components/store/ProductCard"
 import { useSearchContext } from "@/components/store/SearchContext"
 import { useEffect, useRef, useState, useCallback, useMemo } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 
 interface ProductItem {
   id: string; name: string; slug: string; base_price: number
@@ -113,6 +113,7 @@ export default function ProductFilterEngine({
 }) {
   const supabase = createClient()
   const searchParams = useSearchParams()
+  const router = useRouter()
   const { query: contextQuery, submitSearch } = useSearchContext()
 
   const urlSearch = searchParams.get("q") || ""
@@ -213,7 +214,11 @@ export default function ProductFilterEngine({
     setFilterStats({ categoryCounts: catCounts, stockCount: stkCount, saleCount: slCount })
   }, [supabase, initialCategories])
 
-  useEffect(() => { fetchCategoryStats(initialSearch, null, false, false) }, [])
+  useEffect(() => {
+    fetchProducts(effectiveSearch, null, false, false, "relevance", 1)
+    fetchCategoryStats(effectiveSearch, null, false, false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     if (!hasUserAction) return
@@ -228,16 +233,18 @@ export default function ProductFilterEngine({
 
   useEffect(() => {
     if (contextQuery && contextQuery !== pendingSearchRef.current) {
-      pendingSearchRef.current = contextQuery; setPage(1); setHasUserAction(true); submitSearch("")
+      pendingSearchRef.current = contextQuery; setPage(1); setHasUserAction(true)
     }
   }, [contextQuery, submitSearch])
 
   const clearFilters = () => {
     setCategoryId(null); setInStock(false); setOnSale(false)
     setSort("relevance"); setPage(1); setHasUserAction(true)
+    submitSearch("")
+    router.replace("/", { scroll: false })
   }
   const applyFilter = (fn: () => void) => { fn(); setHasUserAction(true) }
-  const filterCount = [categoryId, inStock, onSale].filter(Boolean).length
+  const filterCount = [categoryId, inStock, onSale, effectiveSearch ? true : false].filter(Boolean).length
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
   const allCatCount = Object.values(filterStats.categoryCounts).reduce((a, b) => a + b, 0)
 
@@ -297,10 +304,22 @@ export default function ProductFilterEngine({
                   </svg>
                 </button>
               )}
+              {effectiveSearch && (
+                <button onClick={clearFilters}
+                  className="inline-flex flex-shrink-0 items-center gap-1 bg-gray-100 text-gray-700 rounded-full px-3 py-1.5 text-[11px] font-medium border border-gray-200">
+                  &quot;{effectiveSearch.length > 15 ? effectiveSearch.slice(0, 15) + "..." : effectiveSearch}&quot;
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
               {filterCount > 0 && (
                 <button onClick={clearFilters}
-                  className="text-[11px] font-medium text-gray-500 hover:underline ml-auto flex-shrink-0 px-2">
-                  Limpiar
+                  className="inline-flex flex-shrink-0 items-center gap-1 bg-red-50 text-red-600 hover:bg-red-100 rounded-full px-3 py-1.5 text-[11px] font-semibold border border-red-200 transition-all ml-auto cursor-pointer">
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                  </svg>
+                  Limpiar filtros
                 </button>
               )}
             </>
@@ -374,8 +393,13 @@ export default function ProductFilterEngine({
             <div className="sticky bottom-0 bg-white border-t border-gray-100 p-4 flex gap-3 z-10">
               {filterCount > 0 && (
                 <button onClick={() => { clearFilters(); const d = document.getElementById("mobile-filter-drawer"); if (d) d.classList.add("translate-y-full") }}
-                  className="flex-1 py-3 text-xs font-bold rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-700 transition-colors">
-                  Limpiar Todo
+                  className="flex-1 py-3 text-xs font-bold rounded-xl border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-colors cursor-pointer">
+                  <span className="flex items-center justify-center gap-1.5">
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                    Limpiar filtros
+                  </span>
                 </button>
               )}
               <button onClick={() => { const d = document.getElementById("mobile-filter-drawer"); if (d) d.classList.add("translate-y-full") }}
@@ -395,7 +419,12 @@ export default function ProductFilterEngine({
               <div className="mb-3 flex items-center justify-between">
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">Filtros</p>
                 {filterCount > 0 && (
-                  <button onClick={clearFilters} className="text-[11px] font-medium text-gray-400 hover:text-gray-700 transition-colors">Limpiar</button>
+                  <button onClick={clearFilters} className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-500 hover:text-red-600 transition-colors cursor-pointer">
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                    Limpiar
+                  </button>
                 )}
               </div>
 
@@ -483,7 +512,7 @@ export default function ProductFilterEngine({
                 <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
               </svg>
               <p className="text-sm text-gray-400">{effectiveSearch ? `Sin resultados para "${effectiveSearch}"` : "No se encontraron productos"}</p>
-              <button onClick={clearFilters} className="mt-4 text-[13px] font-medium text-gray-900 hover:underline">Quitar filtros</button>
+              <button onClick={clearFilters} className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-gray-900 px-5 py-2.5 text-[13px] font-semibold text-white hover:bg-gray-800 transition-colors cursor-pointer">Quitar filtros</button>
             </div>
           ) : (
             <>

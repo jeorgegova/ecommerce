@@ -12,7 +12,7 @@ export default async function HomePage({
   const supabase = await createClient()
 
   const [productsRes, categoriesRes] = await Promise.all([
-    supabase.from("product_listing").select("*").order("created_at", { ascending: false }).limit(20),
+    supabase.from("product_listing").select("*", { count: "exact" }).order("created_at", { ascending: false }).limit(20),
     supabase.from("categories").select("*").eq("is_active", true).order("sort_order", { ascending: true }).order("name", { ascending: true }),
   ])
 
