@@ -11,6 +11,7 @@ interface Suggestion {
   suggestion_type: "product" | "category"
   suggestion_text: string
   slug: string
+  sku?: string | null
 }
 
 export default function SearchBar() {
@@ -30,8 +31,34 @@ export default function SearchBar() {
     if (debounceRef.current) clearTimeout(debounceRef.current)
     if (query.length < 2) { setSuggestions([]); setOpen(false); return }
     debounceRef.current = setTimeout(async () => {
-      const { data } = await supabase.rpc("autocomplete_products", { p_query: query })
-      setSuggestions(data || []); setOpen(true); setSelectedIndex(-1)
+      const term = query.trim()
+      const [{ data: products }, { data: categories }] = await Promise.all([
+        supabase
+          .from("products")
+          .select("name, slug, sku")
+          .eq("status", "active")
+          .or(`name.ilike.%${term}%,sku.ilike.%${term}%`)
+          .limit(5),
+        supabase
+          .from("categories")
+          .select("name, slug")
+          .eq("is_active", true)
+          .ilike("name", `%${term}%`)
+          .limit(3),
+      ])
+      const productSuggestions: Suggestion[] = (products || []).map((product) => ({
+        suggestion_type: "product",
+        suggestion_text: product.name,
+        slug: product.slug,
+        sku: product.sku,
+      }))
+      const categorySuggestions: Suggestion[] = (categories || []).map((category) => ({
+        suggestion_type: "category",
+        suggestion_text: category.name,
+        slug: category.slug,
+      }))
+      setSuggestions([...productSuggestions, ...categorySuggestions])
+      setOpen(true); setSelectedIndex(-1)
     }, 200)
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
   }, [query, supabase])
@@ -78,7 +105,7 @@ export default function SearchBar() {
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => suggestions.length > 0 && setOpen(true)}
             onKeyDown={handleKeyDown}
-            placeholder="Buscar..."
+            placeholder="Buscar por nombre o SKU..."
             className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 transition-all duration-200 focus:border-gray-300 focus:bg-white focus:outline-none focus:ring-0 hover:border-gray-300"
           />
           {query.length > 0 && (
@@ -105,7 +132,10 @@ export default function SearchBar() {
                 <span className={`flex-shrink-0 rounded-lg px-2 py-1 text-[10px] font-semibold uppercase tracking-wide ${
                   sug.suggestion_type === "product" ? "bg-gray-100 text-gray-500" : "bg-blue-50 text-blue-600"
                 }`}>{sug.suggestion_type === "product" ? "Prod." : "Cat."}</span>
-                <span className="text-gray-700 truncate">{sug.suggestion_text}</span>
+                <span className="min-w-0 truncate text-gray-700">
+                  {sug.suggestion_text}
+                  {sug.suggestion_type === "product" && sug.sku && <span className="ml-2 text-[11px] text-gray-400">SKU {sug.sku}</span>}
+                </span>
               </Link>
             ))}
           </div>

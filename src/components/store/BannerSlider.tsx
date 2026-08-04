@@ -46,26 +46,26 @@ export default function BannerSlider() {
     <div className="relative w-full overflow-hidden bg-gray-100">
       <Link
         href={banner.link_url || "#"}
-        className="relative block aspect-[3/1] w-full sm:aspect-[4/1] lg:aspect-[5/1]"
+        className="relative block max-h-[330px] w-full overflow-hidden bg-gray-100"
       >
           <img
             src={banner.image_url}
             alt={banner.title || "Banner promocional"}
-            className="hidden h-full w-full object-cover sm:block"
+            className="hidden h-auto max-h-[330px] w-full object-cover sm:block"
             fetchPriority="high"
           />
         {banner.mobile_image_url && (
           <img
             src={banner.mobile_image_url}
             alt={banner.title || "Banner promocional"}
-            className="h-full w-full object-cover sm:hidden"
+            className="h-auto max-h-[330px] w-full object-cover sm:hidden"
           />
         )}
         {!banner.mobile_image_url && (
           <img
             src={banner.image_url}
             alt={banner.title || "Banner promocional"}
-            className="h-full w-full object-cover sm:hidden"
+            className="h-auto max-h-[330px] w-full object-cover sm:hidden"
           />
         )}
 

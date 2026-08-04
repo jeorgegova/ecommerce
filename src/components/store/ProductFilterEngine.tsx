@@ -65,8 +65,9 @@ function CategoryTreeItem({
           if (hasChildren) setExpanded(!expanded)
           onClick(cat.id)
         }}
-        className={`w-full text-left flex items-center gap-2 rounded-xl px-2.5 py-2 text-[13px] transition-all duration-150 ${
-          isActive ? "bg-gray-100 font-semibold text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-800"
+        aria-pressed={isActive}
+        className={`w-full text-left flex items-center gap-2 rounded-xl px-2.5 py-2.5 text-[13px] cursor-pointer transition-all duration-150 ${
+          isActive ? "bg-[#f5f5f7] font-semibold text-[#1d1d1f]" : "text-gray-500 hover:bg-[#f5f5f7] hover:text-[#1d1d1f]"
         }`}
       >
         {hasChildren && (
@@ -75,10 +76,10 @@ function CategoryTreeItem({
           </svg>
         )}
         {!hasChildren && <span className="w-3 flex-shrink-0" />}
-        <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${isActive ? "bg-gray-900" : "bg-transparent"}`} />
+            <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${isActive ? "bg-[#1d1d1f]" : "bg-transparent"}`} />
         <span className="flex-1 truncate">{cat.name}</span>
         {count > 0 && (
-          <span className={`text-[11px] tabular-nums ${isActive ? "text-gray-400" : "text-gray-300"}`}>{count}</span>
+          <span className="text-[11px] tabular-nums text-gray-400">{count}</span>
         )}
       </button>
       {hasChildren && expanded && (
@@ -120,6 +121,7 @@ export default function ProductFilterEngine({
   const effectiveSearch = contextQuery || urlSearch || initialSearch
 
   const [categoryId, setCategoryId] = useState<string | null>(null)
+  const [sidebarSearch, setSidebarSearch] = useState(effectiveSearch)
   const [inStock, setInStock] = useState(false)
   const [onSale, setOnSale] = useState(false)
   const [sort, setSort] = useState<SortOption>("relevance")
@@ -195,11 +197,10 @@ export default function ProductFilterEngine({
   }, [supabase, initialCategories])
 
   const fetchCategoryStats = useCallback(async (
-    search: string, catId: string | null, inStk: boolean, onSl: boolean
+    search: string, _catId: string | null, inStk: boolean, onSl: boolean
   ) => {
     let q = supabase.from("products").select("category_id, stock, promotion_active, sale_price").eq("status", "active")
     if (search.trim()) q = q.or(`name.ilike.%${search.trim()}%,sku.ilike.%${search.trim()}%`)
-    if (catId) q = q.in("category_id", getAllChildIds(catId, initialCategories))
     if (inStk) q = q.gt("stock", 0)
     if (onSl) q = q.eq("promotion_active", true).not("sale_price", "is", null)
     const { data } = await q
@@ -211,7 +212,18 @@ export default function ProductFilterEngine({
       if (p.promotion_active && p.sale_price) slCount++
       if (p.category_id) catCounts[p.category_id] = (catCounts[p.category_id] || 0) + 1
     }
-    setFilterStats({ categoryCounts: catCounts, stockCount: stkCount, saleCount: slCount })
+    const aggregated: Record<string, number> = {}
+    const propagate = (catId: string): number => {
+      if (aggregated[catId] !== undefined) return aggregated[catId]
+      let total = catCounts[catId] || 0
+      for (const c of initialCategories) {
+        if (c.parent_id === catId) total += propagate(c.id)
+      }
+      aggregated[catId] = total
+      return total
+    }
+    for (const cat of initialCategories) propagate(cat.id)
+    setFilterStats({ categoryCounts: aggregated, stockCount: stkCount, saleCount: slCount })
   }, [supabase, initialCategories])
 
   useEffect(() => {
@@ -237,16 +249,33 @@ export default function ProductFilterEngine({
     }
   }, [contextQuery, submitSearch])
 
+  useEffect(() => {
+    setSidebarSearch(effectiveSearch)
+  }, [effectiveSearch])
+
   const clearFilters = () => {
     setCategoryId(null); setInStock(false); setOnSale(false)
     setSort("relevance"); setPage(1); setHasUserAction(true)
     submitSearch("")
     router.replace("/", { scroll: false })
   }
+  const handleSidebarSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    const value = sidebarSearch.trim()
+    if (!value) {
+      clearFilters()
+      return
+    }
+    submitSearch(value)
+    setPage(1)
+    setHasUserAction(true)
+  }
   const applyFilter = (fn: () => void) => { fn(); setHasUserAction(true) }
   const filterCount = [categoryId, inStock, onSale, effectiveSearch ? true : false].filter(Boolean).length
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
-  const allCatCount = Object.values(filterStats.categoryCounts).reduce((a, b) => a + b, 0)
+  const allCatCount = initialCategories
+    .filter((c) => !c.parent_id)
+    .reduce((sum, c) => sum + (filterStats.categoryCounts[c.id] || 0), 0)
 
   return (
     <div>
@@ -413,13 +442,17 @@ export default function ProductFilterEngine({
 
       <div className="flex gap-8">
         {/* Sidebar Desktop */}
-        <aside className="hidden w-[220px] flex-shrink-0 lg:block">
-          <div className="sticky top-24 space-y-6">
-            <div>
-              <div className="mb-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">Filtros</p>
+        <aside className="hidden w-[236px] flex-shrink-0 lg:block mt-6">
+          <div className="sticky top-24">
+            <div className="px-1 pb-5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[17px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Filtrar productos</p>
+                  <p className="mt-1 text-[12px] leading-relaxed text-gray-500">Encuentra una pieza por categoría.</p>
+                </div>
                 {filterCount > 0 && (
-                  <button onClick={clearFilters} className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-500 hover:text-red-600 transition-colors cursor-pointer">
+                  <button onClick={clearFilters} aria-label="Limpiar todos los filtros"
+                    className="mt-0.5 inline-flex cursor-pointer items-center gap-1 rounded-full px-2 py-1 text-[10px] font-medium text-gray-500 transition-colors hover:bg-[#f5f5f7] hover:text-[#1d1d1f]">
                     <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                     </svg>
@@ -427,59 +460,76 @@ export default function ProductFilterEngine({
                   </button>
                 )}
               </div>
+              <form onSubmit={handleSidebarSearch} className="relative mt-4">
+                <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
+                <input
+                  value={sidebarSearch}
+                  onChange={(e) => setSidebarSearch(e.target.value)}
+                  placeholder="Nombre o SKU..."
+                  aria-label="Buscar productos"
+                  className="h-10 w-full rounded-xl border border-gray-200/80 bg-[#f5f5f7] pl-9 pr-3 text-[12px] text-[#1d1d1f] outline-none transition-colors placeholder:text-gray-400 hover:bg-white focus:border-gray-300 focus:bg-white"
+                />
+              </form>
+            </div>
 
-              <div className="space-y-4">
-                <div>
-                  <p className="mb-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide">Ordenar</p>
-                  <select value={sort} onChange={(e) => applyFilter(() => { setSort(e.target.value as SortOption); setPage(1) })}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-[13px] text-gray-600 focus:border-gray-300 focus:outline-none focus:ring-0 cursor-pointer hover:border-gray-300 transition-colors">
-                    {sortOptions.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
-                  </select>
-                </div>
-
-                <div>
-                  <p className="mb-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide">Categoría</p>
-                  <div className="space-y-0.5">
-                    <button
-                      onClick={() => applyFilter(() => { setCategoryId(null); setPage(1) })}
-                      className={`w-full text-left flex items-center gap-2 rounded-xl px-2.5 py-2 text-[13px] transition-all ${
-                        !categoryId ? "bg-gray-100 font-semibold text-gray-900" : "text-gray-600 hover:bg-gray-50"
-                      }`}
-                    >
-                      <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${!categoryId ? "bg-gray-900" : "bg-transparent"}`} />
-                      Todas ({allCatCount})
-                    </button>
-                    {categoryTree.map((cat) => (
-                      <CategoryTreeItem key={cat.id} cat={cat} counts={filterStats.categoryCounts} activeId={categoryId}
-                        level={0} onClick={(id) => applyFilter(() => { setCategoryId(categoryId === id ? null : id); setPage(1) })} />
-                    ))}
+            <div className="space-y-7 border-t border-gray-200/70 pt-5">
+              <div>
+                <div className="mb-2.5 flex items-end justify-between">
+                  <div>
+                    <p className="text-[12px] font-medium text-[#1d1d1f]">Categorías</p>
+                    <p className="mt-0.5 text-[11px] text-gray-400">Familias y modelos</p>
                   </div>
+                  <span className="text-[11px] tabular-nums text-gray-400">{allCatCount}</span>
                 </div>
+                <div className="max-h-[390px] space-y-0.5 overflow-y-auto pr-1 scrollbar-hide">
+                  <button
+                    onClick={() => applyFilter(() => { setCategoryId(null); setPage(1) })}
+                    aria-pressed={!categoryId}
+                    className={`w-full cursor-pointer text-left flex items-center gap-2 rounded-xl px-2.5 py-2.5 text-[13px] transition-all ${
+                      !categoryId ? "bg-[#f5f5f7] font-semibold text-[#1d1d1f]" : "text-gray-500 hover:bg-[#f5f5f7] hover:text-[#1d1d1f]"
+                    }`}
+                  >
+                      <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${!categoryId ? "bg-[#1d1d1f]" : "bg-transparent"}`} />
+                    <span className="flex-1">Todas las categorías</span>
+                    <span className="text-[11px] tabular-nums text-gray-400">{allCatCount}</span>
+                  </button>
+                  {categoryTree.map((cat) => (
+                    <CategoryTreeItem key={cat.id} cat={cat} counts={filterStats.categoryCounts} activeId={categoryId}
+                      level={0} onClick={(id) => applyFilter(() => { setCategoryId(categoryId === id ? null : id); setPage(1) })} />
+                  ))}
+                </div>
+              </div>
 
-                <div>
-                  <p className="mb-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide">Disponibilidad</p>
-                  <div className="space-y-0.5">
-                    <button onClick={() => applyFilter(() => { setInStock(!inStock); setPage(1) })}
-                      className={`w-full text-left flex items-center justify-between rounded-xl px-3 py-2.5 text-[13px] transition-all ${
-                        inStock ? "bg-gray-50 font-medium text-gray-900 ring-1 ring-gray-200/80" : "text-gray-500 hover:bg-gray-100 hover:text-gray-800"
-                      }`}>
-                      <span className="flex items-center gap-2.5">
-                        <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${inStock ? "bg-green-500" : "bg-transparent"}`} />
-                        En stock
-                      </span>
-                      <span className="text-[11px] text-gray-300">{filterStats.stockCount}</span>
-                    </button>
-                    <button onClick={() => applyFilter(() => { setOnSale(!onSale); setPage(1) })}
-                      className={`w-full text-left flex items-center justify-between rounded-xl px-3 py-2.5 text-[13px] transition-all ${
-                        onSale ? "bg-gray-50 font-medium text-gray-900 ring-1 ring-gray-200/80" : "text-gray-500 hover:bg-gray-100 hover:text-gray-800"
-                      }`}>
-                      <span className="flex items-center gap-2.5">
-                        <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${onSale ? "bg-red-500" : "bg-transparent"}`} />
-                        En oferta
-                      </span>
-                      <span className="text-[11px] text-gray-300">{filterStats.saleCount}</span>
-                    </button>
-                  </div>
+              <div>
+                <div className="mb-2.5">
+                  <p className="text-[12px] font-medium text-[#1d1d1f]">Disponibilidad</p>
+                  <p className="mt-0.5 text-[11px] text-gray-400">Compra solo lo disponible</p>
+                </div>
+                <div className="space-y-1.5">
+                  <button onClick={() => applyFilter(() => { setInStock(!inStock); setPage(1) })}
+                    aria-pressed={inStock}
+                    className={`w-full cursor-pointer text-left flex items-center justify-between rounded-xl border px-3 py-2.5 text-[13px] transition-all ${
+                      inStock ? "border-gray-300 bg-[#f5f5f7] font-semibold text-[#1d1d1f]" : "border-gray-100 bg-[#f5f5f7]/70 text-gray-500 hover:border-gray-200 hover:bg-white"
+                    }`}>
+                    <span className="flex items-center gap-2.5">
+                      <span className={`h-2 w-2 rounded-full ${inStock ? "bg-green-500" : "bg-gray-300"}`} />
+                      En stock
+                    </span>
+                    <span className="text-[11px] tabular-nums text-gray-400">{filterStats.stockCount}</span>
+                  </button>
+                  <button onClick={() => applyFilter(() => { setOnSale(!onSale); setPage(1) })}
+                    aria-pressed={onSale}
+                    className={`w-full cursor-pointer text-left flex items-center justify-between rounded-xl border px-3 py-2.5 text-[13px] transition-all ${
+                      onSale ? "border-gray-300 bg-[#f5f5f7] font-semibold text-[#1d1d1f]" : "border-gray-100 bg-[#f5f5f7]/70 text-gray-500 hover:border-gray-200 hover:bg-white"
+                    }`}>
+                    <span className="flex items-center gap-2.5">
+                      <span className={`h-2 w-2 rounded-full ${onSale ? "bg-gray-700" : "bg-gray-300"}`} />
+                      En oferta
+                    </span>
+                    <span className="text-[11px] tabular-nums text-gray-400">{filterStats.saleCount}</span>
+                  </button>
                 </div>
               </div>
             </div>

@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client"
 import { useAuthModal } from "@/stores/auth-modal"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { createPortal } from "react-dom"
 import type { User } from "@supabase/supabase-js"
 
@@ -22,7 +22,7 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [categories, setCategories] = useState<CategoryNode[]>([])
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const { openAuth } = useAuthModal()
 
   const [mounted, setMounted] = useState(false)
@@ -30,15 +30,21 @@ export default function Header() {
   useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data } = await supabase.auth.getUser()
-      setUser(data.user)
-      if (data.user) {
-        const { data: profile } = await supabase.from("profiles").select("role, full_name").eq("id", data.user.id).single()
+    const loadUser = async (authUser: User | null) => {
+      setUser(authUser)
+      if (authUser) {
+        const { data: profile } = await supabase.from("profiles").select("role, full_name").eq("id", authUser.id).single()
         setIsAdmin(profile?.role === "admin")
-        setUserName(profile?.full_name || data.user.email?.split("@")[0])
+        setUserName(profile?.full_name || authUser.email?.split("@")[0])
+      } else {
+        setUserName(undefined)
+        setIsAdmin(false)
       }
       setLoading(false)
+    }
+    const getUser = async () => {
+      const { data } = await supabase.auth.getUser()
+      await loadUser(data.user)
     }
     getUser()
 
@@ -53,8 +59,7 @@ export default function Header() {
     fetchCategories()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session?.user ?? null)
-      if (!session?.user) { setUserName(undefined); setIsAdmin(false) }
+      void loadUser(session?.user ?? null)
     })
     return () => subscription.unsubscribe()
   }, [supabase])
@@ -176,6 +181,10 @@ export default function Header() {
                       <Link href="/admin/products" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-gray-500 hover:bg-gray-50 transition-colors">
                         <svg className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
                         Productos
+                      </Link>
+                      <Link href="/admin/banners" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-gray-500 hover:bg-gray-50 transition-colors">
+                        <svg className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><rect x="3" y="4" width="18" height="16" rx="2" /><path strokeLinecap="round" strokeLinejoin="round" d="m7 15 3-3 2 2 3-4 3 5M7.5 8.5h.01" /></svg>
+                        Banners
                       </Link>
                       <Link href="/admin/orders" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-gray-500 hover:bg-gray-50 transition-colors">
                         <svg className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
