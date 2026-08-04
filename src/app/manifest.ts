@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next"
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "VendingShop",
-    short_name: "VendingShop",
+    name: "Wil Motos",
+    short_name: "Wil Motos",
     description: "Tu tienda de confianza",
     start_url: "/",
     display: "standalone",

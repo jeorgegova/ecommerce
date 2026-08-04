@@ -6,42 +6,31 @@ import NotificationBell from "@/components/store/NotificationBell"
 import UserMenu from "@/components/layout/UserMenu"
 import { createClient } from "@/lib/supabase/client"
 import { useAuthModal } from "@/stores/auth-modal"
+import { useAuthStore } from "@/stores/auth"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
-import type { User } from "@supabase/supabase-js"
 
 interface CategoryNode { id: string; name: string; slug: string; children: CategoryNode[] }
 
 export default function Header() {
-  const [user, setUser] = useState<User | null>(null)
-  const [userName, setUserName] = useState<string | undefined>(undefined)
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const user = useAuthStore((s) => s.user)
+  const loading = useAuthStore((s) => s.loading)
+  const userName = useAuthStore((s) => s.userName)
+  const isAdmin = useAuthStore((s) => s.isAdmin)
   const [menuOpen, setMenuOpen] = useState(false)
   const [categories, setCategories] = useState<CategoryNode[]>([])
   const router = useRouter()
   const supabase = createClient()
   const { openAuth } = useAuthModal()
+  const setUser = useAuthStore((s) => s.setUser)
 
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data } = await supabase.auth.getUser()
-      setUser(data.user)
-      if (data.user) {
-        const { data: profile } = await supabase.from("profiles").select("role, full_name").eq("id", data.user.id).single()
-        setIsAdmin(profile?.role === "admin")
-        setUserName(profile?.full_name || data.user.email?.split("@")[0])
-      }
-      setLoading(false)
-    }
-    getUser()
-
     const fetchCategories = async () => {
       const { data } = await supabase.from("categories").select("*").eq("is_active", true).order("sort_order", { ascending: true }).order("name", { ascending: true })
       if (data) {
@@ -51,28 +40,22 @@ export default function Header() {
       }
     }
     fetchCategories()
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session?.user ?? null)
-      if (!session?.user) { setUserName(undefined); setIsAdmin(false) }
-    })
-    return () => subscription.unsubscribe()
   }, [supabase])
 
-  const handleLogout = async () => { await supabase.auth.signOut(); router.push("/"); router.refresh() }
+  const handleLogout = async () => { await supabase.auth.signOut(); setUser(null); router.push("/"); router.refresh() }
 
   return (
     <header className={`sticky top-0 border-b border-gray-100 bg-white/90 backdrop-blur-xl supports-[backdrop-filter]:bg-white/80 ${menuOpen ? "z-50" : "z-40"}`}>
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:h-16 lg:gap-5 lg:px-8">
         <Link href="/" className="group flex-shrink-0 flex items-center gap-2 hover:opacity-90 transition-opacity">
           <div className="relative flex items-center justify-center p-1.5 bg-gray-50 rounded-xl border border-gray-100 shadow-xs">
-            <img src="/logoVendingShop.png" alt="VendingShop" className="h-7 w-7 object-contain transition-transform group-hover:scale-110 duration-300" />
+            <img src="/logoWilMotos.png" alt="Wil Motos" className="h-7 w-7 object-contain transition-transform group-hover:scale-110 duration-300" />
           </div>
           <div className="flex flex-col">
             <span className="text-base font-extrabold tracking-tight text-gray-900 leading-none lg:text-lg flex items-center gap-1">
-              VendingShop <span className="text-[10px] font-semibold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">Shop</span>
+              Wil<span className="text-[10px] font-semibold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">Motos</span>
             </span>
-            <span className="text-[8px] font-bold text-gray-500 uppercase tracking-wider leading-none mt-1">Repuestos para Máquinas Vending</span>
+            <span className="text-[8px] font-bold text-gray-500 uppercase tracking-wider leading-none mt-1">Repuestos para Motos</span>
           </div>
         </Link>
 

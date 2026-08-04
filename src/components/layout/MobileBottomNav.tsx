@@ -3,38 +3,30 @@
 import CartBadge from "@/components/store/CartBadge"
 import { createClient } from "@/lib/supabase/client"
 import { useAuthModal } from "@/stores/auth-modal"
+import { useAuthStore } from "@/stores/auth"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { createPortal } from "react-dom"
 import { useEffect, useState } from "react"
 
 export default function MobileBottomNav() {
-  const [user, setUser] = useState<any>(null)
-  const [isAdmin, setIsAdmin] = useState(false)
+  const user = useAuthStore((s) => s.user)
+  const isAdmin = useAuthStore((s) => s.isAdmin)
   const [menuOpen, setMenuOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
   const { openAuth } = useAuthModal()
+  const setUser = useAuthStore((s) => s.setUser)
 
   useEffect(() => { setMounted(true) }, [])
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        setUser(data.user)
-        supabase.from("profiles").select("role").eq("id", data.user.id).single().then(({ data: profile }) => {
-          if (profile?.role === "admin") setIsAdmin(true)
-        })
-      }
-    })
-  }, [supabase])
 
   const isActive = (href: string) => href === "/" ? pathname === "/" : pathname.startsWith(href)
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
+    setUser(null)
     setMenuOpen(false)
     router.push("/")
     router.refresh()
