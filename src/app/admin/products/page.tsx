@@ -26,17 +26,27 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
   const [toggling, setToggling] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+  const pageSize = 20
+  const totalPages = Math.ceil(totalCount / pageSize)
   const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const { data } = await supabase
-        .from("products")
-        .select("*, categories(name)")
-        .order("created_at", { ascending: false })
+      setLoading(true)
+      const from = (page - 1) * pageSize
+      const to = from + pageSize - 1
 
-      const prodIds = (data || []).map((p: any) => p.id)
+      const [countResult, dataResult] = await Promise.all([
+        supabase.from("products").select("*", { count: "exact", head: true }),
+        supabase.from("products").select("*, categories(name)").order("created_at", { ascending: false }).range(from, to),
+      ])
+
+      setTotalCount(countResult.count ?? 0)
+
+      const prodIds = (dataResult.data || []).map((p: any) => p.id)
       let imageMap: Record<string, string> = {}
       if (prodIds.length > 0) {
         const { data: images } = await supabase
@@ -51,11 +61,11 @@ export default function AdminProductsPage() {
         }
       }
 
-      setProducts((data || []).map((p: any) => ({ ...p, main_image: imageMap[p.id] || null })))
+      setProducts((dataResult.data || []).map((p: any) => ({ ...p, main_image: imageMap[p.id] || null })))
       setLoading(false)
     }
     fetchProducts()
-  }, [supabase])
+  }, [supabase, page])
 
   const togglePromotion = async (product: Product) => {
     if (!product.sale_price) return
@@ -96,7 +106,11 @@ export default function AdminProductsPage() {
     <div className="mx-auto max-w-7xl">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-gray-500">{products.length} productos</p>
+          <p className="text-sm text-gray-500">
+            {totalCount > 0
+              ? `${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, totalCount)} de ${totalCount} productos`
+              : "0 productos"}
+          </p>
         </div>
         <Link
           href="/admin/products/new"
@@ -111,7 +125,7 @@ export default function AdminProductsPage() {
           type="text"
           placeholder="Buscar productos..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => { setSearch(e.target.value); setPage(1) }}
           className="block w-full max-w-sm rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
         />
       </div>
@@ -236,6 +250,49 @@ export default function AdminProductsPage() {
           <div className="col-span-full py-12 text-center text-sm text-gray-500">No se encontraron productos</div>
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div className="mt-6 flex items-center justify-center gap-1">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-default transition-colors"
+          >
+            Anterior
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1)
+            .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+            .reduce<(number | "...")[]>((acc, p, idx, arr) => {
+              if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push("...")
+              acc.push(p)
+              return acc
+            }, [])
+            .map((item, i) =>
+              item === "..." ? (
+                <span key={`dots-${i}`} className="px-2 text-sm text-gray-400">...</span>
+              ) : (
+                <button
+                  key={item}
+                  onClick={() => setPage(item)}
+                  className={`min-w-[36px] rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
+                    item === page
+                      ? "bg-gray-900 text-white"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  {item}
+                </button>
+              )
+            )}
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-default transition-colors"
+          >
+            Siguiente
+          </button>
+        </div>
+      )}
     </div>
   )
 }
