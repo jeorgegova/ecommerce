@@ -120,7 +120,7 @@ export default function CartContent() {
               <div className="flex justify-between text-sm"><span className="text-gray-600">Envío</span><span className="text-gray-900">Por calcular</span></div>
               <div className="border-t border-gray-200 pt-3 flex justify-between"><span className="font-semibold">Total</span><span className="font-semibold">${subtotal.toLocaleString("es-CO")}</span></div>
             </div>
-            <Link href="/cart/checkout" className="mt-6 block w-full rounded-full bg-gray-900 px-6 py-3 text-sm font-medium text-white text-center hover:bg-gray-800">Ir a pagar</Link>
+            <Link href="/cart/checkout" className="mt-6 block w-full rounded-full bg-gray-900 px-6 py-3 text-center text-sm font-medium text-white hover:bg-gray-800">Generar proforma</Link>
             <Link href="/products" className="mt-3 block text-center text-sm text-gray-500 hover:text-gray-900">Seguir comprando</Link>
           </div>
         </div>

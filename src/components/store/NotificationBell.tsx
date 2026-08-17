@@ -74,20 +74,26 @@ export default function NotificationBell() {
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const fetchNotifications = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    setAuthUser(user)
-    if (!user) { setNotifications([]); setUnreadCount(0); return }
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      setAuthUser(user)
+      if (!user) { setNotifications([]); setUnreadCount(0); return }
 
-    const { data } = await supabase
-      .from("notifications")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(20)
+      const { data } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(20)
 
-    if (data) {
-      setNotifications(data)
-      setUnreadCount(data.filter((n) => !n.is_read).length)
+      if (data) {
+        setNotifications(data)
+        setUnreadCount(data.filter((n) => !n.is_read).length)
+      }
+    } catch {
+      setAuthUser(null)
+      setNotifications([])
+      setUnreadCount(0)
     }
   }
 

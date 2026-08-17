@@ -185,6 +185,8 @@ CREATE OR REPLACE FUNCTION create_order_from_cart(
 )
 RETURNS UUID
 LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_order_id     UUID;
@@ -197,6 +199,10 @@ DECLARE
   v_coupon       RECORD;
   v_used_count   INTEGER;
 BEGIN
+  IF auth.uid() IS NULL OR auth.uid() <> p_user_id THEN
+    RAISE EXCEPTION 'Unauthorized order user';
+  END IF;
+
   -- Verificar que el carrito no esté vacío
   IF NOT EXISTS (SELECT 1 FROM cart_items WHERE user_id = p_user_id) THEN
     RAISE EXCEPTION 'Cart is empty';
