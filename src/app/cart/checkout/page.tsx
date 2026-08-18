@@ -2,6 +2,7 @@
 
 import StoreLayout from "@/components/layout/StoreLayout"
 import { createClient } from "@/lib/supabase/client"
+import { downloadProformaPdf, getSettingValue } from "@/lib/utils/proforma-pdf"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -59,16 +60,34 @@ export default function CheckoutPage() {
     setPlacing(true); setError("")
 
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Sesión no disponible")
       const { data, error: rpcError } = await supabase.rpc("create_order_from_cart", {
-        p_user_id: (await supabase.auth.getUser()).data.user!.id,
+        p_user_id: user.id,
         p_shipping_address_id: selectedAddressId,
       })
 
       if (rpcError) throw new Error(rpcError.message)
 
+      const orderId = data as string
+      const [{ data: order }, { data: orderItems }, { data: settings }] = await Promise.all([
+        supabase.from("orders").select("*").eq("id", orderId).single(),
+        supabase.from("order_items").select("*").eq("order_id", orderId).order("created_at"),
+        supabase.from("settings").select("key, value").in("key", ["banco_consignar", "numero_cuenta_bancaria"]),
+      ])
+      if (order && orderItems) {
+        const address = addresses.find((item) => item.id === selectedAddressId)
+        await downloadProformaPdf({
+          orderNumber: order.order_number, createdAt: order.created_at, status: order.status,
+          subtotal: order.subtotal, shipping_cost: order.shipping_cost, discount: order.discount, total: order.total,
+          items: orderItems, customerName: address?.full_name, customerEmail: user.email, customerPhone: address?.phone,
+          address: address?.address_line_1, city: address?.city, state: address?.state,
+          bankName: getSettingValue(settings, "banco_consignar"), bankAccount: getSettingValue(settings, "numero_cuenta_bancaria"),
+        })
+      }
       router.push(`/account/orders/${data}`)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "No fue posible crear el pedido")
       setPlacing(false)
     }
   }
@@ -148,7 +167,7 @@ export default function CheckoutPage() {
               {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
               <button onClick={placeOrder} disabled={placing || addresses.length === 0}
                 className="mt-6 w-full rounded-full bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50">
-                {placing ? "Procesando..." : "Confirmar Pedido"}
+                {placing ? "Generando proforma..." : "Generar proforma"}
               </button>
             </div>
           </div>

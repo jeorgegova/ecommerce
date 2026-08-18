@@ -5,64 +5,13 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
-interface Order {
-  id: string; order_number: string; status: string; total: number
-  subtotal: number; shipping_cost: number; created_at: string
-  order_statuses: { name: string; color: string } | null
-}
+interface Order { id: string; order_number: string; status: string; total: number; created_at: string; order_statuses: { name: string; color: string } | null }
+const labels: Record<string, string> = { pending: "Pendiente", confirmed: "Confirmado", paid: "Pagado", processing: "En preparación", shipped: "Enviado", delivered: "Entregado", cancelled: "Cancelado" }
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([])
-  const [loading, setLoading] = useState(true)
-  const router = useRouter()
-  const supabase = createClient()
-
-  useEffect(() => {
-    const fetchOrders = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push("/login"); return }
-
-      const { data } = await supabase
-        .from("orders")
-        .select("*, order_statuses(name, color)")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-
-      setOrders(data || [])
-      setLoading(false)
-    }
-    fetchOrders()
-  }, [supabase, router])
-
-  return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <h1 className="text-2xl font-bold text-gray-900">Mis Pedidos</h1>
-      {loading ? (
-        <p className="mt-8 text-gray-600">Cargando...</p>
-      ) : orders.length === 0 ? (
-        <div className="mt-12 text-center">
-          <p className="text-gray-500">No tienes pedidos aún</p>
-
-        </div>
-      ) : (
-        <div className="mt-8 space-y-4">
-          {orders.map((order) => (
-            <Link key={order.id} href={`/account/orders/${order.id}`} className="flex items-center justify-between rounded-xl border border-gray-200 p-5 hover:border-gray-300">
-              <div>
-                <p className="font-medium text-gray-900">{order.order_number}</p>
-                <p className="mt-1 text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString("es-CO")}</p>
-              </div>
-              <div className="text-right">
-                <span className="inline-flex rounded-full px-3 py-1 text-xs font-medium"
-                  style={{ backgroundColor: (order.order_statuses?.color || "#6B7280") + "20", color: order.order_statuses?.color || "#6B7280" }}>
-                  {order.order_statuses?.name || order.status}
-                </span>
-                <p className="mt-1 text-sm font-medium text-gray-900">${Number(order.total).toLocaleString("es-CO")}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
-    </div>
-  )
+  const [orders, setOrders] = useState<Order[]>([]); const [loading, setLoading] = useState(true); const router = useRouter(); const supabase = createClient()
+  useEffect(() => { const fetchOrders = async () => { const { data: { user } } = await supabase.auth.getUser(); if (!user) { router.push("/login"); return }; const { data } = await supabase.from("orders").select("*, order_statuses(name, color)").eq("user_id", user.id).order("created_at", { ascending: false }); setOrders(data || []); setLoading(false) }; fetchOrders() }, [supabase, router])
+  return <div className="bg-gray-50/70"><div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8"><div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end"><div><p className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Cuenta</p><h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-950">Mis pedidos</h1><p className="mt-2 text-gray-500">Consulta estado, productos y documentos de tus compras.</p></div><span className="text-sm text-gray-500">{orders.length} {orders.length === 1 ? "pedido" : "pedidos"}</span></div>
+    {loading ? <div className="mt-8 space-y-4">{[1, 2, 3].map((item) => <div key={item} className="h-28 animate-pulse rounded-2xl bg-gray-200" />)}</div> : orders.length === 0 ? <div className="mt-10 rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-16 text-center"><p className="text-lg font-semibold text-gray-900">Aún no tienes pedidos</p><p className="mt-2 text-sm text-gray-500">Tus compras aparecerán aquí cuando confirmes un pedido.</p><Link href="/products" className="mt-6 inline-flex rounded-full bg-gray-950 px-5 py-2.5 text-sm font-semibold text-white">Explorar productos</Link></div> : <div className="mt-8 space-y-4">{orders.map((order) => { const color = order.order_statuses?.color || "#6B7280"; return <Link key={order.id} href={`/account/orders/${order.id}`} className="group block rounded-2xl border border-gray-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-gray-400 hover:shadow-lg sm:p-6"><div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div><div className="flex items-center gap-3"><span className="text-lg font-bold text-gray-950">{order.order_number}</span><span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} /></div><p className="mt-1 text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString("es-CO", { year: "numeric", month: "long", day: "numeric" })}</p></div><div className="flex items-center justify-between gap-6 sm:justify-end"><div><span className="rounded-full px-3 py-1.5 text-xs font-semibold" style={{ backgroundColor: `${color}20`, color }}>{labels[order.status] || order.status}</span><p className="mt-2 text-right text-base font-bold text-gray-950">${Number(order.total).toLocaleString("es-CO")}</p></div><span className="text-xl text-gray-400 transition group-hover:translate-x-1">→</span></div></div></Link> })}</div>}
+  </div></div>
 }

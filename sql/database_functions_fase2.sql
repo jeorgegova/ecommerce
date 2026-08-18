@@ -185,6 +185,8 @@ CREATE OR REPLACE FUNCTION create_order_from_cart(
 )
 RETURNS UUID
 LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_order_id     UUID;
@@ -197,6 +199,10 @@ DECLARE
   v_coupon       RECORD;
   v_used_count   INTEGER;
 BEGIN
+  IF auth.uid() IS NULL OR auth.uid() <> p_user_id THEN
+    RAISE EXCEPTION 'Unauthorized order creation';
+  END IF;
+
   -- Verificar que el carrito no esté vacío
   IF NOT EXISTS (SELECT 1 FROM cart_items WHERE user_id = p_user_id) THEN
     RAISE EXCEPTION 'Cart is empty';
@@ -306,7 +312,7 @@ BEGIN
     p_notes, p_shipping_address_id, p_billing_address_id, p_coupon_id
   ) RETURNING id INTO v_order_id;
 
-  -- Crear order_items y descontar inventario
+  -- Crear order_items. El inventario se descuenta al confirmar la orden.
   FOR v_item IN
     SELECT
       ci.product_id,
@@ -333,17 +339,6 @@ BEGIN
       (v_item.unit_price + v_item.price_adjustment) * v_item.quantity
     );
 
-    -- Descontar stock
-    PERFORM record_movement(
-      p_product_id    => v_item.product_id,
-      p_variant_id    => v_item.variant_id,
-      p_user_id       => p_user_id,
-      p_movement_type => 'sale',
-      p_quantity      => -v_item.quantity,
-      p_reference_type => 'order',
-      p_reference_id  => v_order_id::TEXT,
-      p_notes         => 'Order ' || v_order_number
-    );
   END LOOP;
 
   -- Registrar uso de cupón
@@ -377,11 +372,22 @@ CREATE OR REPLACE FUNCTION update_order_status(
 )
 RETURNS BOOLEAN
 LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_old_status TEXT;
   v_order_number TEXT;
+  v_item RECORD;
 BEGIN
+  IF auth.uid() IS NULL OR NOT EXISTS (
+    SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'
+  ) THEN
+    RAISE EXCEPTION 'Unauthorized order status change';
+  END IF;
+
+  p_user_id := auth.uid();
+
   SELECT status, order_number INTO v_old_status, v_order_number
   FROM orders WHERE id = p_order_id;
 
@@ -398,6 +404,30 @@ BEGIN
     RAISE EXCEPTION 'Cannot cancel an order that has been shipped or delivered';
   END IF;
 
+  -- Confirmar es el punto que descuenta inventario. Validar todo antes de cambiar estado.
+  IF p_new_status = 'confirmed' AND v_old_status <> 'confirmed' THEN
+    FOR v_item IN
+      SELECT oi.product_id, oi.variant_id, oi.quantity,
+             p.stock AS product_stock, pv.stock AS variant_stock,
+             oi.product_name, oi.variant_name
+      FROM order_items oi
+      JOIN products p ON p.id = oi.product_id
+      LEFT JOIN product_variants pv ON pv.id = oi.variant_id
+      WHERE oi.order_id = p_order_id
+      FOR UPDATE OF p
+    LOOP
+      IF v_item.variant_id IS NOT NULL AND COALESCE(v_item.variant_stock, 0) < v_item.quantity THEN
+        RAISE EXCEPTION 'Insufficient stock for variant % of %. Available: %, requested: %',
+          v_item.variant_name, v_item.product_name, v_item.variant_stock, v_item.quantity;
+      END IF;
+
+      IF v_item.variant_id IS NULL AND v_item.product_stock < v_item.quantity THEN
+        RAISE EXCEPTION 'Insufficient stock for %. Available: %, requested: %',
+          v_item.product_name, v_item.product_stock, v_item.quantity;
+      END IF;
+    END LOOP;
+  END IF;
+
   -- Actualizar estado
   UPDATE orders SET
     status = p_new_status,
@@ -405,8 +435,27 @@ BEGIN
     cancellation_reason = CASE WHEN p_new_status = 'cancelled' THEN p_cancel_reason ELSE cancellation_reason END
   WHERE id = p_order_id;
 
+  IF p_new_status = 'confirmed' AND v_old_status <> 'confirmed' THEN
+    FOR v_item IN
+      SELECT product_id, variant_id, quantity
+      FROM order_items
+      WHERE order_id = p_order_id
+    LOOP
+      PERFORM record_movement(
+        p_product_id     => v_item.product_id,
+        p_variant_id     => v_item.variant_id,
+        p_user_id        => COALESCE(p_user_id, auth.uid()),
+        p_movement_type  => 'sale',
+        p_quantity       => -v_item.quantity,
+        p_reference_type => 'order',
+        p_reference_id   => p_order_id::TEXT,
+        p_notes          => 'Order ' || v_order_number || ' confirmed'
+      );
+    END LOOP;
+  END IF;
+
   -- Si se cancela, restaurar stock
-  IF p_new_status = 'cancelled' AND v_old_status NOT IN ('cancelled', 'delivered') THEN
+  IF p_new_status = 'cancelled' AND v_old_status IN ('confirmed', 'processing', 'shipped') THEN
     INSERT INTO inventory_movements (
       product_id, variant_id, user_id, movement_type,
       quantity, stock_before, stock_after,
@@ -415,7 +464,7 @@ BEGIN
     SELECT
       oi.product_id,
       oi.variant_id,
-      p_user_id,
+      COALESCE(p_user_id, auth.uid()),
       'return',
       oi.quantity,
       COALESCE(pv.stock, p.stock),

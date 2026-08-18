@@ -2,76 +2,16 @@
 
 import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
-interface Order {
-  id: string; order_number: string; status: string; total: number; user_id: string; created_at: string
-  order_statuses: { name: string; color: string } | null
-  profiles: { full_name: string; email: string } | null
-}
-
+interface Order { id: string; order_number: string; status: string; total: number; created_at: string; profiles: { full_name: string; email: string } | null; order_statuses: { name: string; color: string } | null }
+const labels: Record<string, string> = { pending: "Pendiente", confirmed: "Confirmado", paid: "Pagado", processing: "En preparación", shipped: "Enviado", delivered: "Entregado", cancelled: "Cancelado" }
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([])
-  const [loading, setLoading] = useState(true)
-  const supabase = createClient()
-
-  useEffect(() => {
-    const fetchOrders = async () => {
-      const { data } = await supabase
-        .from("orders")
-        .select("*, order_statuses(name, color), profiles(full_name, email)")
-        .order("created_at", { ascending: false })
-
-      setOrders(data || [])
-      setLoading(false)
-    }
-    fetchOrders()
-  }, [supabase])
-
-  const statusBadge = (order: Order) => {
-    const color = order.order_statuses?.color || "#6B7280"
-    return (
-      <span className="inline-flex rounded-full px-2 py-1 text-xs font-medium"
-        style={{ backgroundColor: color + "20", color }}>
-        {order.order_statuses?.name || order.status}
-      </span>
-    )
-  }
-
-  if (loading) return <p className="text-gray-600">Cargando...</p>
-
-  return (
-    <div>
-      <p className="text-sm text-gray-500">{orders.length} pedidos</p>
-
-      <div className="mt-8 overflow-hidden rounded-xl border border-gray-200">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Pedido</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Cliente</th>
-              <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Estado</th>
-              <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Total</th>
-              <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Fecha</th>
-              <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Acciones</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
-            {orders.map((order) => (
-              <tr key={order.id} className="hover:bg-gray-50">
-                <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">{order.order_number}</td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.profiles?.full_name || order.profiles?.email || "—"}</td>
-                <td className="whitespace-nowrap px-6 py-4 text-center">{statusBadge(order)}</td>
-                <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">${Number(order.total).toLocaleString("es-CO")}</td>
-                <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString("es-CO")}</td>
-                <td className="whitespace-nowrap px-6 py-4 text-right text-sm">
-                  <Link href={`/admin/orders/${order.id}`} className="font-medium text-gray-900 hover:text-gray-600">Gestionar</Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  )
+  const [orders, setOrders] = useState<Order[]>([]); const [query, setQuery] = useState(""); const [status, setStatus] = useState("all"); const [loading, setLoading] = useState(true); const supabase = createClient()
+  useEffect(() => { const fetchOrders = async () => { const { data } = await supabase.from("orders").select("*, order_statuses(name, color), profiles(full_name, email)").order("created_at", { ascending: false }); setOrders(data || []); setLoading(false) }; fetchOrders() }, [supabase])
+  const filtered = useMemo(() => orders.filter((order) => { const haystack = `${order.order_number} ${order.profiles?.full_name || ""} ${order.profiles?.email || ""}`.toLowerCase(); return haystack.includes(query.toLowerCase()) && (status === "all" || order.status === status) }), [orders, query, status])
+  const pending = orders.filter((order) => order.status === "pending").length; const total = orders.reduce((sum, order) => sum + Number(order.total), 0)
+  const badge = (order: Order) => { const color = order.order_statuses?.color || "#6B7280"; return <span className="rounded-full px-2.5 py-1 text-xs font-semibold" style={{ backgroundColor: `${color}20`, color }}>{labels[order.status] || order.order_statuses?.name || order.status}</span> }
+  if (loading) return <div className="space-y-4"><div className="h-10 w-64 animate-pulse rounded bg-gray-200" /><div className="h-64 animate-pulse rounded-2xl bg-gray-200" /></div>
+  return <div><div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end"><div><p className="text-sm font-semibold uppercase tracking-wider text-gray-500">Operaciones</p><h1 className="mt-1 text-3xl font-bold text-gray-950">Gestión de pedidos</h1><p className="mt-2 text-sm text-gray-500">Busca, filtra y gestiona pedidos de clientes.</p></div><span className="text-sm text-gray-500">{filtered.length} resultados</span></div><div className="mt-6 grid gap-4 sm:grid-cols-3"><div className="rounded-2xl border border-gray-200 bg-white p-5"><p className="text-sm text-gray-500">Total de pedidos</p><p className="mt-2 text-2xl font-bold">{orders.length}</p></div><div className="rounded-2xl border border-gray-200 bg-white p-5"><p className="text-sm text-gray-500">Pendientes</p><p className="mt-2 text-2xl font-bold text-amber-600">{pending}</p></div><div className="rounded-2xl border border-gray-200 bg-white p-5"><p className="text-sm text-gray-500">Valor acumulado</p><p className="mt-2 text-2xl font-bold">${total.toLocaleString("es-CO")}</p></div></div><div className="mt-6 flex flex-col gap-3 sm:flex-row"><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar pedido, cliente o correo" className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-gray-950 sm:max-w-md" /><select value={status} onChange={(event) => setStatus(event.target.value)} className="rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm"><option value="all">Todos los estados</option>{Object.entries(labels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div><div className="mt-6 hidden overflow-hidden rounded-2xl border border-gray-200 bg-white md:block"><table className="min-w-full divide-y divide-gray-200"><thead className="bg-gray-50"><tr>{["Pedido", "Cliente", "Estado", "Total", "Fecha", ""].map((heading) => <th key={heading} className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{heading}</th>)}</tr></thead><tbody className="divide-y divide-gray-100">{filtered.map((order) => <tr key={order.id} className="hover:bg-gray-50"><td className="px-5 py-4 text-sm font-semibold">{order.order_number}</td><td className="px-5 py-4 text-sm"><p>{order.profiles?.full_name || "Pendiente"}</p><p className="text-xs text-gray-500">{order.profiles?.email || ""}</p></td><td className="px-5 py-4">{badge(order)}</td><td className="px-5 py-4 text-sm font-semibold">${Number(order.total).toLocaleString("es-CO")}</td><td className="px-5 py-4 text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString("es-CO")}</td><td className="px-5 py-4 text-right"><Link href={`/admin/orders/${order.id}`} className="text-sm font-semibold text-gray-950 hover:underline">Gestionar</Link></td></tr>)}</tbody></table></div><div className="mt-6 space-y-3 md:hidden">{filtered.map((order) => <Link key={order.id} href={`/admin/orders/${order.id}`} className="block rounded-2xl border border-gray-200 bg-white p-4"><div className="flex justify-between gap-3"><div><p className="font-bold">{order.order_number}</p><p className="mt-1 text-sm text-gray-500">{order.profiles?.full_name || order.profiles?.email || "Cliente pendiente"}</p></div>{badge(order)}</div><div className="mt-4 flex justify-between text-sm"><span className="text-gray-500">{new Date(order.created_at).toLocaleDateString("es-CO")}</span><span className="font-bold">${Number(order.total).toLocaleString("es-CO")}</span></div></Link>)}</div></div>
 }
