@@ -1,6 +1,6 @@
 "use client"
 
-import { compressImage } from "@/lib/utils/image"
+import { compressImage, getDisplayImageUrl, isSupabaseStorageUrl } from "@/lib/utils/image"
 import Image from "next/image"
 import { useCallback, useEffect, useRef, useState } from "react"
 
@@ -32,8 +32,35 @@ export default function ImageUpload({
   const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number; fileName: string } | null>(null)
   const [uploadErrors, setUploadErrors] = useState<string[]>([])
 
+  const [urlInput, setUrlInput] = useState("")
+  const [urlError, setUrlError] = useState("")
+
   const imagesRef = useRef(images)
   useEffect(() => { imagesRef.current = images }, [images])
+
+  const handleAddUrl = () => {
+    const raw = urlInput.trim()
+    if (!raw) return
+    try {
+      const parsed = new URL(raw)
+      if (!["http:", "https:"].includes(parsed.protocol)) throw new Error("invalid")
+    } catch {
+      setUrlError("URL inválida. Usa https://...")
+      return
+    }
+    setUrlError("")
+    const baseLength = imagesRef.current.length
+    onChange((prev) => [
+      ...prev,
+      {
+        url: raw,
+        alt: raw.split("/").pop()?.split("?")[0] || "external",
+        is_main: prev.length === 0,
+        sort_order: baseLength,
+      },
+    ])
+    setUrlInput("")
+  }
 
   const handleFiles = useCallback(
     async (files: FileList) => {
@@ -97,7 +124,7 @@ export default function ImageUpload({
   const removeImage = async (index: number) => {
     const removed = imagesRef.current[index]
 
-    if (removed?.url) {
+    if (removed?.url && isSupabaseStorageUrl(removed.url)) {
       try {
         const supabase = (await import("@/lib/supabase/client")).createClient()
         const match = new URL(removed.url).pathname.match(/\/object\/public\/[^/]+\/(.+)/)
@@ -177,6 +204,26 @@ export default function ImageUpload({
         </div>
       )}
 
+      {/* Agregar por URL externa */}
+      <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+        <p className="text-xs font-medium text-gray-700">Agregar imagen por URL</p>
+        <p className="mt-0.5 text-[11px] text-gray-500">Pega link Drive u otro host. Se guarda tal cual en <code>product_images.url</code>.</p>
+        <div className="mt-2 flex gap-2">
+          <input
+            type="url"
+            value={urlInput}
+            onChange={(e) => setUrlInput(e.target.value)}
+            placeholder="https://drive.google.com/file/d/... o https://..."
+            className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddUrl())}
+          />
+          <button type="button" onClick={handleAddUrl} className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
+            Agregar URL
+          </button>
+        </div>
+        {urlError && <p className="mt-1.5 text-xs text-red-600">{urlError}</p>}
+      </div>
+
       {/* Errores de subida */}
       {uploadErrors.length > 0 && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
@@ -202,9 +249,10 @@ export default function ImageUpload({
             }`}
           >
             <Image
-              src={img.url}
+              src={getDisplayImageUrl(img.url)}
               alt={img.alt}
               fill
+              unoptimized={!isSupabaseStorageUrl(img.url)}
               className="object-cover"
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />

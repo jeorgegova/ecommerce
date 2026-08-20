@@ -11,7 +11,7 @@ interface Order { id: string; order_number: string; status: string; subtotal: nu
 interface OrderItem { id: string; product_id: string; product_name: string; product_sku: string; variant_name: string | null; unit_price: number; quantity: number; subtotal: number; product_images?: { url: string; is_main: boolean }[] }
 
 const labels: Record<string, string> = { pending: "Pendiente", confirmed: "Confirmado", paid: "Pagado", processing: "En preparación", shipped: "Enviado", delivered: "Entregado", cancelled: "Cancelado" }
-const money = (value: number) => `$${Number(value || 0).toLocaleString("es-CO")}`
+const money = (value: number) => `€${Number(value || 0).toLocaleString("es-CO")}`
 
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>()

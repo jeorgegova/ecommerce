@@ -5,7 +5,12 @@ import type { SupabaseClient } from "@supabase/supabase-js"
  * Ejemplo: https://xxx.supabase.co/storage/v1/object/public/products/foto.webp
  *          → "foto.webp"
  */
+export function isSupabaseStorageUrl(url: string): boolean {
+  return url.includes("supabase.co")
+}
+
 export function extractStoragePath(publicUrl: string): string | null {
+  if (!isSupabaseStorageUrl(publicUrl)) return null
   try {
     const url = new URL(publicUrl)
     // El path tiene la forma: /storage/v1/object/public/<bucket>/<path>
@@ -25,7 +30,8 @@ export async function deleteStorageFiles(
   bucket: string,
   urls: string[]
 ): Promise<void> {
-  const paths = urls.map(extractStoragePath).filter(Boolean) as string[]
+  const supabaseUrls = urls.filter(isSupabaseStorageUrl)
+  const paths = supabaseUrls.map(extractStoragePath).filter(Boolean) as string[]
   if (paths.length === 0) return
 
   const { error } = await supabase.storage.from(bucket).remove(paths)

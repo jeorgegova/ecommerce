@@ -108,10 +108,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 {product.sale_price && product.promotion_active ? (
                   <>
                     <span className="text-[28px] font-bold leading-none text-gray-900 lg:text-[32px]">
-                      ${Number(product.sale_price).toLocaleString("es-CO")}
+                      €{Number(product.sale_price).toLocaleString("es-CO")}
                     </span>
                     <span className="text-lg text-gray-400 line-through">
-                      ${Number(product.base_price).toLocaleString("es-CO")}
+                      €{Number(product.base_price).toLocaleString("es-CO")}
                     </span>
                     <span className="rounded-full bg-green-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm shadow-green-200">
                       {Math.round((1 - Number(product.sale_price) / Number(product.base_price)) * 100)}% OFF
@@ -119,7 +119,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   </>
                 ) : (
                   <span className="text-[28px] font-bold leading-none text-gray-900 lg:text-[32px]">
-                    ${Number(currentPrice).toLocaleString("es-CO")}
+                    €{Number(currentPrice).toLocaleString("es-CO")}
                   </span>
                 )}
               </div>

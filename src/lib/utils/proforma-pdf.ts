@@ -36,7 +36,7 @@ export interface ProformaData {
 
 const PAGE = { left: 13, right: 13, top: 10, bottom: 287 }
 const colors = { black: "#111111", gray: "#555555", muted: "#777777", light: "#CCCCCC", wash: "#F3F4F6" }
-const money = (value: number) => `$${Number(value || 0).toLocaleString("es-CO")}`
+const money = (value: number) => `€${Number(value || 0).toLocaleString("es-CO")}`
 type TextOptions = { align?: "left" | "center" | "right" }
 
 export function getSettingValue(settings: { key: string; value: unknown }[] | null, key: string) {

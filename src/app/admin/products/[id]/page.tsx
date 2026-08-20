@@ -52,6 +52,7 @@ export default function EditProductPage() {
     const { data: imgs } = await supabase.from("product_images").select("url").eq("product_id", id)
     if (imgs && imgs.length > 0) {
       const paths = imgs
+        .filter((img) => img.url.includes("supabase.co"))
         .map((img) => {
           try {
             const url = new URL(img.url)

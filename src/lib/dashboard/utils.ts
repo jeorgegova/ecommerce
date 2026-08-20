@@ -23,12 +23,12 @@ export function formatCompactNumber(value: number): string {
 
 export function formatCompactCurrency(value: number): string {
   if (value >= 1_000_000) {
-    return "$" + (value / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M"
+    return "€" + (value / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M"
   }
   if (value >= 1_000) {
-    return "$" + (value / 1_000).toFixed(1).replace(/\.0$/, "") + "K"
+    return "€" + (value / 1_000).toFixed(1).replace(/\.0$/, "") + "K"
   }
-  return "$" + formatNumber(value)
+  return "€" + formatNumber(value)
 }
 
 export function formatDate(dateStr: string): string {

@@ -71,7 +71,7 @@ export default function RevenueChart() {
                 <div className="rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-lg">
                   <p className="text-[11px] font-medium text-gray-500">{label ? new Date(label).toLocaleDateString("es-CO", { day: "numeric", month: "long" }) : ""}</p>
                   <p className="text-[14px] font-semibold text-gray-900">
-                    {activeMetric === "order_count" ? payload[0].value : `$${Number(payload[0].value).toLocaleString("es-CO")}`}
+                    {activeMetric === "order_count" ? payload[0].value : `€${Number(payload[0].value).toLocaleString("es-CO")}`}
                   </p>
                 </div>
               )

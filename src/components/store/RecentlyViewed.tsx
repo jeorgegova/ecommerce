@@ -1,5 +1,6 @@
 "use client"
 
+import { getDisplayImageUrl, isSupabaseStorageUrl } from "@/lib/utils/image"
 import { createClient } from "@/lib/supabase/client"
 import Image from "next/image"
 import Link from "next/link"
@@ -81,7 +82,7 @@ export default function RecentlyViewed() {
           >
             <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-md bg-gray-100">
               {item.product_image ? (
-                <Image src={item.product_image} alt={item.product_name} width={56} height={56} className="h-full w-full object-cover" />
+                <Image src={getDisplayImageUrl(item.product_image)} alt={item.product_name} width={56} height={56} unoptimized={!isSupabaseStorageUrl(item.product_image)} className="h-full w-full object-cover" />
               ) : null}
             </div>
             <div className="flex-1 min-w-0">
@@ -89,11 +90,11 @@ export default function RecentlyViewed() {
               <p className="mt-0.5 flex items-baseline gap-1.5">
                 {item.product_sale_price && item.product_promotion_active ? (
                   <>
-                    <span className="text-xs font-semibold text-gray-900">${Number(item.product_sale_price).toLocaleString("es-CO")}</span>
-                    <span className="text-[10px] text-gray-400 line-through">${Number(item.product_price).toLocaleString("es-CO")}</span>
+                    <span className="text-xs font-semibold text-gray-900">€{Number(item.product_sale_price).toLocaleString("es-CO")}</span>
+                    <span className="text-[10px] text-gray-400 line-through">€{Number(item.product_price).toLocaleString("es-CO")}</span>
                   </>
                 ) : (
-                  <span className="text-xs font-semibold text-gray-900">${Number(item.product_price).toLocaleString("es-CO")}</span>
+                  <span className="text-xs font-semibold text-gray-900">€{Number(item.product_price).toLocaleString("es-CO")}</span>
                 )}
               </p>
             </div>

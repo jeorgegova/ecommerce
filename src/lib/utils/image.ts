@@ -71,3 +71,28 @@ export function generateThumbnailUrl(url: string): string {
   parts.push(`thumb_${name}.webp`)
   return parts.join("/")
 }
+
+export function isSupabaseStorageUrl(url: string): boolean {
+  return url.includes("supabase.co")
+}
+
+export function isExternalImageUrl(url: string): boolean {
+  return !isSupabaseStorageUrl(url)
+}
+
+export function getGoogleDriveFileId(url: string): string | null {
+  const m1 = url.match(/\/file\/d\/([^/]+)/)
+  if (m1) return m1[1]
+  const m2 = url.match(/[?&]id=([^&]+)/)
+  if (m2) return m2[1]
+  return null
+}
+
+export function getDisplayImageUrl(url: string): string {
+  if (!url) return url
+  if (url.includes("drive.google.com")) {
+    const id = getGoogleDriveFileId(url)
+    if (id) return `https://drive.google.com/thumbnail?id=${id}&sz=w1000`
+  }
+  return url
+}

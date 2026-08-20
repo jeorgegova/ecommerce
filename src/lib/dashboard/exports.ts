@@ -14,7 +14,7 @@ function downloadBlob(blob: Blob, filename: string) {
 }
 
 function formatCOP(value: number) {
-  return "$" + Math.round(value).toLocaleString("es-CO")
+  return "€" + Math.round(value).toLocaleString("es-CO")
 }
 
 function formatDate(dateStr: string) {

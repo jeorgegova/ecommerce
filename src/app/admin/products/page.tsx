@@ -148,7 +148,7 @@ export default function AdminProductsPage() {
                 <td className="px-6 py-4"><div className="text-sm font-medium text-gray-900">{product.name}</div></td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{product.sku}</td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{product.categories?.name || "—"}</td>
-                <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-900 font-medium">${Number(product.base_price).toLocaleString("es-CO")}</td>
+                <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-900 font-medium">€{Number(product.base_price).toLocaleString("es-CO")}</td>
                 <td className="whitespace-nowrap px-6 py-4 text-center">
                   <div className="flex items-center justify-center gap-2">
                     {product.sale_price ? (
@@ -161,7 +161,7 @@ export default function AdminProductsPage() {
                           <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ${
                             product.promotion_active ? "translate-x-5" : "translate-x-0"}`} />
                         </button>
-                        <span className="text-xs font-medium text-green-600">${Number(product.sale_price).toLocaleString("es-CO")}</span>
+                        <span className="text-xs font-medium text-green-600">€{Number(product.sale_price).toLocaleString("es-CO")}</span>
                       </>
                     ) : (
                       <span className="text-xs text-gray-400">—</span>
@@ -204,13 +204,13 @@ export default function AdminProductsPage() {
               </div>
               <p className="mt-0.5 text-[10px] text-gray-400">{product.sku} · {product.categories?.name || "—"}</p>
               <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span className="text-xs font-semibold text-gray-900">${Number(product.base_price).toLocaleString("es-CO")}</span>
+                <span className="text-xs font-semibold text-gray-900">€{Number(product.base_price).toLocaleString("es-CO")}</span>
                 {product.sale_price ? (
                   <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[9px] font-medium ${
                     product.promotion_active ? "bg-green-50 text-green-700" : "bg-gray-50 text-gray-500"
                   }`}>
                     <span className={`inline-block h-1 w-1 rounded-full ${product.promotion_active ? "bg-green-500" : "bg-gray-300"}`} />
-                    ${Number(product.sale_price).toLocaleString("es-CO")}
+                    €{Number(product.sale_price).toLocaleString("es-CO")}
                   </span>
                 ) : null}
                 {product.sale_price && (
