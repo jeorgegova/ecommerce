@@ -1,3 +1,28 @@
+export function isSupabaseStorageUrl(url: string): boolean {
+  return url.includes("supabase.co")
+}
+
+export function getGoogleDriveFileId(url: string): string | null {
+  try {
+    const u = new URL(url)
+    // https://drive.google.com/file/d/ID/view
+    const m1 = u.pathname.match(/\/file\/d\/([^/]+)/)
+    if (m1) return m1[1]
+    // https://drive.google.com/open?id=ID  or  ?id=ID
+    const idParam = u.searchParams.get("id")
+    if (idParam) return idParam
+    return null
+  } catch {
+    return null
+  }
+}
+
+export function getDisplayImageUrl(url: string): string {
+  const driveId = getGoogleDriveFileId(url)
+  if (driveId) return `https://drive.google.com/thumbnail?id=${driveId}&sz=w1000`
+  return url
+}
+
 interface CompressOptions {
   maxWidth?: number
   maxHeight?: number

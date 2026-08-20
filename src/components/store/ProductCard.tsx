@@ -1,5 +1,6 @@
 "use client"
 
+import { getDisplayImageUrl, isSupabaseStorageUrl } from "@/lib/utils/image"
 import Image from "next/image"
 import Link from "next/link"
 import { memo, useCallback, useEffect, useRef, useState } from "react"
@@ -78,9 +79,10 @@ const ProductCard = memo(function ProductCard({ product, images }: ProductCardPr
             {images.map((img, idx) => (
               <Image
                 key={idx}
-                src={img}
+                src={getDisplayImageUrl(img)}
                 alt={product.name}
                 fill
+                unoptimized={!isSupabaseStorageUrl(img)}
                 className={`object-cover transition-all duration-400 ease-out ${
                   idx === activeIdx ? "opacity-100 scale-100" : "opacity-0 scale-105"
                 }`}

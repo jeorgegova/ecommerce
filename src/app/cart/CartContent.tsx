@@ -1,6 +1,7 @@
 "use client"
 
 import { createClient } from "@/lib/supabase/client"
+import { getDisplayImageUrl, isSupabaseStorageUrl } from "@/lib/utils/image"
 import Image from "next/image"
 import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
@@ -79,7 +80,7 @@ export default function CartContent() {
                       ? images.find((img: any) => img.is_main)?.url || images[0]?.url || null
                       : null
                     return mainImage ? (
-                      <Image src={mainImage} alt={item.products.name} fill className="object-cover" sizes="96px" />
+                      <Image src={getDisplayImageUrl(mainImage)} alt={item.products.name} fill unoptimized={!isSupabaseStorageUrl(mainImage)} className="object-cover" sizes="96px" />
                     ) : null
                   })()}
                 </div>

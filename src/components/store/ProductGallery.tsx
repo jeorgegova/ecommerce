@@ -1,5 +1,6 @@
 "use client"
 
+import { getDisplayImageUrl, isSupabaseStorageUrl } from "@/lib/utils/image"
 import Image from "next/image"
 import { useCallback, useEffect, useRef, useState } from "react"
 
@@ -119,9 +120,10 @@ export default function ProductGallery({ images }: { images: ProductImage[] }) {
         >
           <Image
             key={current.url}
-            src={current.url}
+            src={getDisplayImageUrl(current.url)}
             alt={current.alt || ""}
             fill
+            unoptimized={!isSupabaseStorageUrl(current.url)}
             className={`object-contain ${zoom ? "cursor-zoom-in" : "cursor-default"}`}
             style={{
               transition: zoom ? "transform 0.15s ease-out" : "none",
@@ -141,9 +143,10 @@ export default function ProductGallery({ images }: { images: ProductImage[] }) {
               }`}
             >
               <Image
-                src={sorted[selected > 0 ? selected - 1 : sorted.length - 1]?.url || current.url}
+                src={getDisplayImageUrl(sorted[selected > 0 ? selected - 1 : sorted.length - 1]?.url || current.url)}
                 alt=""
                 fill
+                unoptimized={!isSupabaseStorageUrl(sorted[selected > 0 ? selected - 1 : sorted.length - 1]?.url || current.url)}
                 className="object-contain opacity-20"
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
@@ -214,9 +217,10 @@ export default function ProductGallery({ images }: { images: ProductImage[] }) {
                 }`}
               >
                 <Image
-                  src={img.url}
+                  src={getDisplayImageUrl(img.url)}
                   alt={img.alt || ""}
                   fill
+                  unoptimized={!isSupabaseStorageUrl(img.url)}
                   className="object-cover"
                   sizes="64px"
                 />
@@ -266,9 +270,10 @@ export default function ProductGallery({ images }: { images: ProductImage[] }) {
 
           <div className="relative w-full max-w-4xl max-h-[85vh] aspect-square">
             <Image
-              src={sorted[lightboxIdx]?.url || current.url}
+              src={getDisplayImageUrl(sorted[lightboxIdx]?.url || current.url)}
               alt={sorted[lightboxIdx]?.alt || ""}
               fill
+              unoptimized={!isSupabaseStorageUrl(sorted[lightboxIdx]?.url || current.url)}
               className="object-contain"
               sizes="90vw"
             />

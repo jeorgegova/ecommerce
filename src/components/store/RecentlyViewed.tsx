@@ -1,6 +1,7 @@
 "use client"
 
 import { createClient } from "@/lib/supabase/client"
+import { getDisplayImageUrl, isSupabaseStorageUrl } from "@/lib/utils/image"
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -81,7 +82,7 @@ export default function RecentlyViewed() {
           >
             <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-md bg-gray-100">
               {item.product_image ? (
-                <Image src={item.product_image} alt={item.product_name} width={56} height={56} className="h-full w-full object-cover" />
+                <Image src={getDisplayImageUrl(item.product_image)} alt={item.product_name} width={56} height={56} unoptimized={!isSupabaseStorageUrl(item.product_image)} className="h-full w-full object-cover" />
               ) : null}
             </div>
             <div className="flex-1 min-w-0">

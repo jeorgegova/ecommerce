@@ -1,6 +1,7 @@
 "use client"
 
-import { compressImage } from "@/lib/utils/image"
+import { compressImage, getDisplayImageUrl, isSupabaseStorageUrl } from "@/lib/utils/image"
+import { extractStoragePath } from "@/lib/utils/storage"
 import Image from "next/image"
 import { useCallback, useEffect, useRef, useState } from "react"
 
@@ -31,6 +32,8 @@ export default function ImageUpload({
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number; fileName: string } | null>(null)
   const [uploadErrors, setUploadErrors] = useState<string[]>([])
+  const [externalUrl, setExternalUrl] = useState("")
+  const [urlError, setUrlError] = useState("")
 
   const imagesRef = useRef(images)
   useEffect(() => { imagesRef.current = images }, [images])
@@ -94,15 +97,44 @@ export default function ImageUpload({
     [onChange, bucket, folder]
   )
 
+  const handleAddUrl = () => {
+    const raw = externalUrl.trim()
+    if (!raw) {
+      setUrlError("Ingresá una URL")
+      return
+    }
+    try {
+      const parsed = new URL(raw)
+      if (parsed.protocol !== "https:") {
+        setUrlError("La URL debe usar https")
+        return
+      }
+    } catch {
+      setUrlError("URL inválida")
+      return
+    }
+    setUrlError("")
+    onChange((prev) => [
+      ...prev,
+      {
+        url: raw,
+        alt: raw,
+        is_main: prev.length === 0,
+        sort_order: prev.length,
+      },
+    ])
+    setExternalUrl("")
+  }
+
   const removeImage = async (index: number) => {
     const removed = imagesRef.current[index]
 
-    if (removed?.url) {
+    if (removed?.url && isSupabaseStorageUrl(removed.url)) {
       try {
         const supabase = (await import("@/lib/supabase/client")).createClient()
-        const match = new URL(removed.url).pathname.match(/\/object\/public\/[^/]+\/(.+)/)
-        if (match) {
-          await supabase.storage.from(bucket).remove([match[1]])
+        const storagePath = extractStoragePath(removed.url)
+        if (storagePath) {
+          await supabase.storage.from(bucket).remove([storagePath])
         }
       } catch (err) {
         console.error("Failed to delete image from storage:", err)
@@ -193,6 +225,29 @@ export default function ImageUpload({
         </div>
       )}
 
+      {/* Agregar imagen por URL */}
+      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <p className="text-sm font-medium text-gray-700">Agregar imagen por URL</p>
+        <p className="mt-0.5 text-xs text-gray-500">Pegá un link directo (https) o de Google Drive. Se guarda tal cual.</p>
+        <div className="mt-3 flex gap-2">
+          <input
+            type="url"
+            value={externalUrl}
+            onChange={(e) => setExternalUrl(e.target.value)}
+            placeholder="https://..."
+            className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+          />
+          <button
+            type="button"
+            onClick={handleAddUrl}
+            className="shrink-0 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+          >
+            Agregar URL
+          </button>
+        </div>
+        {urlError && <p className="mt-2 text-xs text-red-600">{urlError}</p>}
+      </div>
+
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {images.map((img, index) => (
           <div
@@ -202,9 +257,10 @@ export default function ImageUpload({
             }`}
           >
             <Image
-              src={img.url}
+              src={getDisplayImageUrl(img.url)}
               alt={img.alt}
               fill
+              unoptimized={!isSupabaseStorageUrl(img.url)}
               className="object-cover"
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
