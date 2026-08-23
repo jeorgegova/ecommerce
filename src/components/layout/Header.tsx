@@ -47,10 +47,12 @@ export default function Header() {
   return (
     <header className={`sticky top-0 border-b border-gray-100 bg-white/90 backdrop-blur-xl supports-[backdrop-filter]:bg-white/80 ${menuOpen ? "z-50" : "z-40"}`}>
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:h-16 lg:gap-5 lg:px-8">
-        <Link href="/" className="group flex-shrink-0 flex items-center gap-2 hover:opacity-90 transition-opacity">
-          <div className="relative flex items-center justify-center p-1.5 bg-gray-50 rounded-xl border border-gray-100 shadow-xs">
-            <img src="/logoWilMotos.png" alt="Wil Motos" className="h-7 w-7 object-contain transition-transform group-hover:scale-110 duration-300" />
-          </div>
+        <Link href="/" className="group flex-shrink-0 flex items-center gap-2.5 hover:opacity-90 transition-opacity">
+          <img
+            src="/logoWilMotos.png"
+            alt="Wil Motos - Repuestos originales y accesorios"
+            className="h-9 w-auto object-contain lg:h-11 transition-transform duration-300 group-hover:scale-[1.02] drop-shadow-sm"
+          />
           <div className="flex flex-col">
             <span className="text-base font-extrabold tracking-tight text-gray-900 leading-none lg:text-lg flex items-center gap-1">
               Wil<span className="text-[10px] font-semibold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">Motos</span>
@@ -136,6 +138,10 @@ export default function Header() {
                   <Link href="/account/favorites" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                     <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                     Favoritos
+                  </Link>
+                  <Link href="/account/compra-aleatoria" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                    <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>
+                    Compra Aleatoria
                   </Link>
                   <Link href="/account/addresses" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                     <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>

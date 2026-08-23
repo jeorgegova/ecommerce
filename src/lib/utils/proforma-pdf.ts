@@ -299,7 +299,7 @@ export async function downloadProformaPdf(data: ProformaData) {
   heading(doc, "Resumen financiero", rightX, sectionStart)
   const totals = [
     ["Subtotal", formatCOP(data.subtotal)],
-    ["Descuento", formatCOP(data.discount)],
+    ["Descuento", data.discount > 0 ? `-${formatCOP(data.discount)}` : formatCOP(data.discount)],
     ["Envío", data.shippingCost > 0 ? formatCOP(data.shippingCost) : "Por calcular"],
   ]
   totals.forEach(([label, value], index) => {

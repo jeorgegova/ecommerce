@@ -27,10 +27,12 @@ export default function Footer() {
         {/* Vista Desktop (md y superior) */}
         <div className="hidden md:grid grid-cols-4 gap-10 py-12">
           <div className="space-y-4">
-            <Link href="/" className="group flex items-center gap-2 hover:opacity-90 transition-opacity">
-              <div className="relative flex items-center justify-center p-1 bg-gray-900 rounded-lg border border-gray-800 shadow-xs">
-                <img src="/logoWilMotos.png" alt="Wil Motos" className="h-6 w-6 object-contain" />
-              </div>
+            <Link href="/" className="group flex items-center gap-2.5 hover:opacity-90 transition-opacity">
+              <img
+                src="/logoWilMotos.png"
+                alt="Wil Motos - Repuestos originales y accesorios"
+                className="h-10 w-auto object-contain lg:h-12 drop-shadow-sm brightness-0 invert"
+              />
               <span className="text-base font-extrabold tracking-tight text-white leading-none">
                 Wil <span className="text-xs font-semibold text-gray-400">Motos</span>
               </span>
@@ -56,8 +58,8 @@ export default function Footer() {
         {/* Vista Móvil (compacta, funcional y simplificada) */}
         <div className="md:hidden flex flex-col items-center text-center gap-3.5 py-4">
           <div className="flex items-center gap-2">
-            <img src="/logoWilMotos.png" alt="Wil Motos" className="h-5 w-5 object-contain" />
-            <span className="text-sm font-extrabold text-white">wilMotos</span>
+            <img src="/logoWilMotos.png" alt="Wil Motos" className="h-8 w-auto object-contain brightness-0 invert" />
+            <span className="text-sm font-extrabold text-white">Wil <span className="text-xs font-semibold text-gray-400">Motos</span></span>
           </div>
 
           <p className="text-[11px] text-gray-400 max-w-[280px] leading-relaxed">

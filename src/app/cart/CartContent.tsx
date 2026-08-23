@@ -21,6 +21,8 @@ export default function CartContent() {
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
+  const [discount, setDiscount] = useState(0)
+  const [target, setTarget] = useState(0)
   const supabase = createClient()
 
   const fetchCart = useCallback(async () => {
@@ -29,10 +31,26 @@ export default function CartContent() {
     setUserId(user.id)
     const { data } = await supabase.from("cart_items").select("*, products(*, product_images(url, is_main)), product_variants(*)").eq("user_id", user.id).order("created_at")
     setItems(data || [])
+    // fetch random discount
+    try{
+      const r = await fetch("/api/random-purchase/discount")
+      const d = await r.json()
+      setDiscount(d.discount||0)
+      setTarget(d.target||0)
+    }catch{}
     setLoading(false)
   }, [supabase])
 
   useEffect(() => { fetchCart() }, [fetchCart])
+
+  const refreshDiscount = async ()=>{
+    try{
+      const r = await fetch("/api/random-purchase/discount")
+      const d = await r.json()
+      setDiscount(d.discount||0)
+      setTarget(d.target||0)
+    }catch{}
+  }
 
   const updateQuantity = async (itemId: string, newQty: number) => {
     if (newQty < 1) return
@@ -40,11 +58,13 @@ export default function CartContent() {
     await supabase.from("cart_items").update({ quantity: newQty }).eq("id", itemId)
     setItems((prev) => prev.map((item) => item.id === itemId ? { ...item, quantity: newQty } : item))
     setUpdating(null)
+    refreshDiscount()
   }
 
   const removeItem = async (itemId: string) => {
     await supabase.from("cart_items").delete().eq("id", itemId)
     setItems((prev) => prev.filter((item) => item.id !== itemId))
+    refreshDiscount()
   }
 
   const subtotal = items.reduce((sum, item) => {
@@ -52,6 +72,7 @@ export default function CartContent() {
     const adjustment = item.product_variants?.price_adjustment || 0
     return sum + (price + adjustment) * item.quantity
   }, 0)
+  const total = Math.max(0, subtotal - discount)
 
   if (loading) return <p className="text-gray-600 py-12 text-center">Cargando carrito...</p>
 
@@ -118,8 +139,12 @@ export default function CartContent() {
             <h2 className="text-lg font-semibold text-gray-900">Resumen</h2>
             <div className="mt-4 space-y-3">
               <div className="flex justify-between text-sm"><span className="text-gray-600">Subtotal</span><span className="font-medium">${subtotal.toLocaleString("es-CO")}</span></div>
+              {discount>0 && (
+                <div className="flex justify-between text-sm text-green-700"><span>Descuento Compra Aleatoria</span><span>-${discount.toLocaleString("es-CO")}</span></div>
+              )}
               <div className="flex justify-between text-sm"><span className="text-gray-600">Envío</span><span className="text-gray-900">Por calcular</span></div>
-              <div className="border-t border-gray-200 pt-3 flex justify-between"><span className="font-semibold">Total</span><span className="font-semibold">${subtotal.toLocaleString("es-CO")}</span></div>
+              <div className="border-t border-gray-200 pt-3 flex justify-between"><span className="font-semibold">Total</span><span className="font-semibold">${total.toLocaleString("es-CO")}</span></div>
+              {target>0 && <p className="text-xs text-gray-400">Objetivo: ${target.toLocaleString("es-CO")}</p>}
             </div>
             <Link href="/cart/checkout" className="mt-6 block w-full rounded-full bg-gray-900 px-6 py-3 text-center text-sm font-medium text-white hover:bg-gray-800">Generar proforma</Link>
             <Link href="/products" className="mt-3 block text-center text-sm text-gray-500 hover:text-gray-900">Seguir comprando</Link>

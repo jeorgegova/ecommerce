@@ -49,6 +49,8 @@ export default function CheckoutPage() {
   const [placing, setPlacing] = useState(false)
   const [error, setError] = useState("")
   const [customerEmail, setCustomerEmail] = useState("")
+  const [randomDiscount, setRandomDiscount] = useState(0)
+  const [randomTarget, setRandomTarget] = useState(0)
   const [storeInfo, setStoreInfo] = useState<StoreInfo>({
     name: "Wil Motos",
     phone: "",
@@ -83,6 +85,14 @@ export default function CheckoutPage() {
       setAddresses(addr || [])
       const defaultAddr = addr?.find((a) => a.is_default) || addr?.[0]
       if (defaultAddr) setSelectedAddressId(defaultAddr.id)
+
+      // random purchase discount
+      try{
+        const r = await fetch("/api/random-purchase/discount")
+        const d = await r.json()
+        setRandomDiscount(d.discount||0)
+        setRandomTarget(d.target||0)
+      }catch{}
 
       const { data: settings } = await supabase
         .from("settings")
@@ -132,6 +142,7 @@ export default function CheckoutPage() {
     const price = (item.products.sale_price && item.products.promotion_active) ? item.products.sale_price : item.products.base_price
     return sum + (price + (item.product_variants?.price_adjustment || 0)) * item.quantity
   }, 0)
+  const total = Math.max(0, subtotal - randomDiscount)
 
   const itemUnitPrice = (item: CartItem) => {
     const price = item.products.sale_price && item.products.promotion_active ? item.products.sale_price : item.products.base_price
@@ -143,13 +154,12 @@ export default function CheckoutPage() {
     setPlacing(true); setError("")
 
     try {
-      const { data, error: rpcError } = await supabase.rpc("create_order_from_cart", {
-        p_user_id: (await supabase.auth.getUser()).data.user!.id,
-        p_shipping_address_id: selectedAddressId,
-        p_billing_address_id: null,
-        p_notes: null,
-        p_coupon_id: null,
-      })
+      const useRandom = randomDiscount>0
+      const rpcName = useRandom ? "create_order_from_cart_random" : "create_order_from_cart"
+      const rpcParams: any = useRandom
+        ? { p_user_id: (await supabase.auth.getUser()).data.user!.id, p_shipping_address_id: selectedAddressId, p_billing_address_id: null, p_notes: null }
+        : { p_user_id: (await supabase.auth.getUser()).data.user!.id, p_shipping_address_id: selectedAddressId, p_billing_address_id: null, p_notes: null, p_coupon_id: null }
+      const { data, error: rpcError } = await supabase.rpc(rpcName, rpcParams)
 
       if (rpcError) throw new Error(rpcError.message)
 
@@ -272,8 +282,12 @@ export default function CheckoutPage() {
               <h2 className="text-lg font-semibold text-gray-900">Resumen</h2>
               <div className="mt-4 space-y-3">
                 <div className="flex justify-between text-sm"><span className="text-gray-600">Subtotal</span><span className="font-medium">${subtotal.toLocaleString("es-CO")}</span></div>
+                {randomDiscount>0 && (
+                  <div className="flex justify-between text-sm text-green-700"><span>Descuento Compra Aleatoria</span><span>-${randomDiscount.toLocaleString("es-CO")}</span></div>
+                )}
                 <div className="flex justify-between text-sm"><span className="text-gray-600">Envío</span><span className="text-gray-900">Por calcular</span></div>
-                <div className="border-t border-gray-200 pt-3 flex justify-between"><span className="font-semibold">Total</span><span className="font-semibold">${subtotal.toLocaleString("es-CO")}</span></div>
+                <div className="border-t border-gray-200 pt-3 flex justify-between"><span className="font-semibold">Total</span><span className="font-semibold">${total.toLocaleString("es-CO")}</span></div>
+                {randomTarget>0 && <p className="text-xs text-gray-400">Objetivo: ${randomTarget.toLocaleString("es-CO")}</p>}
               </div>
               <div className="mt-5 rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
                 <p className="font-semibold">Pago por transferencia bancaria</p>
