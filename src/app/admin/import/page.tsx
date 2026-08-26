@@ -206,7 +206,7 @@ export default function AdminImportPage() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-gray-900">{file!.name}</p>
-                  <p className="text-xs text-gray-500">{preview.totalRows.toLocaleString("es-CO")} productos · {(file!.size / 1024).toFixed(1)} KB</p>
+                  <p className="text-xs text-gray-500">{preview.totalRows.toLocaleString("es-CR")} productos · {(file!.size / 1024).toFixed(1)} KB</p>
                 </div>
               </div>
               <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
@@ -398,7 +398,7 @@ export default function AdminImportPage() {
                     <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${imp.status === "completed" ? "bg-green-50 text-green-700" : imp.status === "failed" ? "bg-red-50 text-red-700" : "bg-yellow-50 text-yellow-700"}`}>{imp.status}</span>
                   </td>
                   <td className="px-4 py-3 text-gray-500">{imp.profiles?.full_name || "—"}</td>
-                  <td className="px-4 py-3 text-right text-gray-500">{new Date(imp.created_at).toLocaleDateString("es-CO")}</td>
+                  <td className="px-4 py-3 text-right text-gray-500">{new Date(imp.created_at).toLocaleDateString("es-CR")}</td>
                 </tr>
               ))}
             </tbody>

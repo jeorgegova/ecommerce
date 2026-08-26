@@ -499,7 +499,7 @@ export default function ProductFilterEngine({
                 {effectiveSearch ? `"${effectiveSearch}"` : "Productos"}
               </h1>
               <p className="text-[10px] sm:text-[13px] text-gray-400 tabular-nums">
-                {totalCount.toLocaleString("es-CO")} resultado{totalCount !== 1 ? "s" : ""}
+                {totalCount.toLocaleString("es-CR")} resultado{totalCount !== 1 ? "s" : ""}
               </p>
             </div>
             <div className="flex items-center gap-1.5 flex-shrink-0">

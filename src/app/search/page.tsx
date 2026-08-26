@@ -202,7 +202,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         </div>
         <div className="mb-3 flex items-center gap-3 lg:hidden">
           <SortSelect currentSort={sort} currentParams={currentParams} />
-          <p className="ml-auto text-xs text-gray-500">{totalCount.toLocaleString("es-CO")} resultados</p>
+          <p className="ml-auto text-xs text-gray-500">{totalCount.toLocaleString("es-CR")} resultados</p>
         </div>
 
         <div className="flex gap-8">
@@ -264,7 +264,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           </aside>
           <div className="flex-1">
             <div className="mb-4 hidden items-center justify-between lg:mb-6 lg:flex">
-              <p className="text-sm text-gray-600">{totalCount.toLocaleString("es-CO")} resultados</p>
+              <p className="text-sm text-gray-600">{totalCount.toLocaleString("es-CR")} resultados</p>
               <SortSelect currentSort={sort} currentParams={currentParams} />
             </div>
             {products.length > 0 ? (

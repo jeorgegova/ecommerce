@@ -15,12 +15,12 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Wil Motos",
+  title: "Willy Motos",
   description: "Tu tienda de confianza",
   icons: {
-    icon: "/logoWilMotos.png",
-    shortcut: "/logoWilMotos.png",
-    apple: "/logoWilMotos.png",
+    icon: "/logoWillyMotos.png",
+    shortcut: "/logoWillyMotos.png",
+    apple: "/logoWillyMotos.png",
   },
 }
 

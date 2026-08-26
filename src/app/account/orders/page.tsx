@@ -77,7 +77,7 @@ export default function OrdersPage() {
                   </div>
                   <div className="min-w-0">
                     <p className="truncate font-bold text-gray-950">{order.order_number}</p>
-                    <p className="mt-1 text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString("es-CO", { year: "numeric", month: "long", day: "numeric" })}</p>
+                    <p className="mt-1 text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString("es-CR", { year: "numeric", month: "long", day: "numeric" })}</p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between gap-5 sm:justify-end">
@@ -87,7 +87,7 @@ export default function OrdersPage() {
                       <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: order.order_statuses?.color || "#9CA3AF" }} />
                       {order.order_statuses?.name || order.status}
                     </span>
-                    <p className="mt-2 text-base font-bold text-gray-950">${Number(order.total).toLocaleString("es-CO")}</p>
+                    <p className="mt-2 text-base font-bold text-gray-950">₡{Number(order.total).toLocaleString("es-CR")}</p>
                   </div>
                   <span className="text-xl text-gray-300 transition-transform group-hover:translate-x-1 group-hover:text-gray-900" aria-hidden="true">→</span>
                 </div>

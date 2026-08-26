@@ -93,7 +93,7 @@ export default function AdminOrderDetailPage() {
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">Gestión de pedido</p>
             <h1 className="mt-2 text-2xl font-bold tracking-tight text-gray-950">{order.order_number}</h1>
-            <p className="mt-1 text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString("es-CO", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+            <p className="mt-1 text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString("es-CR", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             {nextAction && <button onClick={() => updateStatus(nextAction[0])} disabled={updating} className="rounded-full bg-gray-950 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:opacity-50">{updating ? "Actualizando..." : nextAction[1]}</button>}
@@ -119,7 +119,7 @@ export default function AdminOrderDetailPage() {
             {items.map((item) => (
               <div key={item.id} className="flex items-center justify-between gap-4 px-5 py-5 sm:px-6">
                 <div className="min-w-0"><p className="font-semibold text-gray-950">{item.product_name}</p>{item.variant_name && <p className="mt-1 text-sm text-gray-500">{item.variant_name}</p>}<p className="mt-2 text-xs text-gray-400">SKU {item.product_sku} · Cantidad {item.quantity}</p></div>
-                <div className="flex-shrink-0 text-right"><p className="text-sm text-gray-500">${Number(item.unit_price).toLocaleString("es-CO")} c/u</p><p className="mt-1 font-bold text-gray-950">${Number(item.subtotal).toLocaleString("es-CO")}</p></div>
+                <div className="flex-shrink-0 text-right"><p className="text-sm text-gray-500">₡{Number(item.unit_price).toLocaleString("es-CR")} c/u</p><p className="mt-1 font-bold text-gray-950">₡{Number(item.subtotal).toLocaleString("es-CR")}</p></div>
               </div>
             ))}
             {items.length === 0 && <p className="px-6 py-12 text-center text-sm text-gray-500">No hay productos en este pedido.</p>}
@@ -129,8 +129,8 @@ export default function AdminOrderDetailPage() {
         <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
           <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-400">Resumen financiero</p>
-            <div className="mt-5 space-y-3 text-sm"><div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span>${Number(order.subtotal).toLocaleString("es-CO")}</span></div><div className="flex justify-between"><span className="text-gray-500">Envío</span><span>{Number(order.shipping_cost) > 0 ? `$${Number(order.shipping_cost).toLocaleString("es-CO")}` : "Por calcular"}</span></div>{order.discount > 0 && <div className="flex justify-between"><span className="text-gray-500">Descuento</span><span>-${Number(order.discount).toLocaleString("es-CO")}</span></div>}</div>
-            <div className="mt-5 border-t border-gray-200 pt-5"><div className="flex items-end justify-between"><span className="font-semibold">Total</span><span className="text-2xl font-bold tracking-tight">${Number(order.total).toLocaleString("es-CO")}</span></div></div>
+            <div className="mt-5 space-y-3 text-sm"><div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span>₡{Number(order.subtotal).toLocaleString("es-CR")}</span></div><div className="flex justify-between"><span className="text-gray-500">Envío</span><span>{Number(order.shipping_cost) > 0 ? `₡${Number(order.shipping_cost).toLocaleString("es-CR")}` : "Por calcular"}</span></div>{order.discount > 0 && <div className="flex justify-between"><span className="text-gray-500">Descuento</span><span>-₡{Number(order.discount).toLocaleString("es-CR")}</span></div>}</div>
+            <div className="mt-5 border-t border-gray-200 pt-5"><div className="flex items-end justify-between"><span className="font-semibold">Total</span><span className="text-2xl font-bold tracking-tight">₡{Number(order.total).toLocaleString("es-CR")}</span></div></div>
           </section>
           {order.shipping_address && <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"><p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-400">Entrega</p><p className="mt-4 font-semibold text-gray-950">{order.shipping_address.full_name}</p><p className="mt-1 text-sm text-gray-600">{order.shipping_address.address_line_1}</p><p className="mt-1 text-sm text-gray-500">{order.shipping_address.city}, {order.shipping_address.state}</p>{order.shipping_address.phone && <p className="mt-3 border-t border-gray-100 pt-3 text-xs text-gray-500">Tel. {order.shipping_address.phone}</p>}</section>}
         </aside>

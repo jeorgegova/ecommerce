@@ -134,7 +134,7 @@ export default function AdminQuestionsPage() {
                           {q.status === "pending" ? "Pendiente" : "Respondida"}
                         </span>
                         <span className="text-[11px] text-gray-400">
-                          {new Date(q.created_at).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}
+                          {new Date(q.created_at).toLocaleDateString("es-CR", { day: "numeric", month: "short", year: "numeric" })}
                         </span>
                       </div>
                       <p className="mt-1.5 text-[15px] font-semibold leading-snug text-gray-900">{q.question}</p>
@@ -165,7 +165,7 @@ export default function AdminQuestionsPage() {
                         <span className="text-[13px] font-medium text-gray-700">Respuesta</span>
                         {q.answered_at && (
                           <span className="text-[12px] text-gray-400">
-                            {new Date(q.answered_at).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}
+                            {new Date(q.answered_at).toLocaleDateString("es-CR", { day: "numeric", month: "short", year: "numeric" })}
                           </span>
                         )}
                       </div>

@@ -62,7 +62,7 @@ function timeAgo(dateStr: string): string {
   if (hours < 24) return `Hace ${hours}h`
   const days = Math.floor(hours / 24)
   if (days < 7) return `Hace ${days} días`
-  return new Date(dateStr).toLocaleDateString("es-CO", { day: "numeric", month: "short" })
+  return new Date(dateStr).toLocaleDateString("es-CR", { day: "numeric", month: "short" })
 }
 
 function avgResponseTime(questions: Question[]): string | null {
@@ -75,7 +75,7 @@ function avgResponseTime(questions: Question[]): string | null {
   if (avgMin < 60) return `${avgMin} min`
   const hours = Math.round(avgMin / 60)
   if (hours < 24) return `${hours}h`
-  return `${Math.round(hours / 24)} días`
+  return `₡{Math.round(hours / 24)} días`
 }
 
 function lastAnswerTime(questions: Question[]): string | null {

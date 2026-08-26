@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import RandomPurchaseClient from "@/components/random-purchase/RandomPurchaseClient"
 
-export const metadata = { title: "Compra Aleatoria | Wil Motos" }
+export const metadata = { title: "Compra Aleatoria | Willy Motos" }
 
 export default async function CompraAleatoriaPage(){
   const supabase = await createClient()

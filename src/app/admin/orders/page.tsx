@@ -58,7 +58,7 @@ export default function AdminOrdersPage() {
           <h1 className="mt-2 text-2xl font-bold tracking-tight text-gray-950">Pedidos</h1>
           <p className="mt-1 text-sm text-gray-500">Revisa pedidos, clientes y estados de pago.</p>
         </div>
-        <div className="text-left sm:text-right"><p className="text-xs text-gray-400">Valor acumulado</p><p className="mt-1 text-xl font-bold text-gray-950">${totalValue.toLocaleString("es-CO")}</p></div>
+        <div className="text-left sm:text-right"><p className="text-xs text-gray-400">Valor acumulado</p><p className="mt-1 text-xl font-bold text-gray-950">₡{totalValue.toLocaleString("es-CR")}</p></div>
       </div>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -95,8 +95,8 @@ export default function AdminOrdersPage() {
               <td className="whitespace-nowrap px-5 py-4"><p className="text-sm font-bold text-gray-950">{order.order_number}</p><p className="mt-1 text-xs text-gray-400">#{order.id.slice(0, 8)}</p></td>
               <td className="px-5 py-4"><p className="max-w-[220px] truncate text-sm font-medium text-gray-800">{order.profiles?.full_name || "Cliente sin nombre"}</p><p className="mt-1 max-w-[220px] truncate text-xs text-gray-400">{order.profiles?.email || "—"}</p></td>
               <td className="whitespace-nowrap px-5 py-4 text-center">{statusBadge(order)}</td>
-              <td className="whitespace-nowrap px-5 py-4 text-right text-sm font-bold text-gray-950">${Number(order.total).toLocaleString("es-CO")}</td>
-              <td className="whitespace-nowrap px-5 py-4 text-right text-xs text-gray-500">{new Date(order.created_at).toLocaleDateString("es-CO")}</td>
+              <td className="whitespace-nowrap px-5 py-4 text-right text-sm font-bold text-gray-950">₡{Number(order.total).toLocaleString("es-CR")}</td>
+              <td className="whitespace-nowrap px-5 py-4 text-right text-xs text-gray-500">{new Date(order.created_at).toLocaleDateString("es-CR")}</td>
               <td className="whitespace-nowrap px-5 py-4 text-right"><Link href={`/admin/orders/${order.id}`} className="inline-flex rounded-full border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 transition-colors hover:border-gray-950 hover:text-gray-950">Gestionar</Link></td>
             </tr>)}
             {filteredOrders.length === 0 && <tr><td colSpan={6} className="px-6 py-14 text-center text-sm text-gray-500">No hay pedidos que coincidan con la búsqueda.</td></tr>}
@@ -107,7 +107,7 @@ export default function AdminOrdersPage() {
       <div className="mt-4 space-y-3 lg:hidden">
         {filteredOrders.map((order) => <Link key={order.id} href={`/admin/orders/${order.id}`} className="block rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition-colors hover:border-gray-400">
           <div className="flex items-start justify-between gap-3"><div><p className="font-bold text-gray-950">{order.order_number}</p><p className="mt-1 text-xs text-gray-500">{order.profiles?.full_name || order.profiles?.email || "Cliente sin nombre"}</p></div>{statusBadge(order)}</div>
-          <div className="mt-4 flex items-end justify-between border-t border-gray-100 pt-3"><div><p className="text-xs text-gray-400">{new Date(order.created_at).toLocaleDateString("es-CO")}</p><p className="mt-1 text-base font-bold text-gray-950">${Number(order.total).toLocaleString("es-CO")}</p></div><span className="text-sm font-semibold text-gray-500">Gestionar →</span></div>
+          <div className="mt-4 flex items-end justify-between border-t border-gray-100 pt-3"><div><p className="text-xs text-gray-400">{new Date(order.created_at).toLocaleDateString("es-CR")}</p><p className="mt-1 text-base font-bold text-gray-950">₡{Number(order.total).toLocaleString("es-CR")}</p></div><span className="text-sm font-semibold text-gray-500">Gestionar →</span></div>
         </Link>)}
         {filteredOrders.length === 0 && <p className="rounded-xl border border-dashed border-gray-300 px-4 py-12 text-center text-sm text-gray-500">No hay pedidos que coincidan con la búsqueda.</p>}
       </div>

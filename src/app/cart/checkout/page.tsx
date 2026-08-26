@@ -52,7 +52,7 @@ export default function CheckoutPage() {
   const [randomDiscount, setRandomDiscount] = useState(0)
   const [randomTarget, setRandomTarget] = useState(0)
   const [storeInfo, setStoreInfo] = useState<StoreInfo>({
-    name: "Wil Motos",
+    name: "Willy Motos",
     phone: "",
     email: "",
     address: "",
@@ -115,7 +115,7 @@ export default function CheckoutPage() {
         }
       }
       setStoreInfo({
-        name: settingValue("store_name", "Wil Motos"),
+        name: settingValue("store_name", "Willy Motos"),
         phone: settingValue("store_phone", ""),
         email: settingValue("store_email", ""),
         address: settingValue("store_address", ""),
@@ -266,9 +266,9 @@ export default function CheckoutPage() {
                       <p className="text-sm text-gray-500">Cant: {item.quantity}</p>
                     </div>
                     <p className="font-medium text-gray-900">
-                      ${(itemUnitPrice(item) * item.quantity).toLocaleString("es-CO")}
+                      ₡{(itemUnitPrice(item) * item.quantity).toLocaleString("es-CR")}
                       {item.products.sale_price && item.products.promotion_active && (
-                        <> <span className="text-xs text-gray-400 line-through font-normal">${((item.products.base_price + (item.product_variants?.price_adjustment || 0)) * item.quantity).toLocaleString("es-CO")}</span></>
+                        <> <span className="text-xs text-gray-400 line-through font-normal">₡{((item.products.base_price + (item.product_variants?.price_adjustment || 0)) * item.quantity).toLocaleString("es-CR")}</span></>
                       )}
                     </p>
                   </div>
@@ -281,13 +281,13 @@ export default function CheckoutPage() {
             <div className="sticky top-24 rounded-xl border border-gray-200 p-6">
               <h2 className="text-lg font-semibold text-gray-900">Resumen</h2>
               <div className="mt-4 space-y-3">
-                <div className="flex justify-between text-sm"><span className="text-gray-600">Subtotal</span><span className="font-medium">${subtotal.toLocaleString("es-CO")}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-600">Subtotal</span><span className="font-medium">₡{subtotal.toLocaleString("es-CR")}</span></div>
                 {randomDiscount>0 && (
-                  <div className="flex justify-between text-sm text-green-700"><span>Descuento Compra Aleatoria</span><span>-${randomDiscount.toLocaleString("es-CO")}</span></div>
+                  <div className="flex justify-between text-sm text-green-700"><span>Descuento Compra Aleatoria</span><span>-₡{randomDiscount.toLocaleString("es-CR")}</span></div>
                 )}
                 <div className="flex justify-between text-sm"><span className="text-gray-600">Envío</span><span className="text-gray-900">Por calcular</span></div>
-                <div className="border-t border-gray-200 pt-3 flex justify-between"><span className="font-semibold">Total</span><span className="font-semibold">${total.toLocaleString("es-CO")}</span></div>
-                {randomTarget>0 && <p className="text-xs text-gray-400">Objetivo: ${randomTarget.toLocaleString("es-CO")}</p>}
+                <div className="border-t border-gray-200 pt-3 flex justify-between"><span className="font-semibold">Total</span><span className="font-semibold">₡{total.toLocaleString("es-CR")}</span></div>
+                {randomTarget>0 && <p className="text-xs text-gray-400">Objetivo: ₡{randomTarget.toLocaleString("es-CR")}</p>}
               </div>
               <div className="mt-5 rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
                 <p className="font-semibold">Pago por transferencia bancaria</p>

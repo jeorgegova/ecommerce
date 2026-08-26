@@ -37,7 +37,7 @@ export default function TopProducts() {
               <div className="mt-0.5 flex items-center gap-2 text-[11px] text-gray-400">
                 <span>{p.total_sold} vendidos</span>
                 <span>·</span>
-                <span className="text-emerald-600">${Number(p.total_revenue).toLocaleString("es-CO")}</span>
+                <span className="text-emerald-600">₡{Number(p.total_revenue).toLocaleString("es-CR")}</span>
               </div>
             </div>
           </Link>

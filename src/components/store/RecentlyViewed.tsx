@@ -90,11 +90,11 @@ export default function RecentlyViewed() {
               <p className="mt-0.5 flex items-baseline gap-1.5">
                 {item.product_sale_price && item.product_promotion_active ? (
                   <>
-                    <span className="text-xs font-semibold text-gray-900">${Number(item.product_sale_price).toLocaleString("es-CO")}</span>
-                    <span className="text-[10px] text-gray-400 line-through">${Number(item.product_price).toLocaleString("es-CO")}</span>
+                    <span className="text-xs font-semibold text-gray-900">₡{Number(item.product_sale_price).toLocaleString("es-CR")}</span>
+                    <span className="text-[10px] text-gray-400 line-through">₡{Number(item.product_price).toLocaleString("es-CR")}</span>
                   </>
                 ) : (
-                  <span className="text-xs font-semibold text-gray-900">${Number(item.product_price).toLocaleString("es-CO")}</span>
+                  <span className="text-xs font-semibold text-gray-900">₡{Number(item.product_price).toLocaleString("es-CR")}</span>
                 )}
               </p>
             </div>

@@ -149,15 +149,15 @@ const ProductCard = memo(function ProductCard({ product, images }: ProductCardPr
           {salePrice ? (
             <div className="flex flex-col lg:flex-row lg:items-baseline lg:gap-1.5">
               <span className="text-[13px] font-bold text-gray-900 lg:text-base">
-                ${Number(salePrice).toLocaleString("es-CO")}
+                ₡{Number(salePrice).toLocaleString("es-CR")}
               </span>
               <span className="text-[10px] text-gray-400 line-through lg:text-[11px]">
-                ${Number(product.base_price).toLocaleString("es-CO")}
+                ₡{Number(product.base_price).toLocaleString("es-CR")}
               </span>
             </div>
           ) : (
             <span className="text-[13px] font-bold text-gray-900 lg:text-base">
-              ${Number(product.current_price).toLocaleString("es-CO")}
+              ₡{Number(product.current_price).toLocaleString("es-CR")}
             </span>
           )}
         </div>

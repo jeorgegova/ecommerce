@@ -171,7 +171,7 @@ export default function EditProductPage() {
           <div className="rounded-xl border border-gray-200 bg-white p-6 lg:col-span-2">
             <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Stock actual</p>
             <div className="mt-1 flex items-baseline gap-2">
-              <span className={`text-3xl font-bold ${Number(product?.stock || 0) <= 0 ? "text-red-600" : Number(product?.stock || 0) <= lowStockThreshold ? "text-amber-600" : "text-gray-900"}`}>
+              <span className={`text-3xl font-bold ₡{Number(product?.stock || 0) <= 0 ? "text-red-600" : Number(product?.stock || 0) <= lowStockThreshold ? "text-amber-600" : "text-gray-900"}`}>
                 {String(product?.stock || 0)}
               </span>
               <span className="text-sm text-gray-500">unidades</span>
@@ -343,7 +343,7 @@ export default function EditProductPage() {
               {adjustQty > 0 && (
                 <div className="mt-3 flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 text-xs">
                   <span className="text-gray-500">Stock resultante:</span>
-                  <span className={`font-mono font-semibold ${Number(product?.stock || 0) + (adjustDirection === "add" ? adjustQty : -adjustQty) <= 0 ? "text-red-600" : "text-gray-900"}`}>
+                  <span className={`font-mono font-semibold ₡{Number(product?.stock || 0) + (adjustDirection === "add" ? adjustQty : -adjustQty) <= 0 ? "text-red-600" : "text-gray-900"}`}>
                     {Number(product?.stock || 0)} {adjustDirection === "add" ? "+" : "−"} {adjustQty} = {Number(product?.stock || 0) + (adjustDirection === "add" ? adjustQty : -adjustQty)}
                   </span>
                   <span className="text-gray-400">unidades</span>
@@ -403,8 +403,8 @@ export default function EditProductPage() {
                   <td className="hidden sm:table-cell px-4 py-2 text-gray-500 max-w-[200px] truncate">{m.notes || "—"}</td>
                   <td className="hidden sm:table-cell px-4 py-2 text-gray-500">{m.profiles?.full_name || "—"}</td>
                   <td className="whitespace-nowrap px-2 py-1.5 text-right text-gray-500 sm:px-4 sm:py-2 leading-tight">
-                    <span className="block text-[10px] sm:text-xs">{new Date(m.created_at).toLocaleDateString("es-CO", { day: "2-digit", month: "2-digit", year: "numeric" })}</span>
-                    <span className="block text-[9px] text-gray-400 sm:text-[11px]">{new Date(m.created_at).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}</span>
+                    <span className="block text-[10px] sm:text-xs">{new Date(m.created_at).toLocaleDateString("es-CR", { day: "2-digit", month: "2-digit", year: "numeric" })}</span>
+                    <span className="block text-[9px] text-gray-400 sm:text-[11px]">{new Date(m.created_at).toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit" })}</span>
                   </td>
                 </tr>
               ))}

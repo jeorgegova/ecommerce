@@ -76,7 +76,7 @@ function timeAgo(dateStr: string): string {
   const days = Math.floor(hours / 24)
   if (days < 7) return `Hace ${days} días`
   if (days < 30) return `Hace ${Math.floor(days / 7)} semanas`
-  return new Date(dateStr).toLocaleDateString("es-CO", { day: "numeric", month: "short" })
+  return new Date(dateStr).toLocaleDateString("es-CR", { day: "numeric", month: "short" })
 }
 
 function groupByDate(items: Notification[]): { label: string; items: Notification[] }[] {

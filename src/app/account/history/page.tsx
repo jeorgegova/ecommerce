@@ -74,7 +74,7 @@ export default function HistoryPage() {
                   }}
                   images={item.allImages || []}
                 />
-                <p className="mt-1 text-xs text-gray-400">{new Date(item.viewed_at).toLocaleDateString("es-CO")}</p>
+                <p className="mt-1 text-xs text-gray-400">{new Date(item.viewed_at).toLocaleDateString("es-CR")}</p>
               </div>
             )
           })}

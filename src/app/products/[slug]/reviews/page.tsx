@@ -72,7 +72,7 @@ export default function ProductReviewsPage() {
               <div className="flex items-center gap-2"><span className="text-sm font-medium text-gray-900">{r.profiles?.full_name || "Anónimo"}</span><span className="text-xs text-yellow-500">{"★".repeat(r.rating)}</span></div>
               {r.title && <p className="mt-1 font-medium text-gray-900">{r.title}</p>}
               {r.comment && <p className="mt-1 text-sm text-gray-600">{r.comment}</p>}
-              <p className="mt-2 text-xs text-gray-400">{new Date(r.created_at).toLocaleDateString("es-CO")}</p>
+              <p className="mt-2 text-xs text-gray-400">{new Date(r.created_at).toLocaleDateString("es-CR")}</p>
             </div>
           ))}
         </div>

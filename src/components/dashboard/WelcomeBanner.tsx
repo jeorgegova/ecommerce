@@ -27,7 +27,7 @@ export default function WelcomeBanner() {
 
     const updateDateTime = () => {
       setDateTime(
-        new Intl.DateTimeFormat("es-CO", {
+        new Intl.DateTimeFormat("es-CR", {
           weekday: "long",
           day: "numeric",
           month: "long",

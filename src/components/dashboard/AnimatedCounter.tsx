@@ -11,7 +11,7 @@ interface AnimatedCounterProps {
 
 export default function AnimatedCounter({
   value,
-  format = (v) => v.toLocaleString("es-CO"),
+  format = (v) => v.toLocaleString("es-CR"),
   duration = 800,
   className = "",
 }: AnimatedCounterProps) {

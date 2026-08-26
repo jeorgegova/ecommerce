@@ -14,11 +14,11 @@ function downloadBlob(blob: Blob, filename: string) {
 }
 
 function formatCOP(value: number) {
-  return "$" + Math.round(value).toLocaleString("es-CO")
+  return "₡" + Math.round(value).toLocaleString("es-CR")
 }
 
 function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("es-CO", {
+  return new Date(dateStr).toLocaleDateString("es-CR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -26,7 +26,7 @@ function formatDate(dateStr: string) {
 }
 
 function localeDate() {
-  return new Date().toLocaleDateString("es-CO").replace(/\//g, "-")
+  return new Date().toLocaleDateString("es-CR").replace(/\//g, "-")
 }
 
 // ───── PDF ─────
@@ -44,7 +44,7 @@ export async function exportSalesPDF() {
 
   const doc = new jsPDF()
   const title = "Reporte de Ventas"
-  const subtitle = `Generado el ${new Date().toLocaleString("es-CO")}`
+  const subtitle = `Generado el ${new Date().toLocaleString("es-CR")}`
 
   doc.setFontSize(18)
   doc.text(title, 14, 22)
@@ -100,7 +100,7 @@ export async function exportMonthlyReport() {
 
   const doc = new jsPDF()
   const title = "Reporte Mensual"
-  const subtitle = `Generado el ${new Date().toLocaleString("es-CO")}`
+  const subtitle = `Generado el ${new Date().toLocaleString("es-CR")}`
 
   doc.setFontSize(18)
   doc.text(title, 14, 22)

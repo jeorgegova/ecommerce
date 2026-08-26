@@ -29,7 +29,7 @@ export async function POST(req: NextRequest){
     if(price<=0) return NextResponse.json({error:"Precio inválido"},{status:400})
     subtotal += price * qty
   }
-  if(subtotal < target) return NextResponse.json({error:`Subtotal $${subtotal.toLocaleString("es-CO")} menor que objetivo $${target.toLocaleString("es-CO")}`},{status:400})
+  if(subtotal < target) return NextResponse.json({error:`Subtotal $₡{subtotal.toLocaleString("es-CR")} menor que objetivo $₡{target.toLocaleString("es-CR")}`},{status:400})
   const discount = subtotal - target
   // cap discount sanity 50% or 200k
   if(discount <0) return NextResponse.json({error:"Descuento negativo"},{status:400})

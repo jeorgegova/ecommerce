@@ -124,7 +124,7 @@ export default function OrderDetailPage() {
         bankDocument: settingValue("documento_cuenta_bancaria"),
         paymentMethod: settingValue("metodo_pago", "Transferencia bancaria"),
         shippingMethod: settingValue("metodo_envio"),
-        storeName: settingValue("store_name", "Wil Motos"),
+        storeName: settingValue("store_name", "Willy Motos"),
         storePhone: settingValue("store_phone"),
         storeEmail: settingValue("store_email"),
         storeAddress: settingValue("store_address"),
@@ -150,7 +150,7 @@ export default function OrderDetailPage() {
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">Detalle del pedido</p>
             <h1 className="mt-2 text-2xl font-bold tracking-tight text-gray-950 sm:text-3xl">{order.order_number}</h1>
             <p className="mt-2 text-sm text-gray-500">
-              Realizado el {new Date(order.created_at).toLocaleDateString("es-CO", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+              Realizado el {new Date(order.created_at).toLocaleDateString("es-CR", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 sm:justify-end">
@@ -200,9 +200,9 @@ export default function OrderDetailPage() {
                         {item.variant_name && <p className="mt-1 text-sm text-gray-500">{item.variant_name}</p>}
                         <p className="mt-2 text-xs text-gray-400">SKU {item.product_sku} · Cantidad {item.quantity}</p>
                       </div>
-                      <p className="font-bold text-gray-950">${Number(item.subtotal).toLocaleString("es-CO")}</p>
+                      <p className="font-bold text-gray-950">₡{Number(item.subtotal).toLocaleString("es-CR")}</p>
                     </div>
-                    <p className="mt-2 text-xs text-gray-500">${Number(item.unit_price).toLocaleString("es-CO")} por unidad</p>
+                    <p className="mt-2 text-xs text-gray-500">₡{Number(item.unit_price).toLocaleString("es-CR")} por unidad</p>
                   </div>
                 </div>
               ))}
@@ -232,12 +232,12 @@ export default function OrderDetailPage() {
           <section className="rounded-2xl border border-gray-200 bg-white p-5 text-gray-950 shadow-sm sm:p-6">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-400">Resumen de pago</p>
             <div className="mt-5 space-y-3 text-sm">
-              <div className="flex justify-between gap-4"><span className="text-gray-500">Subtotal</span><span>${Number(order.subtotal).toLocaleString("es-CO")}</span></div>
-              <div className="flex justify-between gap-4"><span className="text-gray-500">Envío</span><span>{Number(order.shipping_cost) > 0 ? `$${Number(order.shipping_cost).toLocaleString("es-CO")}` : "Por calcular"}</span></div>
-              {order.discount > 0 && <div className="flex justify-between gap-4"><span className="text-gray-500">Descuento</span><span>-${Number(order.discount).toLocaleString("es-CO")}</span></div>}
+              <div className="flex justify-between gap-4"><span className="text-gray-500">Subtotal</span><span>₡{Number(order.subtotal).toLocaleString("es-CR")}</span></div>
+              <div className="flex justify-between gap-4"><span className="text-gray-500">Envío</span><span>{Number(order.shipping_cost) > 0 ? `₡${Number(order.shipping_cost).toLocaleString("es-CR")}` : "Por calcular"}</span></div>
+              {order.discount > 0 && <div className="flex justify-between gap-4"><span className="text-gray-500">Descuento</span><span>-₡{Number(order.discount).toLocaleString("es-CR")}</span></div>}
             </div>
             <div className="mt-5 border-t border-gray-200 pt-5">
-              <div className="flex items-end justify-between gap-4"><span className="font-semibold">Total</span><span className="text-2xl font-bold tracking-tight">${Number(order.total).toLocaleString("es-CO")}</span></div>
+              <div className="flex items-end justify-between gap-4"><span className="font-semibold">Total</span><span className="text-2xl font-bold tracking-tight">₡{Number(order.total).toLocaleString("es-CR")}</span></div>
               <p className="mt-2 text-right text-xs text-gray-500">Valores expresados en pesos colombianos</p>
             </div>
           </section>

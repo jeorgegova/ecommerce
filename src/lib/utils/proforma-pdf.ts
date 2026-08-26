@@ -66,11 +66,11 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 function formatCOP(value: number) {
-  return `$${Math.round(value).toLocaleString("es-CO")}`
+  return `₡${Math.round(value).toLocaleString("es-CR")}`
 }
 
 function formatDate(value: string) {
-  return new Date(value).toLocaleDateString("es-CO", {
+  return new Date(value).toLocaleDateString("es-CR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -97,6 +97,20 @@ function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url)
 }
 
+async function loadFontAsBase64(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url)
+    if (!res.ok) return null
+    const buffer = await res.arrayBuffer()
+    const bytes = new Uint8Array(buffer)
+    let binary = ""
+    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i])
+    return btoa(binary)
+  } catch {
+    return null
+  }
+}
+
 async function loadImageData(url: string) {
   try {
     const response = await fetch(url)
@@ -116,7 +130,11 @@ async function loadImageData(url: string) {
 function text(doc: jsPDF, color: [number, number, number], size: number, style = "normal") {
   doc.setTextColor(...color)
   doc.setFontSize(size)
-  doc.setFont("helvetica", style)
+  try {
+    doc.setFont("DejaVuSans", style)
+  } catch {
+    doc.setFont("helvetica", style)
+  }
 }
 
 function heading(doc: jsPDF, title: string, x: number, y: number) {
@@ -166,8 +184,21 @@ function continuationHeader(doc: jsPDF, data: ProformaData) {
 export async function downloadProformaPdf(data: ProformaData) {
   const { jsPDF } = await import("jspdf")
   const { autoTable } = await import("jspdf-autotable")
-  const logo = await loadImageData("/logoWilMotos.png")
+  const logo = await loadImageData("/logoWillyMotos.png")
   const doc = new jsPDF({ format: "a4", unit: "mm" })
+  // Cargar fuente Unicode para ₡ (colón) – helvetica no lo soporta (muestra ¡)
+  const fontNormal = await loadFontAsBase64("/fonts/DejaVuSans.ttf")
+  const fontBold = await loadFontAsBase64("/fonts/DejaVuSans-Bold.ttf")
+  if (fontNormal) {
+    doc.addFileToVFS("DejaVuSans.ttf", fontNormal)
+    doc.addFont("DejaVuSans.ttf", "DejaVuSans", "normal")
+  }
+  if (fontBold) {
+    doc.addFileToVFS("DejaVuSans-Bold.ttf", fontBold)
+    doc.addFont("DejaVuSans-Bold.ttf", "DejaVuSans", "bold")
+  } else if (fontNormal) {
+    doc.addFont("DejaVuSans.ttf", "DejaVuSans", "bold")
+  }
   const pageWidth = doc.internal.pageSize.getWidth()
   const contentWidth = pageWidth - 28
 
@@ -238,7 +269,7 @@ export async function downloadProformaPdf(data: ProformaData) {
     body: productRows,
     theme: "plain",
     styles: {
-      font: "helvetica",
+      font: "DejaVuSans",
       fontSize: 8,
       textColor: DARK_GRAY,
       cellPadding: { top: 2.3, right: 2, bottom: 2.3, left: 2 },
@@ -252,6 +283,7 @@ export async function downloadProformaPdf(data: ProformaData) {
       textColor: BLACK,
       fontSize: 7,
       fontStyle: "bold",
+      font: "DejaVuSans",
       cellPadding: { top: 2.5, right: 2, bottom: 2.5, left: 2 },
       lineColor: BLACK,
       lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 },

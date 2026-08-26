@@ -25,7 +25,7 @@ function timeAgo(dateStr: string): string {
   if (hours < 24) return `Hace ${hours}h`
   const days = Math.floor(hours / 24)
   if (days < 7) return `Hace ${days}d`
-  return new Date(dateStr).toLocaleDateString("es-CO", { day: "numeric", month: "short" })
+  return new Date(dateStr).toLocaleDateString("es-CR", { day: "numeric", month: "short" })
 }
 
 const typeIcon: Record<string, { bg: string; icon: React.ReactNode }> = {

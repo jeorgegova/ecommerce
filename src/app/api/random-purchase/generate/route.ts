@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
   if (!candidates.length) return NextResponse.json({ error: "No hay productos disponibles" }, { status:404 })
 
   const cheapest = Math.min(...candidates.map(c=>c.price))
-  if (target < cheapest) return NextResponse.json({ error: `No encontramos productos por ese valor. Producto más barato: $${cheapest.toLocaleString("es-CO")}` }, { status:404 })
+  if (target < cheapest) return NextResponse.json({ error: `No encontramos productos por ese valor. Producto más barato: $₡{cheapest.toLocaleString("es-CR")}` }, { status:404 })
 
   const result = findBestCombination(candidates, target)
   if (!result) return NextResponse.json({ error: "No encontramos combinación para ese valor. Probá otro monto." }, { status:404 })

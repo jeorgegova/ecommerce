@@ -49,18 +49,18 @@ export default function MainChart() {
   const formatXAxis = (dateStr: string) => {
     const date = new Date(dateStr)
     if (period === "7d") {
-      return date.toLocaleDateString("es-CO", { weekday: "short" })
+      return date.toLocaleDateString("es-CR", { weekday: "short" })
     }
     if (period === "30d") {
-      return date.toLocaleDateString("es-CO", { day: "numeric", month: "short" })
+      return date.toLocaleDateString("es-CR", { day: "numeric", month: "short" })
     }
-    return date.toLocaleDateString("es-CO", { day: "numeric", month: "short" })
+    return date.toLocaleDateString("es-CR", { day: "numeric", month: "short" })
   }
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload || payload.length === 0) return null
     const date = new Date(label)
-    const dateStr = date.toLocaleDateString("es-CO", {
+    const dateStr = date.toLocaleDateString("es-CR", {
       weekday: "long",
       day: "numeric",
       month: "long",

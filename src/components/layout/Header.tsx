@@ -49,13 +49,13 @@ export default function Header() {
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:h-16 lg:gap-5 lg:px-8">
         <Link href="/" className="group flex-shrink-0 flex items-center gap-2.5 hover:opacity-90 transition-opacity">
           <img
-            src="/logoWilMotos.png"
-            alt="Wil Motos - Repuestos originales y accesorios"
+            src="/logoWillyMotos.png"
+            alt="Willy Motos - Repuestos originales y accesorios"
             className="h-9 w-auto object-contain lg:h-11 transition-transform duration-300 group-hover:scale-[1.02] drop-shadow-sm"
           />
           <div className="flex flex-col">
             <span className="text-base font-extrabold tracking-tight text-gray-900 leading-none lg:text-lg flex items-center gap-1">
-              Wil<span className="text-[10px] font-semibold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">Motos</span>
+              Willy<span className="text-[10px] font-semibold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">Motos</span>
             </span>
             <span className="text-[8px] font-bold text-gray-500 uppercase tracking-wider leading-none mt-1">Repuestos para Motos</span>
           </div>

@@ -106,7 +106,7 @@ export default function RandomPurchaseClient(){
       {result && (
         <div className="rounded-2xl border border-gray-200 bg-white p-5 lg:p-6">
           <h2 className="text-lg font-semibold text-gray-900">Tu compra aleatoria</h2>
-          <p className="mt-1 text-sm text-gray-500">Valor solicitado: <span className="font-semibold text-gray-900">${Number(result.target).toLocaleString("es-CO")}</span></p>
+          <p className="mt-1 text-sm text-gray-500">Valor solicitado: <span className="font-semibold text-gray-900">₡{Number(result.target).toLocaleString("es-CR")}</span></p>
 
           <div className="mt-4 space-y-3">
             {result.items.map(it=> (
@@ -120,18 +120,18 @@ export default function RandomPurchaseClient(){
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">{it.name}</p>
-                  <p className="text-xs text-gray-500">{it.quantity} × ${it.unit_price.toLocaleString("es-CO")} = ${it.subtotal.toLocaleString("es-CO")}</p>
+                  <p className="text-xs text-gray-500">{it.quantity} × ₡{it.unit_price.toLocaleString("es-CR")} = ₡{it.subtotal.toLocaleString("es-CR")}</p>
                 </div>
               </div>
             ))}
           </div>
 
           <div className="mt-6 space-y-2 rounded-xl bg-gray-50 p-4 text-sm">
-            <div className="flex justify-between"><span className="text-gray-600">Subtotal</span><span className="font-medium">${result.subtotal.toLocaleString("es-CO")}</span></div>
+            <div className="flex justify-between"><span className="text-gray-600">Subtotal</span><span className="font-medium">₡{result.subtotal.toLocaleString("es-CR")}</span></div>
             {result.discount>0 && (
-              <div className="flex justify-between text-green-700"><span>Descuento Compra Aleatoria</span><span>-${result.discount.toLocaleString("es-CO")}</span></div>
+              <div className="flex justify-between text-green-700"><span>Descuento Compra Aleatoria</span><span>-₡{result.discount.toLocaleString("es-CR")}</span></div>
             )}
-            <div className="flex justify-between border-t border-gray-200 pt-2 font-semibold text-gray-900"><span>Total a pagar</span><span>${result.total.toLocaleString("es-CO")}</span></div>
+            <div className="flex justify-between border-t border-gray-200 pt-2 font-semibold text-gray-900"><span>Total a pagar</span><span>₡{result.total.toLocaleString("es-CR")}</span></div>
           </div>
 
           <div className="mt-5 flex gap-3">

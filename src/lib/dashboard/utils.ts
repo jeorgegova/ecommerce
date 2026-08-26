@@ -1,5 +1,5 @@
 export function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("es-CO", {
+  return new Intl.NumberFormat("es-CR", {
     style: "currency",
     currency: "COP",
     minimumFractionDigits: 0,
@@ -8,7 +8,7 @@ export function formatCurrency(value: number): string {
 }
 
 export function formatNumber(value: number): string {
-  return new Intl.NumberFormat("es-CO").format(value)
+  return new Intl.NumberFormat("es-CR").format(value)
 }
 
 export function formatCompactNumber(value: number): string {
@@ -23,17 +23,17 @@ export function formatCompactNumber(value: number): string {
 
 export function formatCompactCurrency(value: number): string {
   if (value >= 1_000_000) {
-    return "$" + (value / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M"
+    return "₡" + (value / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M"
   }
   if (value >= 1_000) {
-    return "$" + (value / 1_000).toFixed(1).replace(/\.0$/, "") + "K"
+    return "₡" + (value / 1_000).toFixed(1).replace(/\.0$/, "") + "K"
   }
-  return "$" + formatNumber(value)
+  return "₡" + formatNumber(value)
 }
 
 export function formatDate(dateStr: string): string {
   const date = new Date(dateStr)
-  return new Intl.DateTimeFormat("es-CO", {
+  return new Intl.DateTimeFormat("es-CR", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -42,7 +42,7 @@ export function formatDate(dateStr: string): string {
 
 export function formatDateTime(dateStr: string): string {
   const date = new Date(dateStr)
-  return new Intl.DateTimeFormat("es-CO", {
+  return new Intl.DateTimeFormat("es-CR", {
     day: "2-digit",
     month: "short",
     year: "numeric",

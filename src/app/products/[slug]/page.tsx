@@ -108,10 +108,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 {product.sale_price && product.promotion_active ? (
                   <>
                     <span className="text-[28px] font-bold leading-none text-gray-900 lg:text-[32px]">
-                      ${Number(product.sale_price).toLocaleString("es-CO")}
+                      ₡{Number(product.sale_price).toLocaleString("es-CR")}
                     </span>
                     <span className="text-lg text-gray-400 line-through">
-                      ${Number(product.base_price).toLocaleString("es-CO")}
+                      ₡{Number(product.base_price).toLocaleString("es-CR")}
                     </span>
                     <span className="rounded-full bg-green-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm shadow-green-200">
                       {Math.round((1 - Number(product.sale_price) / Number(product.base_price)) * 100)}% OFF
@@ -119,7 +119,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   </>
                 ) : (
                   <span className="text-[28px] font-bold leading-none text-gray-900 lg:text-[32px]">
-                    ${Number(currentPrice).toLocaleString("es-CO")}
+                    ₡{Number(currentPrice).toLocaleString("es-CR")}
                   </span>
                 )}
               </div>
@@ -162,7 +162,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               {product.weight && (
                 <div className="rounded-xl bg-gray-50 px-4 py-3">
                   <dt className="text-[11px] font-medium uppercase tracking-wider text-gray-400">Peso</dt>
-                  <dd className="mt-0.5 text-sm font-medium text-gray-900">{Number(product.weight).toLocaleString("es-CO")} kg</dd>
+                  <dd className="mt-0.5 text-sm font-medium text-gray-900">{Number(product.weight).toLocaleString("es-CR")} kg</dd>
                 </div>
               )}
               {(product.width || product.height || product.length) && (
@@ -242,7 +242,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                       </div>
                     </div>
                     <span className="ml-auto text-xs text-gray-400">
-                      {new Date(review.created_at).toLocaleDateString("es-CO", { year: "numeric", month: "short", day: "numeric" })}
+                      {new Date(review.created_at).toLocaleDateString("es-CR", { year: "numeric", month: "short", day: "numeric" })}
                     </span>
                   </div>
                   {review.title && <p className="mt-3 text-sm font-medium text-gray-900">{review.title}</p>}

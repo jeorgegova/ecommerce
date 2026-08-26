@@ -131,9 +131,9 @@ export default function AdminBannersPage() {
                 </p>
                 {(banner.starts_at || banner.ends_at) && (
                   <p className="mt-0.5 text-[11px] text-gray-400">
-                    {banner.starts_at && `Desde: ${new Date(banner.starts_at).toLocaleDateString("es-CO")}`}
+                    {banner.starts_at && `Desde: ${new Date(banner.starts_at).toLocaleDateString("es-CR")}`}
                     {banner.starts_at && banner.ends_at && " · "}
-                    {banner.ends_at && `Hasta: ${new Date(banner.ends_at).toLocaleDateString("es-CO")}`}
+                    {banner.ends_at && `Hasta: ${new Date(banner.ends_at).toLocaleDateString("es-CR")}`}
                   </p>
                 )}
               </div>
