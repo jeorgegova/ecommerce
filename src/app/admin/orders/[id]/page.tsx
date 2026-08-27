@@ -8,14 +8,141 @@ import { useEffect, useState } from "react"
 const labels: Record<string, string> = { pending: "Pendiente", confirmed: "Confirmado", paid: "Pagado", processing: "En preparación", shipped: "Enviado", delivered: "Entregado", cancelled: "Cancelado" }
 const nextActions: Record<string, { status: string; label: string }> = { pending: { status: "confirmed", label: "Confirmar pedido" }, confirmed: { status: "processing", label: "Iniciar preparación" }, processing: { status: "shipped", label: "Marcar enviado" }, shipped: { status: "delivered", label: "Marcar entregado" } }
 const money = (value: number) => `€${Number(value || 0).toLocaleString("es-CO")}`
-interface AdminOrder { id: string; order_number: string; status: string; subtotal: number; shipping_cost: number; discount: number; total: number; created_at: string; shipping_address_id: string | null; shipping_address: { full_name: string; phone: string | null; address_line_1: string; address_line_2: string | null; city: string; state: string } | null; order_statuses: { color: string } | null }
+
+interface AdminOrder {
+  id: string; order_number: string; status: string; subtotal: number; shipping_cost: number; discount: number; total: number; created_at: string
+  coupon_id: string | null
+  coupons?: { code: string; type: string; value: number } | null
+  shipping_address_id: string | null
+  shipping_address: { full_name: string; phone: string | null; address_line_1: string; address_line_2: string | null; city: string; state: string } | null
+  order_statuses: { color: string } | null
+}
 interface AdminItem { id: string; product_name: string; product_sku: string | null; variant_name: string | null; quantity: number; unit_price: number; subtotal: number }
+
 export default function AdminOrderDetailPage() {
-  const { id } = useParams<{ id: string }>(); const [order, setOrder] = useState<AdminOrder | null>(null); const [items, setItems] = useState<AdminItem[]>([]); const [loading, setLoading] = useState(true); const [updating, setUpdating] = useState(false); const [error, setError] = useState(""); const supabase = createClient()
-  useEffect(() => { const load = async () => { const { data: found } = await supabase.from("orders").select("*, order_statuses(*)").eq("id", id).single(); const { data: orderItems } = await supabase.from("order_items").select("*").eq("order_id", id).order("created_at"); let address = found?.shipping_address; if (found?.shipping_address_id && !address) { const { data } = await supabase.from("addresses").select("*").eq("id", found.shipping_address_id).single(); address = data }; setOrder(found ? { ...found, shipping_address: address } : null); setItems(orderItems || []); setLoading(false) }; void load() }, [id, supabase])
-  const updateStatus = async (newStatus: string) => { setUpdating(true); setError(""); const { error: rpcError } = await supabase.rpc("update_order_status", { p_order_id: id, p_new_status: newStatus }); if (rpcError) setError(rpcError.message); else { const { data: found } = await supabase.from("orders").select("*, order_statuses(*)").eq("id", id).single(); if (found) setOrder(found) }; setUpdating(false) }
+  const { id } = useParams<{ id: string }>()
+  const [order, setOrder] = useState<AdminOrder | null>(null)
+  const [items, setItems] = useState<AdminItem[]>([])
+  const [couponCode, setCouponCode] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [updating, setUpdating] = useState(false)
+  const [error, setError] = useState("")
+  const supabase = createClient()
+
+  useEffect(() => {
+    const load = async () => {
+      const { data: found } = await supabase.from("orders").select("*, coupons(code,type,value), order_statuses(*)").eq("id", id).single()
+      const { data: orderItems } = await supabase.from("order_items").select("*").eq("order_id", id).order("created_at")
+      let address = (found as any)?.shipping_address
+      if ((found as any)?.shipping_address_id && !address) {
+        const { data } = await supabase.from("addresses").select("*").eq("id", (found as any).shipping_address_id).single()
+        address = data
+      }
+      // fallback coupon code if relation not returned
+      let code: string | null = (found as any)?.coupons?.code || null
+      if (!code && (found as any)?.coupon_id) {
+        const { data: c } = await supabase.from("coupons").select("code").eq("id", (found as any).coupon_id).maybeSingle()
+        code = c?.code || null
+      }
+      setCouponCode(code)
+      setOrder(found ? { ...(found as any), shipping_address: address } : null)
+      setItems(orderItems || [])
+      setLoading(false)
+    }
+    void load()
+  }, [id, supabase])
+
+  const updateStatus = async (newStatus: string) => {
+    setUpdating(true); setError("")
+    const { error: rpcError } = await supabase.rpc("update_order_status", { p_order_id: id, p_new_status: newStatus })
+    if (rpcError) setError(rpcError.message)
+    else {
+      const { data: found } = await supabase.from("orders").select("*, coupons(code,type,value), order_statuses(*)").eq("id", id).single()
+      if (found) setOrder(found as any)
+    }
+    setUpdating(false)
+  }
+
   if (loading) return <div className="space-y-4"><div className="h-10 w-64 animate-pulse rounded bg-gray-200" /><div className="h-56 animate-pulse rounded-2xl bg-gray-200" /></div>
   if (!order) return <p className="text-gray-500">Pedido no encontrado</p>
-  const color = order.order_statuses?.color || "#6B7280"; const action = nextActions[order.status]; const addr = order.shipping_address
-  return <div><Link href="/admin/orders" className="text-sm font-medium text-gray-500 hover:text-gray-950">← Volver a pedidos</Link><header className="mt-5 flex flex-col gap-5 rounded-2xl border border-gray-200 bg-white p-6 lg:flex-row lg:items-center lg:justify-between"><div><p className="text-sm text-gray-500">Pedido</p><h1 className="mt-1 text-2xl font-bold text-gray-950">{order.order_number}</h1><p className="mt-1 text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString("es-CO", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p></div><div className="flex flex-wrap items-center gap-2"><span className="rounded-full px-3 py-1.5 text-sm font-semibold" style={{ backgroundColor: `${color}20`, color }}>{labels[order.status] || order.status}</span>{action && <button onClick={() => updateStatus(action.status)} disabled={updating} className="rounded-full bg-gray-950 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{updating ? "Actualizando..." : action.label}</button>}{!['cancelled', 'delivered', 'shipped'].includes(order.status) && <button onClick={() => updateStatus("cancelled")} disabled={updating} className="rounded-full border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 disabled:opacity-50">Cancelar pedido</button>}</div></header>{error && <p className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}<div className="mt-6 grid gap-6 lg:grid-cols-[1fr_330px]"><section className="rounded-2xl border border-gray-200 bg-white p-6"><h2 className="text-lg font-bold">Productos</h2><div className="mt-4 divide-y divide-gray-100">{items.map((item) => <div key={item.id} className="flex items-start justify-between gap-4 py-4 first:pt-0"><div><p className="font-semibold">{item.product_name}</p>{item.variant_name && <p className="text-sm text-gray-500">{item.variant_name}</p>}<p className="mt-1 text-xs text-gray-500">SKU: {item.product_sku || "Pendiente"} · {item.quantity} unidades · {money(item.unit_price)} c/u</p></div><p className="font-semibold">{money(item.subtotal)}</p></div>)}</div></section><aside className="space-y-6"><section className="rounded-2xl border border-gray-200 bg-white p-6"><h2 className="font-bold">Resumen financiero</h2><div className="mt-4 space-y-3 text-sm"><div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span>{money(order.subtotal)}</span></div><div className="flex justify-between"><span className="text-gray-500">Envío</span><span>{money(order.shipping_cost)}</span></div>{order.discount > 0 && <div className="flex justify-between text-red-600"><span>Descuento</span><span>-{money(order.discount)}</span></div>}<div className="flex justify-between border-t border-gray-200 pt-3 font-bold"><span>Total</span><span>{money(order.total)}</span></div></div></section>{addr && <section className="rounded-2xl border border-gray-200 bg-white p-6"><h2 className="font-bold">Dirección de entrega</h2><div className="mt-3 space-y-1 text-sm text-gray-600"><p className="font-medium text-gray-950">{addr.full_name}</p>{addr.phone && <p>{addr.phone}</p>}<p>{addr.address_line_1}</p>{addr.address_line_2 && <p>{addr.address_line_2}</p>}<p>{addr.city}, {addr.state}</p></div></section>}</aside></div></div>
+
+  const color = order.order_statuses?.color || "#6B7280"
+  const action = nextActions[order.status]
+  const addr = order.shipping_address
+  const canEdit = !["cancelled", "delivered", "shipped"].includes(order.status)
+
+  return (
+    <div>
+      <Link href="/admin/orders" className="text-sm font-medium text-gray-500 hover:text-gray-950">← Volver a pedidos</Link>
+      <header className="mt-5 flex flex-col gap-5 rounded-2xl border border-gray-200 bg-white p-6 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p className="text-sm text-gray-500">Pedido</p>
+          <h1 className="mt-1 text-2xl font-bold text-gray-950">{order.order_number}</h1>
+          <p className="mt-1 text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString("es-CO", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+          {couponCode && <p className="mt-1 text-xs font-mono text-emerald-700">Cupón: {couponCode} · descuento {money(order.discount)}</p>}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-full px-3 py-1.5 text-sm font-semibold" style={{ backgroundColor: `${color}20`, color }}>{labels[order.status] || order.status}</span>
+          {canEdit && (
+            <Link href={`/admin/orders/${id}/edit`} className="rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+              Editar pedido
+            </Link>
+          )}
+          {action && <button onClick={() => updateStatus(action.status)} disabled={updating} className="rounded-full bg-gray-950 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{updating ? "Actualizando..." : action.label}</button>}
+          {canEdit && <button onClick={() => updateStatus("cancelled")} disabled={updating} className="rounded-full border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 disabled:opacity-50">Cancelar pedido</button>}
+        </div>
+      </header>
+
+      {error && <p className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_330px]">
+        <section className="rounded-2xl border border-gray-200 bg-white p-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold">Productos</h2>
+            {canEdit && <Link href={`/admin/orders/${id}/edit`} className="text-sm font-medium text-gray-600 hover:text-gray-900 underline">Editar items</Link>}
+          </div>
+          <div className="mt-4 divide-y divide-gray-100">
+            {items.map((item) => (
+              <div key={item.id} className="flex items-start justify-between gap-4 py-4 first:pt-0">
+                <div>
+                  <p className="font-semibold">{item.product_name}</p>
+                  {item.variant_name && <p className="text-sm text-gray-500">{item.variant_name}</p>}
+                  <p className="mt-1 text-xs text-gray-500">SKU: {item.product_sku || "Pendiente"} · {item.quantity} unidades · {money(item.unit_price)} c/u</p>
+                </div>
+                <p className="font-semibold">{money(item.subtotal)}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <aside className="space-y-6">
+          <section className="rounded-2xl border border-gray-200 bg-white p-6">
+            <div className="flex items-center justify-between">
+              <h2 className="font-bold">Resumen financiero</h2>
+              {canEdit && <Link href={`/admin/orders/${id}/edit`} className="text-xs font-medium text-gray-500 hover:text-gray-900 underline">Editar</Link>}
+            </div>
+            <div className="mt-4 space-y-3 text-sm">
+              <div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span>{money(order.subtotal)}</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">Envío</span><span>{money(order.shipping_cost)}</span></div>
+              {order.discount > 0 && <div className="flex justify-between text-emerald-700"><span>Descuento {couponCode ? `(${couponCode})` : ""}</span><span>-{money(order.discount)}</span></div>}
+              <div className="flex justify-between border-t border-gray-200 pt-3 font-bold"><span>Total</span><span>{money(order.total)}</span></div>
+            </div>
+          </section>
+
+          {addr && (
+            <section className="rounded-2xl border border-gray-200 bg-white p-6">
+              <h2 className="font-bold">Dirección de entrega</h2>
+              <div className="mt-3 space-y-1 text-sm text-gray-600">
+                <p className="font-medium text-gray-950">{addr.full_name}</p>
+                {addr.phone && <p>{addr.phone}</p>}
+                <p>{addr.address_line_1}</p>
+                {addr.address_line_2 && <p>{addr.address_line_2}</p>}
+                <p>{addr.city}, {addr.state}</p>
+              </div>
+            </section>
+          )}
+        </aside>
+      </div>
+    </div>
+  )
 }

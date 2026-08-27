@@ -77,6 +77,15 @@ const managementItems: NavItem[] = [
       </svg>
     ),
   },
+  {
+    href: "/admin/coupons",
+    label: "Cupones",
+    icon: (
+      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 6v.75m0 3v.75m0 3v.75m0 3V18M9 12h3.75M9 15h3.75M3 12l3-3m0 0l3 3m-3-3v12" />
+      </svg>
+    ),
+  },
 ]
 
 const otherItems: NavItem[] = [
