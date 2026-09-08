@@ -4,8 +4,9 @@ import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 
-export default function CartBadge({ className, onClick, showLabel }: { className?: string; onClick?: () => void; showLabel?: boolean }) {
+export default function CartBadge({ className, onClick, showLabel, showTotal }: { className?: string; onClick?: () => void; showLabel?: boolean; showTotal?: boolean }) {
   const [count, setCount] = useState(0)
+  const [total, setTotal] = useState(0)
   const supabase = createClient()
 
   useEffect(() => {
@@ -13,7 +14,13 @@ export default function CartBadge({ className, onClick, showLabel }: { className
 
     const fetchCount = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user || cancelled) return
+      if (!user || cancelled) {
+        if (!user) {
+          setCount(0)
+          setTotal(0)
+        }
+        return
+      }
 
       const { count: itemCount } = await supabase
         .from("cart_items")
@@ -21,6 +28,25 @@ export default function CartBadge({ className, onClick, showLabel }: { className
         .eq("user_id", user.id)
 
       if (!cancelled) setCount(itemCount ?? 0)
+
+      if (showTotal) {
+        const { data: items } = await supabase
+          .from("cart_items")
+          .select("quantity, products(base_price, sale_price, promotion_active)")
+          .eq("user_id", user.id)
+
+        if (items && !cancelled) {
+          const sum = items.reduce((acc, item) => {
+            const raw: unknown = item.products
+            const p = Array.isArray(raw) ? raw[0] : raw
+            if (!p) return acc
+            const prod = p as { base_price: number; sale_price: number | null; promotion_active: boolean }
+            const price = prod.promotion_active && prod.sale_price ? prod.sale_price : prod.base_price
+            return acc + price * item.quantity
+          }, 0)
+          setTotal(sum)
+        }
+      }
     }
 
     fetchCount()
@@ -39,7 +65,23 @@ export default function CartBadge({ className, onClick, showLabel }: { className
       document.removeEventListener("visibilitychange", handleVisibility)
       subscription.unsubscribe()
     }
-  }, [supabase])
+  }, [supabase, showTotal])
+
+  if (showTotal) {
+    return (
+      <Link href="/cart" className={`relative inline-flex items-center gap-2 ${className || ""}`} onClick={onClick}>
+        <svg className="h-5 w-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+        </svg>
+        <span className="whitespace-nowrap text-sm font-semibold">
+          {count} {count === 1 ? "item" : "items"} -{" "}
+          <span className="text-[#C8102E]">
+            ${total.toLocaleString("es-CO")}
+          </span>
+        </span>
+      </Link>
+    )
+  }
 
   return (
     <Link href="/cart" className={`relative inline-flex items-center gap-2 ${className || ""}`} onClick={onClick}>

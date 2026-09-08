@@ -12,10 +12,10 @@
   
   --color-brand-gold: #6B7280;
   --color-brand-blue: #374151;
-  --color-brand-red: #6B7280;
+  --color-brand-red: #C8102E;
   --color-brand-gold-dark: #4B5563;
   --color-brand-blue-dark: #1F2937;
-  --color-brand-red-dark: #4B5563;
+  --color-brand-red-dark: #9E0C24;
 }
 
 @keyframes fadeIn {
@@ -62,10 +62,10 @@
   :root {
     --brand-gold: #6B7280;
     --brand-blue: #374151;
-    --brand-red: #6B7280;
+    --brand-red: #C8102E;
     --brand-gold-dark: #4B5563;
     --brand-blue-dark: #1F2937;
-    --brand-red-dark: #4B5563;
+    --brand-red-dark: #9E0C24;
     --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
   }
 

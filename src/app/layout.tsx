@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { Geist, Geist_Mono, Pacifico } from "next/font/google"
 import Providers from "@/components/providers"
-import BackgroundPattern from "@/components/store/BackgroundPattern"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -11,6 +10,12 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+})
+
+const pacifico = Pacifico({
+  variable: "--font-logo",
+  weight: "400",
   subsets: ["latin"],
 })
 
@@ -33,9 +38,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} ${pacifico.variable} antialiased`}>
       <body className="flex flex-col min-h-screen bg-white text-gray-900">
-        <BackgroundPattern />
         <Providers>{children}</Providers>
       </body>
     </html>

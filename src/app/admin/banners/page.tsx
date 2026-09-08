@@ -43,7 +43,7 @@ export default function AdminBannersPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm("¿Eliminar este banner?")) return
+    if (!confirm("¿Eliminar esta imagen del carrusel?")) return
     await deleteBanner(id)
     fetchBanners()
   }
@@ -72,7 +72,7 @@ export default function AdminBannersPage() {
           <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
             Gestión
           </h2>
-          <p className="mt-1 text-2xl font-bold text-gray-900">Banners</p>
+          <p className="mt-1 text-2xl font-bold text-gray-900">Carrusel</p>
         </div>
         <Link
           href="/admin/banners/new"
@@ -81,7 +81,7 @@ export default function AdminBannersPage() {
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
-          Nuevo banner
+          Nueva imagen
         </Link>
       </div>
 
@@ -92,8 +92,8 @@ export default function AdminBannersPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6.75c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6.75A1.125 1.125 0 012.25 10.875v-3.75zM5.25 18.75h13.5M5.25 18.75v-3.75M18.75 18.75v-3.75M20.25 15.75H3.75a1.125 1.125 0 01-1.125-1.125v-3.75" />
             </svg>
           </div>
-          <h3 className="mt-4 text-sm font-semibold text-gray-900">No hay banners</h3>
-          <p className="mt-1 text-sm text-gray-500">Crea tu primer banner promocional</p>
+          <h3 className="mt-4 text-sm font-semibold text-gray-900">No hay imágenes</h3>
+          <p className="mt-1 text-sm text-gray-500">Crea tu primera imagen para el carrusel</p>
         </div>
       ) : (
         <div className="space-y-3">

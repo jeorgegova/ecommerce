@@ -83,9 +83,9 @@ export default function EditBannerPage() {
     <div className="mx-auto max-w-2xl">
       <div className="mb-6">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-          Banners
+          Carrusel
         </h2>
-        <p className="mt-1 text-2xl font-bold text-gray-900">Editar banner</p>
+        <p className="mt-1 text-2xl font-bold text-gray-900">Editar imagen</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">

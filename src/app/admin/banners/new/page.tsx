@@ -28,9 +28,9 @@ export default function NewBannerPage() {
     <div className="mx-auto max-w-2xl">
       <div className="mb-6">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-          Banners
+          Carrusel
         </h2>
-        <p className="mt-1 text-2xl font-bold text-gray-900">Nuevo banner</p>
+        <p className="mt-1 text-2xl font-bold text-gray-900">Nueva imagen</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -71,7 +71,7 @@ export default function NewBannerPage() {
               placeholder="https://ejemplo.com/banner.jpg"
             />
             <p className="mt-1 text-[11px] text-gray-400">
-              Imagen principal del banner (1920x480 recomendado)
+              Imagen principal del carrusel (1920x1080 recomendado)
             </p>
           </div>
 
@@ -86,7 +86,7 @@ export default function NewBannerPage() {
               placeholder="https://ejemplo.com/banner-mobile.jpg"
             />
             <p className="mt-1 text-[11px] text-gray-400">
-              Versión optimizada para móviles (750x600 recomendado)
+              Versión optimizada para móviles (750x1300 recomendado)
             </p>
           </div>
 
@@ -176,7 +176,7 @@ export default function NewBannerPage() {
             disabled={saving}
             className="rounded-full bg-gray-900 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:opacity-50"
           >
-            {saving ? "Guardando..." : "Crear banner"}
+            {saving ? "Guardando..." : "Crear imagen"}
           </button>
           <button
             type="button"
