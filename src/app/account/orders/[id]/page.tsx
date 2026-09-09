@@ -238,7 +238,7 @@ export default function OrderDetailPage() {
             </div>
             <div className="mt-5 border-t border-gray-200 pt-5">
               <div className="flex items-end justify-between gap-4"><span className="font-semibold">Total</span><span className="text-2xl font-bold tracking-tight">₡{Number(order.total).toLocaleString("es-CR")}</span></div>
-              <p className="mt-2 text-right text-xs text-gray-500">Valores expresados en pesos colombianos</p>
+              <p className="mt-2 text-right text-xs text-gray-500">Valores expresados en colones costarricenses</p>
             </div>
           </section>
           <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-5 text-sm shadow-sm">

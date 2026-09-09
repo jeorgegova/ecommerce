@@ -2,6 +2,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { getDisplayImageUrl, isSupabaseStorageUrl } from "@/lib/utils/image"
 
 interface Item {
@@ -22,6 +23,7 @@ interface Result {
 }
 
 export default function RandomPurchaseClient(){
+  const router = useRouter()
   const [targetStr, setTargetStr] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -64,7 +66,8 @@ export default function RandomPurchaseClient(){
       const data = await res.json()
       if(!res.ok) throw new Error(data.error || "Error")
       setAdded(true)
-      setTimeout(()=> setAdded(false), 2500)
+      router.push("/cart")
+      router.refresh()
     }catch(e:any){ setError(e.message)}
     finally{ setAdding(false)}
   }

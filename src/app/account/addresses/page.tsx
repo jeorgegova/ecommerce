@@ -8,7 +8,7 @@ interface Address {
   address_line_2: string | null; city: string; state: string; postal_code: string; country: string; is_default: boolean
 }
 
-const emptyForm = { name: "", full_name: "", phone: "", address_line_1: "", address_line_2: "", city: "", state: "", postal_code: "", country: "CO" }
+const emptyForm = { name: "", full_name: "", phone: "", address_line_1: "", address_line_2: "", city: "", state: "", postal_code: "", country: "CR" }
 
 export default function AddressesPage() {
   const [addresses, setAddresses] = useState<Address[]>([])
@@ -33,7 +33,7 @@ export default function AddressesPage() {
   const resetForm = () => { setForm(emptyForm); setEditingId(null); setShowForm(false); setError("") }
 
   const startEdit = (addr: Address) => {
-    setForm({ name: addr.name, full_name: addr.full_name, phone: addr.phone || "", address_line_1: addr.address_line_1, address_line_2: addr.address_line_2 || "", city: addr.city, state: addr.state, postal_code: addr.postal_code, country: addr.country })
+    setForm({ name: addr.name, full_name: addr.full_name, phone: addr.phone || "", address_line_1: addr.address_line_1, address_line_2: addr.address_line_2 || "", city: addr.city, state: addr.state, postal_code: addr.postal_code, country: "CR" })
     setEditingId(addr.id); setShowForm(true); setError("")
   }
 
@@ -41,7 +41,7 @@ export default function AddressesPage() {
     e.preventDefault(); setSaving(true); setError("")
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    const payload = { user_id: user.id, name: form.name, full_name: form.full_name, phone: form.phone || null, address_line_1: form.address_line_1, address_line_2: form.address_line_2 || null, city: form.city, state: form.state, postal_code: form.postal_code, country: form.country }
+    const payload = { user_id: user.id, name: form.name, full_name: form.full_name, phone: form.phone || null, address_line_1: form.address_line_1, address_line_2: form.address_line_2 || null, city: form.city, state: form.state, postal_code: form.postal_code, country: "CR" }
 
     if (editingId) {
       const { error: err } = await supabase.from("addresses").update(payload).eq("id", editingId)
@@ -89,7 +89,7 @@ export default function AddressesPage() {
               <div><label className={labelClass}>Nombre</label><input type="text" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} placeholder="Ej: Casa, Oficina" className={inputClass} required /></div>
               <div><label className={labelClass}>Destinatario</label><input type="text" value={form.full_name} onChange={(e) => setForm((p) => ({ ...p, full_name: e.target.value }))} className={inputClass} required /></div>
               <div><label className={labelClass}>Teléfono</label><input type="tel" value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} className={inputClass} /></div>
-              <div><label className={labelClass}>País</label><select value={form.country} onChange={(e) => setForm((p) => ({ ...p, country: e.target.value }))} className={inputClass}><option value="CO">Colombia</option><option value="MX">México</option><option value="AR">Argentina</option></select></div>
+              <div><label className={labelClass}>País</label><input type="text" value="Costa Rica" readOnly disabled className={`${inputClass} bg-gray-50 text-gray-700 cursor-not-allowed`} /></div>
             </div>
             <div><label className={labelClass}>Dirección</label><input type="text" value={form.address_line_1} onChange={(e) => setForm((p) => ({ ...p, address_line_1: e.target.value }))} placeholder="Calle, número, barrio" className={inputClass} required /></div>
             <div><label className={labelClass}>Complemento</label><input type="text" value={form.address_line_2} onChange={(e) => setForm((p) => ({ ...p, address_line_2: e.target.value }))} placeholder="Apto, oficina" className={inputClass} /></div>

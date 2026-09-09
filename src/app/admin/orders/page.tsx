@@ -46,7 +46,10 @@ export default function AdminOrdersPage() {
     return matchesSearch && (statusFilter === "all" || order.status === statusFilter)
   })
   const pendingCount = orders.filter((order) => order.status === "pending").length
-  const totalValue = orders.reduce((sum, order) => sum + Number(order.total), 0)
+  const REVENUE_STATUSES = new Set(["confirmed", "processing", "shipped", "delivered"])
+  const totalValue = orders
+    .filter((order) => REVENUE_STATUSES.has(order.status))
+    .reduce((sum, order) => sum + Number(order.total), 0)
 
   if (loading) return <p className="text-gray-600">Cargando...</p>
 
