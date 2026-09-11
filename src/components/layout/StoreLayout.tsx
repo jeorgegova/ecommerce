@@ -1,4 +1,5 @@
 import BannerSlider from "@/components/store/BannerSlider"
+import BenefitsSection from "@/components/store/BenefitsSection"
 import Footer from "@/components/layout/Footer"
 import Header from "@/components/layout/Header"
 import MobileBottomNav from "@/components/layout/MobileBottomNav"
@@ -8,6 +9,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
     <div className="flex flex-col min-h-screen">
       <Header />
       <BannerSlider />
+      <BenefitsSection />
       <main className="flex-1 pb-32">{children}</main>
       <Footer />
       <MobileBottomNav />

@@ -99,3 +99,39 @@
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
 }
+
+@keyframes coffee-steam {
+  0% { opacity: 0; transform: translateY(6px) scale(0.8); }
+  40% { opacity: 0.9; }
+  100% { opacity: 0; transform: translateY(-14px) scale(1.2); }
+}
+
+.coffee-steam path {
+  animation: coffee-steam 1.8s ease-in-out infinite;
+}
+
+@keyframes coffee-fill {
+  0% { transform: translateY(100%); }
+  55% { transform: translateY(0); }
+  100% { transform: translateY(0); }
+}
+
+.coffee-fill {
+  transform-box: fill-box;
+  animation: coffee-fill 2.4s ease-in-out infinite;
+}
+
+@keyframes coffee-dot {
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50% { transform: translateY(-6px); opacity: 1; }
+}
+
+.coffee-dot {
+  animation: coffee-dot 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coffee-steam path, .coffee-fill, .coffee-dot {
+    animation: none;
+  }
+}

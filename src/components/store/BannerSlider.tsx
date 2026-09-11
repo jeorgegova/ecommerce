@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
+import CoffeeLoader from "@/components/store/CoffeeLoader"
 import { useEffect, useState, useCallback, useRef } from "react"
 
 interface Banner {
@@ -19,7 +20,10 @@ export default function BannerSlider() {
   const [banners, setBanners] = useState<Banner[]>([])
   const [current, setCurrent] = useState(0)
   const [paused, setPaused] = useState(false)
+  const [imagesReady, setImagesReady] = useState(false)
+  const [hideLoader, setHideLoader] = useState(false)
   const touchStartX = useRef<number | null>(null)
+  const firstImageRef = useRef<HTMLImageElement | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -59,35 +63,71 @@ export default function BannerSlider() {
     touchStartX.current = null
   }
 
-  if (banners.length === 0) return null
+  const handleImageReady = useCallback(() => {
+    setImagesReady(true)
+  }, [])
 
+  useEffect(() => {
+    if (banners.length === 0) return
+    if (firstImageRef.current?.complete) {
+      requestAnimationFrame(() => requestAnimationFrame(() => setImagesReady(true)))
+    }
+  }, [banners])
+
+  useEffect(() => {
+    if (!imagesReady) return
+    const t = setTimeout(() => setHideLoader(true), 1900)
+    return () => clearTimeout(t)
+  }, [imagesReady])
+
+  const markReady = useCallback((el: HTMLImageElement | null) => {
+    firstImageRef.current = el
+    if (el?.complete) {
+      requestAnimationFrame(() => requestAnimationFrame(() => setImagesReady(true)))
+    }
+  }, [])
+
+  if (banners.length === 0) {
+    return (
+      <section className="relative flex h-[60vh] w-full items-center justify-center bg-white">
+        <CoffeeLoader />
+      </section>
+    )
+  }
   return (
     <section
-      className="relative w-full overflow-hidden bg-white"
+      className="relative w-full overflow-hidden bg-black"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="relative h-[62vh] min-h-[380px] w-full sm:h-[78vh] sm:min-h-[520px]">
+      <div className="relative w-full">
         {banners.map((banner, i) => (
           <div
             key={banner.id}
-            className={`absolute inset-0 transition-opacity duration-700 ease-out ${
-              i === current ? "z-10 opacity-100" : "z-0 opacity-0"
+            className={`transition-opacity duration-700 ease-out ${
+              i === current ? "relative z-10 opacity-100" : "absolute inset-0 z-0 opacity-0"
             }`}
             aria-hidden={i !== current}
           >
             <img
               src={banner.image_url}
               alt={banner.title || "Banner promocional"}
-              className="hidden h-full w-full object-cover sm:block"
+              className={`hidden w-full transition-[opacity,transform,filter] duration-1000 delay-200 ease-out sm:block ${
+                imagesReady ? "scale-100 opacity-100 blur-0" : "scale-105 opacity-0 blur-lg"
+              }`}
+              onLoad={handleImageReady}
+              ref={i === 0 ? markReady : undefined}
               fetchPriority={i === 0 ? "high" : undefined}
             />
             <img
               src={banner.mobile_image_url || banner.image_url}
               alt={banner.title || "Banner promocional"}
-              className="h-full w-full object-cover sm:hidden"
+              className={`block w-full transition-[opacity,transform,filter] duration-1000 delay-200 ease-out sm:hidden ${
+                imagesReady ? "scale-100 opacity-100 blur-0" : "scale-105 opacity-0 blur-lg"
+              }`}
+              onLoad={handleImageReady}
               fetchPriority={i === 0 ? "high" : undefined}
             />
 
@@ -113,6 +153,16 @@ export default function BannerSlider() {
             </div>
           </div>
         ))}
+
+        {!hideLoader && (
+          <div
+            className={`fixed inset-0 z-[80] flex items-center justify-center bg-white transition-opacity duration-700 ${
+              imagesReady ? "opacity-0" : "opacity-100"
+            }`}
+          >
+            <CoffeeLoader />
+          </div>
+        )}
 
         {banners.length > 1 && (
           <>

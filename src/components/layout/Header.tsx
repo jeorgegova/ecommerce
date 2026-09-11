@@ -3,6 +3,8 @@
 import CartBadge from "@/components/store/CartBadge"
 import NotificationBell from "@/components/store/NotificationBell"
 import UserMenu from "@/components/layout/UserMenu"
+import AmelatteLogo from "@/assets/Logo-Amelatte.png"
+import Image from "next/image"
 import { createClient } from "@/lib/supabase/client"
 import { useAuthModal } from "@/stores/auth-modal"
 import Link from "next/link"
@@ -67,12 +69,12 @@ export default function Header() {
     <header className={`fixed inset-x-0 top-0 z-50 bg-gray-500/40 backdrop-blur-md supports-[backdrop-filter]:bg-gray-500/30 ${menuOpen ? "z-[60]" : ""}`}>
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:h-16 lg:gap-8 lg:px-8">
         <Link href="/" className="flex-shrink-0 hover:opacity-90 transition-opacity">
-          <span
-            className="block text-2xl leading-none text-white drop-shadow-sm lg:text-3xl -rotate-2"
-            style={{ fontFamily: "var(--font-logo), cursive" }}
-          >
-            amelatte
-          </span>
+          <Image
+            src={AmelatteLogo}
+            alt="Amelatte"
+            className="h-8 w-auto drop-shadow-sm lg:h-10"
+            priority
+          />
         </Link>
 
         <nav className="hidden flex-1 items-center justify-center gap-6 lg:flex xl:gap-9">
@@ -134,12 +136,7 @@ export default function Header() {
           <div className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-sm lg:hidden" onClick={() => setMenuOpen(false)} />
           <div className="fixed inset-y-0 right-0 z-[70] w-[300px] max-w-[85vw] overflow-y-auto border-l border-gray-100 bg-white shadow-2xl shadow-black/5 lg:hidden animate-slide-down">
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-50 bg-white/95 px-5 py-4 backdrop-blur-xl">
-              <span
-                className="text-xl leading-none text-gray-900"
-                style={{ fontFamily: "var(--font-logo), cursive" }}
-              >
-                amelatte
-              </span>
+              <Image src={AmelatteLogo} alt="Amelatte" className="h-7 w-auto" />
               <button onClick={() => setMenuOpen(false)} className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-colors">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
