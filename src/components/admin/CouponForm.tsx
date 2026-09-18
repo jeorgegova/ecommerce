@@ -65,7 +65,7 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
             <label className="block text-sm font-medium text-gray-700">Tipo *</label>
             <select name="type" defaultValue={coupon?.type || "percentage"} className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900">
               <option value="percentage">Porcentaje (%)</option>
-              <option value="fixed">Monto fijo (€)</option>
+              <option value="fixed">Monto fijo ($)</option>
             </select>
           </div>
           <div>
@@ -76,7 +76,7 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Monto mínimo de pedido (€)</label>
+          <label className="block text-sm font-medium text-gray-700">Monto mínimo de pedido ($)</label>
           <p className="mb-1 text-xs text-gray-400">Si se define, el subtotal debe alcanzar este valor para aplicar cupón.</p>
           <input name="min_order_amount" type="number" step="0.01" min="0" defaultValue={coupon?.min_order_amount ?? ""} className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900" placeholder="Opcional" />
         </div>

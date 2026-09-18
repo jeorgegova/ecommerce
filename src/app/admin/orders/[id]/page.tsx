@@ -7,7 +7,7 @@ import { useEffect, useState } from "react"
 
 const labels: Record<string, string> = { pending: "Pendiente", confirmed: "Confirmado", paid: "Pagado", processing: "En preparación", shipped: "Enviado", delivered: "Entregado", cancelled: "Cancelado" }
 const nextActions: Record<string, { status: string; label: string }> = { pending: { status: "confirmed", label: "Confirmar pedido" }, confirmed: { status: "processing", label: "Iniciar preparación" }, processing: { status: "shipped", label: "Marcar enviado" }, shipped: { status: "delivered", label: "Marcar entregado" } }
-const money = (value: number) => `€${Number(value || 0).toLocaleString("es-CO")}`
+const money = (value: number) => `$${Number(value || 0).toLocaleString("es-CO")}`
 
 interface AdminOrder {
   id: string; order_number: string; status: string; subtotal: number; shipping_cost: number; discount: number; total: number; created_at: string

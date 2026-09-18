@@ -93,8 +93,8 @@ export default function AdminCouponsPage() {
                   <tr key={c.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 font-mono text-sm font-semibold text-gray-900">{c.code}</td>
                     <td className="px-4 py-3 text-sm text-gray-600">{c.type === "percentage" ? "Porcentaje" : "Fijo"}</td>
-                    <td className="px-4 py-3 text-right text-sm font-medium text-gray-900">{c.type === "percentage" ? `${Number(c.value)}%` : `€${Number(c.value).toLocaleString("es-CO")}`}</td>
-                    <td className="px-4 py-3 text-right text-sm text-gray-500">{c.min_order_amount ? `€${Number(c.min_order_amount).toLocaleString("es-CO")}` : "—"}</td>
+                    <td className="px-4 py-3 text-right text-sm font-medium text-gray-900">{c.type === "percentage" ? `${Number(c.value)}%` : `$${Number(c.value).toLocaleString("es-CO")}`}</td>
+                    <td className="px-4 py-3 text-right text-sm text-gray-500">{c.min_order_amount ? `$${Number(c.min_order_amount).toLocaleString("es-CO")}` : "—"}</td>
                     <td className="px-4 py-3 text-center text-xs text-gray-500">{c.max_uses ?? "∞"} / {c.max_uses_per_user ?? "∞"} p/usuario</td>
                     <td className="px-4 py-3 text-center text-xs text-gray-500">
                       {c.starts_at ? new Date(c.starts_at).toLocaleDateString("es-CO") : "—"} → {c.ends_at ? new Date(c.ends_at).toLocaleDateString("es-CO") : "—"}
@@ -122,7 +122,7 @@ export default function AdminCouponsPage() {
                   <span className="font-mono text-sm font-bold text-gray-900">{c.code}</span>
                   <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${c.is_active ? "bg-emerald-50 text-emerald-700" : "bg-gray-100 text-gray-500"}`}>{c.is_active ? "Activo" : "Inactivo"}</span>
                 </div>
-                <p className="mt-1 text-sm text-gray-600">{c.type === "percentage" ? `${c.value}% descuento` : `€${Number(c.value).toLocaleString("es-CO")} descuento`} {c.min_order_amount ? `· mín €${Number(c.min_order_amount).toLocaleString("es-CO")}` : ""}</p>
+                <p className="mt-1 text-sm text-gray-600">{c.type === "percentage" ? `${c.value}% descuento` : `$${Number(c.value).toLocaleString("es-CO")} descuento`} {c.min_order_amount ? `· mín $${Number(c.min_order_amount).toLocaleString("es-CO")}` : ""}</p>
                 <div className="mt-3 flex gap-2">
                   <Link href={`/admin/coupons/${c.id}`} className="flex-1 rounded-lg bg-gray-900 py-2 text-center text-xs font-medium text-white">Editar</Link>
                   <button onClick={() => handleToggle(c.id, c.is_active)} className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600">{c.is_active ? "Desactivar" : "Activar"}</button>

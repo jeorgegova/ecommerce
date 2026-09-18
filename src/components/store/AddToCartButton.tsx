@@ -1,6 +1,7 @@
 "use client"
 
 import { createClient } from "@/lib/supabase/client"
+import { flyToCart, notifyCartUpdated } from "@/lib/cart/fly"
 import { useAuthModal } from "@/stores/auth-modal"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -10,6 +11,7 @@ interface AddToCartButtonProps {
   variantId?: string | null
   stock: number
   hasVariants: boolean
+  unitPrice?: number
 }
 
 export default function AddToCartButton({
@@ -17,6 +19,7 @@ export default function AddToCartButton({
   variantId,
   stock,
   hasVariants,
+  unitPrice = 0,
 }: AddToCartButtonProps) {
   const [loading, setLoading] = useState(false)
   const [added, setAdded] = useState(false)
@@ -41,7 +44,8 @@ export default function AddToCartButton({
     checkCart()
   }, [supabase, productId])
 
-  const handleAdd = async () => {
+  const handleAdd = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    const buttonRect = e.currentTarget.getBoundingClientRect()
     setLoading(true)
     setAnimating(false)
 
@@ -51,6 +55,8 @@ export default function AddToCartButton({
       setLoading(false)
       return
     }
+
+    flyToCart(buttonRect)
 
     const newItem = {
       user_id: user.id,
@@ -80,6 +86,7 @@ export default function AddToCartButton({
     setAdded(true)
     setAnimating(true)
     setLoading(false)
+    notifyCartUpdated(1, unitPrice)
     setTimeout(() => {
       setAdded(false)
       setAnimating(false)
@@ -108,6 +115,7 @@ export default function AddToCartButton({
       await supabase.from("cart_items").update({ quantity: newQty }).eq("id", existing.id)
       setCartQty(newQty)
     }
+    notifyCartUpdated(delta, delta * unitPrice)
     setLoading(false)
   }
 

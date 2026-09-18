@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
-const money = (v: number) => `€${Number(v || 0).toLocaleString("es-CO")}`
+const money = (v: number) => `$${Number(v || 0).toLocaleString("es-CO")}`
 
 interface OrderItemEdit {
   tempId: string
@@ -114,7 +114,7 @@ export default function AdminOrderEditPage() {
     if (!c.is_active) { setCouponErr("Cupón inactivo"); setCouponPreview(null); return }
     if (c.starts_at && new Date(c.starts_at) > new Date()) { setCouponErr("Cupón aún no vigente"); setCouponPreview(null); return }
     if (c.ends_at && new Date(c.ends_at) < new Date()) { setCouponErr("Cupón expirado"); setCouponPreview(null); return }
-    if (c.min_order_amount && subtotal < Number(c.min_order_amount)) { setCouponErr(`Mínimo €${Number(c.min_order_amount).toLocaleString("es-CO")}`); setCouponPreview(null); return }
+    if (c.min_order_amount && subtotal < Number(c.min_order_amount)) { setCouponErr(`Mínimo $${Number(c.min_order_amount).toLocaleString("es-CO")}`); setCouponPreview(null); return }
     setCouponPreview({ code: c.code, type: c.type, value: Number(c.value) })
   }
 

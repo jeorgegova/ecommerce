@@ -1,6 +1,7 @@
 "use client"
 
 import { createClient } from "@/lib/supabase/client"
+import { flyToCart, notifyCartUpdated } from "@/lib/cart/fly"
 import { useAuthModal } from "@/stores/auth-modal"
 import { useState } from "react"
 
@@ -8,10 +9,12 @@ export default function FeaturedAddButton({
   productId,
   stock,
   hasVariants,
+  price,
 }: {
   productId: string
   stock: number
   hasVariants: boolean
+  price: number
 }) {
   const [loading, setLoading] = useState(false)
   const [added, setAdded] = useState(false)
@@ -26,7 +29,8 @@ export default function FeaturedAddButton({
     )
   }
 
-  const handleAdd = async () => {
+  const handleAdd = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    const buttonRect = e.currentTarget.getBoundingClientRect()
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -34,6 +38,8 @@ export default function FeaturedAddButton({
       setLoading(false)
       return
     }
+
+    flyToCart(buttonRect)
 
     const { data: existing } = await supabase
       .from("cart_items")
@@ -53,6 +59,7 @@ export default function FeaturedAddButton({
         .insert({ user_id: user.id, product_id: productId, quantity: 1 })
     }
 
+    notifyCartUpdated(1, price)
     setAdded(true)
     setLoading(false)
     setTimeout(() => setAdded(false), 1800)

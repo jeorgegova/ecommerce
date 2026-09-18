@@ -100,7 +100,7 @@ export default function CheckoutPage() {
         if (!c.is_active) throw new Error("Cupón inactivo")
         if (c.starts_at && new Date(c.starts_at) > new Date()) throw new Error("Cupón aún no vigente")
         if (c.ends_at && new Date(c.ends_at) < new Date()) throw new Error("Cupón expirado")
-        if (c.min_order_amount && subtotal < Number(c.min_order_amount)) throw new Error(`Monto mínimo €${Number(c.min_order_amount).toLocaleString("es-CO")} no alcanzado`)
+        if (c.min_order_amount && subtotal < Number(c.min_order_amount)) throw new Error(`Monto mínimo $${Number(c.min_order_amount).toLocaleString("es-CO")} no alcanzado`)
         row = c; row.is_valid = true
       }
 
@@ -215,9 +215,9 @@ export default function CheckoutPage() {
                       <p className="text-sm text-gray-500">Cant: {item.quantity}</p>
                     </div>
                     <p className="font-medium text-gray-900">
-                      €{(((item.products.sale_price && item.products.promotion_active ? item.products.sale_price : null) || item.products.base_price) * item.quantity).toLocaleString("es-CO")}
+                      ${(((item.products.sale_price && item.products.promotion_active ? item.products.sale_price : null) || item.products.base_price) * item.quantity).toLocaleString("es-CO")}
                       {item.products.sale_price && item.products.promotion_active && (
-                        <> <span className="text-xs text-gray-400 line-through font-normal">€{(item.products.base_price * item.quantity).toLocaleString("es-CO")}</span></>
+                        <> <span className="text-xs text-gray-400 line-through font-normal">${(item.products.base_price * item.quantity).toLocaleString("es-CO")}</span></>
                       )}
                     </p>
                   </div>
@@ -237,7 +237,7 @@ export default function CheckoutPage() {
                   <div className="mt-2 flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
                     <div>
                       <p className="font-mono text-sm font-semibold text-emerald-800">{coupon.code}</p>
-                      <p className="text-xs text-emerald-600">{coupon.type === "percentage" ? `${coupon.value}%` : `€${Number(coupon.value).toLocaleString("es-CO")}`} · -€{coupon.discount.toLocaleString("es-CO")}</p>
+                      <p className="text-xs text-emerald-600">{coupon.type === "percentage" ? `${coupon.value}%` : `$${Number(coupon.value).toLocaleString("es-CO")}`} · -${coupon.discount.toLocaleString("es-CO")}</p>
                     </div>
                     <button onClick={removeCoupon} className="rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50">Quitar</button>
                   </div>
@@ -252,11 +252,11 @@ export default function CheckoutPage() {
               </div>
 
               <div className="mt-4 space-y-3">
-                <div className="flex justify-between text-sm"><span className="text-gray-600">Subtotal</span><span className="font-medium">€{subtotal.toLocaleString("es-CO")}</span></div>
-                {coupon && <div className="flex justify-between text-sm text-emerald-700"><span>Descuento ({coupon.code})</span><span className="font-medium">-€{discount.toLocaleString("es-CO")}</span></div>}
+                <div className="flex justify-between text-sm"><span className="text-gray-600">Subtotal</span><span className="font-medium">${subtotal.toLocaleString("es-CO")}</span></div>
+                {coupon && <div className="flex justify-between text-sm text-emerald-700"><span>Descuento ({coupon.code})</span><span className="font-medium">-${discount.toLocaleString("es-CO")}</span></div>}
                 <div className="flex justify-between text-sm"><span className="text-gray-600">Envío</span><span className="text-gray-900">Por calcular</span></div>
-                <div className="border-t border-gray-200 pt-3 flex justify-between"><span className="font-semibold">Total</span><span className="font-semibold">€{total.toLocaleString("es-CO")}</span></div>
-                {coupon && subtotal !== total && <p className="text-xs text-gray-500">Ahorras €{discount.toLocaleString("es-CO")} con tu cupón</p>}
+                <div className="border-t border-gray-200 pt-3 flex justify-between"><span className="font-semibold">Total</span><span className="font-semibold">${total.toLocaleString("es-CO")}</span></div>
+                {coupon && subtotal !== total && <p className="text-xs text-gray-500">Ahorras ${discount.toLocaleString("es-CO")} con tu cupón</p>}
               </div>
               {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
               <button onClick={placeOrder} disabled={placing || addresses.length === 0}

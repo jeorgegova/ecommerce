@@ -61,11 +61,20 @@ export default function FeaturedProductsSection() {
   return (
     <section className="bg-[#C8102E] py-16 sm:py-20">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-10 text-center">
+          <h2 className="text-3xl font-extrabold uppercase tracking-tight text-white sm:text-4xl">
+            Nuestros productos destacados
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-white/80 sm:text-base">
+            Una selección de los favoritos de nuestros clientes para que disfrutes el mejor café en
+            casa, oficina o restaurante.
+          </p>
+        </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
           {products.map((p) => (
-            <div key={p.id} className="rounded-2xl bg-white p-6 shadow-lg shadow-black/10">
+            <div key={p.id} className="flex h-full flex-col rounded-2xl bg-white p-6 shadow-lg shadow-black/10">
               <Link href={`/products/${p.slug}`} className="block">
-                <div className="flex h-72 items-center justify-center overflow-hidden rounded-xl bg-white">
+                <div className="flex h-64 items-center justify-center overflow-hidden rounded-xl bg-white sm:h-72">
                   {p.main_image ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
@@ -109,8 +118,8 @@ export default function FeaturedProductsSection() {
                 </p>
               </Link>
 
-              <div className="mt-5 space-y-2.5">
-                <FeaturedAddButton productId={p.id} stock={p.stock ?? 0} hasVariants={p.has_variants} />
+              <div className="mt-5 flex flex-1 flex-col justify-end space-y-2.5">
+                <FeaturedAddButton productId={p.id} stock={p.stock ?? 0} hasVariants={p.has_variants} price={p.current_price} />
                 <Link
                   href={`/products/${p.slug}`}
                   className="flex h-10 items-center justify-center rounded-full bg-[#A61420] px-6 text-xs font-bold uppercase tracking-widest text-white transition-colors duration-200 hover:bg-[#8F111C]"
@@ -125,7 +134,7 @@ export default function FeaturedProductsSection() {
         <div className="mt-10 text-center">
           <Link
             href="/products"
-            className="text-sm font-extrabold tracking-wide text-gray-900 transition-colors hover:text-white"
+            className="inline-flex items-center justify-center rounded-full border-2 border-white px-10 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-lg shadow-black/25 transition-all duration-200 hover:-translate-y-0.5 hover:bg-white hover:text-[#C8102E] hover:shadow-xl hover:shadow-black/30 sm:text-sm"
           >
             Ver Más
           </Link>

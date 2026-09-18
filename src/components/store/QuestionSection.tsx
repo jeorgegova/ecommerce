@@ -186,9 +186,8 @@ export default function QuestionSection({ productId, initialQuestions = [] }: { 
           ))}
 
           <div
-            className={`overflow-hidden transition-all duration-400 ease-in-out space-y-3 ${
-              showAll ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
-            }`}
+            className={`overflow-hidden transition-all duration-400 ease-in-out space-y-3 ${showAll ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
+              }`}
           >
             {hiddenQuestions.map((q) => (
               <QuestionCard key={q.id} q={q} />
@@ -248,7 +247,7 @@ export default function QuestionSection({ productId, initialQuestions = [] }: { 
               <textarea
                 value={newQuestion}
                 onChange={(e) => setNewQuestion(e.target.value)}
-                placeholder="Ej: ¿Este repuesto es compatible con la máquina Dixie Narco 501?"
+                placeholder="Ej: ¿El café viene grano o molido?"
                 rows={4}
                 maxLength={CHAR_LIMIT}
                 className="block min-h-[120px] w-full resize-none rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-[14px] leading-relaxed text-gray-900 placeholder:text-gray-400 focus:border-gray-400 focus:bg-white focus:outline-none focus:ring-0 transition-colors"

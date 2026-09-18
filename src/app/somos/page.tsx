@@ -1,111 +1,148 @@
+import Link from "next/link"
 import StoreLayout from "@/components/layout/StoreLayout"
-
-const valores = [
-  {
-    titulo: "Calidad",
-    descripcion: "Seleccionamos cada equipo y cada insumo con los más altos estándares del sector.",
-    icono: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-  },
-  {
-    titulo: "Servicio",
-    descripcion: "Acompañamiento permanente antes, durante y después de la instalación.",
-    icono: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-      </svg>
-    ),
-  },
-  {
-    titulo: "Innovación",
-    descripcion: "Tecnología de vending de última generación para oficinas y restaurantes.",
-    icono: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-      </svg>
-    ),
-  },
-  {
-    titulo: "Cercanía",
-    descripcion: "Un equipo humano que entiende las necesidades de cada cliente.",
-    icono: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-      </svg>
-    ),
-  },
-]
-
-const cifras = [
-  { valor: "+500", etiqueta: "Clientes activos" },
-  { valor: "+120", etiqueta: "Máquinas instaladas" },
-  { valor: "10+", etiqueta: "Años de experiencia" },
-  { valor: "24/7", etiqueta: "Soporte técnico" },
-]
 
 export default function SomosPage() {
   return (
     <StoreLayout>
-      <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#C8102E]">Sobre nosotros</p>
-          <h1 className="mt-3 text-4xl font-extrabold uppercase tracking-tight text-gray-900 sm:text-5xl">
-            Quiénes somos
-          </h1>
-          <p className="mx-auto mt-6 max-w-3xl text-lg leading-relaxed text-gray-600">
-            En <span className="font-bold text-gray-900">amelatte</span> llevamos el mejor café y las máquinas
-            vending de última generación a oficinas y restaurantes. Creemos que un buen café transforma la
-            jornada de las personas, por eso combinamos tecnología, insumos de calidad y un servicio que
-            responde cuando lo necesitas.
-          </p>
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+        <nav className="flex items-center gap-2 text-xs text-gray-500" aria-label="Breadcrumb">
+          <Link href="/" className="transition-colors hover:text-gray-900">Home</Link>
+          <svg className="h-3 w-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+          </svg>
+          <span className="font-medium text-gray-700">Somos</span>
+        </nav>
+
+        <hr className="mt-4 border-gray-200" />
+
+        <h1 className="mt-8 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+          Somos <span className="text-[#C8102E]">Amelatte</span>
+        </h1>
+
+        <div className="mt-6 overflow-hidden rounded-lg bg-gray-100">
+          <div className="flex aspect-[2/1] w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-sky-100 via-gray-100 to-gray-200">
+            <svg className="h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+            </svg>
+            <p className="text-xs font-medium text-gray-400">
+              Espacio reservado para la imagen panorámica
+            </p>
+          </div>
         </div>
 
-        <div className="mt-16 grid grid-cols-2 gap-6 sm:gap-8">
-          {cifras.map((c) => (
-            <div key={c.etiqueta} className="rounded-2xl border border-gray-100 bg-white p-6 text-center shadow-sm sm:p-8">
-              <p className="text-3xl font-extrabold text-[#C8102E] sm:text-4xl">{c.valor}</p>
-              <p className="mt-2 text-sm font-medium text-gray-500">{c.etiqueta}</p>
+        <div className="mt-10 grid gap-10 text-sm leading-relaxed text-gray-500 lg:grid-cols-2">
+          <div className="space-y-5">
+            <p className="font-bold">
+              Cafe Amelatte es una compañía cuyo proceso nace del maravilloso mundo del café, ese café que
+              late en el corazón de cada una de las personas que hacen parte de la tradición y cultura de la
+              región del viejo Caldas.
+            </p>
+            <p>
+              Todo lo anterior se da como resultado del trabajo arduo del caficultor que selecciona grano a
+              grano el mejor fruto, junto con la experiencia de los abuelos de antaño.
+            </p>
+            <p>
+              Fue a partir de esa tradición familiar que en el 2008 nace la marca Amelatte, que resume toda
+              esa cultura y experiencia, con un café tipo exportación de calidad Premium originario del
+              municipio de Anserma-Caldas, donde año tras año ha mejorado cada uno de sus procesos para
+              ofrecer un café de calidad, que además, contribuye socialmente de la mano de la cooperativa
+              de caficultores de Anserma, en planes de mejoramiento para las familias que viven del café en
+              la región.
+            </p>
+          </div>
+          <div className="space-y-5">
+            <p>
+              En Amelatte estamos convencidos que a partir del café podemos generar lazos para la vida, por
+              eso la importancia de estar siempre en lugares de alto tráfico con nuestro café Vending,
+              Estaciones de café en las oficinas y el café molido para el hogar.
+            </p>
+            <p>
+              Toda una variada línea de productos, para que nuestros clientes en cualquier lugar puedan tener
+              el placer de compartir y sentir el mejor aroma y sabor.
+            </p>
+            <p>
+              Hoy en día, Café Amelatte sigue creciendo en otros mercados, ganando mayor posicionamiento y
+              corazón entre consumidores de paladares exigentes que encuentran en una taza de café Amelatte,
+              un gusto que late.
+            </p>
+          </div>
+        </div>
+
+        <hr className="my-12 border-gray-200" />
+
+        <div className="grid gap-10 text-sm leading-relaxed text-gray-500 lg:grid-cols-2">
+          <div className="space-y-5">
+            <p className="font-bold">
+              Amelatte caffee is a company whose process is born from the wonderful world of coffee, that
+              coffee that beats in the heart of each of the people who are part of the tradition and culture
+              of the old Caldas region.
+            </p>
+            <p>
+              All the above is given as a result of the hard work of the coffee grower who selects grain by
+              grain the best fruit, together with the experience of the grandparents of yesteryear.
+            </p>
+            <p>
+              It was from this family tradition that in 2008 the Amelatte brand was born, which sums up all
+              that culture and experience, with a Premium quality export-type coffee from the municipality
+              of Anserma-Caldas, where year after year it has improved each one of its processes to offer
+              quality coffee, which also contributes socially in the hands of the cooperative of coffee
+              farmers of Anserma, in improvement plans for families that live off of coffee in the region.
+            </p>
+          </div>
+          <div className="space-y-5">
+            <p>
+              In Amelatte we are convinced that from coffee we can generate ties for life, that&apos;s why
+              the importance of always being in places of high traffic with our coffee Vending, coffee
+              stations in the offices and coffee grounds for the home.
+            </p>
+            <p>
+              All a varied line of products, so that our customers anywhere can have the pleasure of sharing
+              and feeling the best aroma and flavor.
+            </p>
+            <p>
+              Today, Amelatte coffee continues to grow in other markets, gaining greater positioning and
+              heart among consumers of demanding palates who find in a cup of coffee Amelatte, a taste that
+              latte.
+            </p>
+          </div>
+        </div>
+
+        <hr className="my-12 border-gray-200" />
+
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            {
+              titulo: "Quienes Somos?",
+              descripcion:
+                "Somos una empresa que nace del corazón del viejo Caldas para ofrecer un café de la mejor calidad y sabor.",
+            },
+            {
+              titulo: "Por qué elegirnos?",
+              descripcion:
+                "Porque somos una empresa de tradición y de calidad Premium que garantiza los más altos estándares.",
+            },
+            {
+              titulo: "Variadas presentaciones",
+              descripcion:
+                "Ofrecemos muchas opciones para poder degustar en cualquier lugar un café de verdad.",
+            },
+          ].map((item) => (
+            <div key={item.titulo}>
+              <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-3 overflow-hidden bg-gray-100">
+                <svg className="h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                </svg>
+                <p className="px-4 text-center text-xs font-medium text-gray-400">
+                  Espacio reservado para la imagen
+                </p>
+              </div>
+              <h3 className="mt-6 text-center text-lg font-extrabold text-gray-900">{item.titulo}</h3>
+              <p className="mt-3 text-center text-sm leading-relaxed text-gray-500">{item.descripcion}</p>
             </div>
           ))}
         </div>
 
-        <div className="mt-16 text-center">
-          <h2 className="text-2xl font-extrabold uppercase tracking-tight text-gray-900 sm:text-3xl">
-            Nuestros valores
-          </h2>
-        </div>
-        <div className="mt-10 grid gap-6 sm:grid-cols-2">
-          {valores.map((v) => (
-            <div key={v.titulo} className="flex gap-4 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-[#C8102E]/10 text-[#C8102E]">
-                {v.icono}
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-gray-900">{v.titulo}</h3>
-                <p className="mt-1 text-sm leading-relaxed text-gray-600">{v.descripcion}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-16 rounded-3xl bg-gray-900 px-8 py-12 text-center sm:px-16">
-          <h2 className="text-2xl font-extrabold uppercase tracking-tight text-white sm:text-3xl">
-            Amelatte ahora en tu oficina y restaurante
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-gray-300 sm:text-base">
-            Instalamos sin costo, surtimos periódicamente y damos mantenimiento continuo. Tú solo disfrutas
-            del mejor café.
-          </p>
-          <a
-            href="/contacto"
-            className="mt-8 inline-flex items-center justify-center rounded-full border-2 border-white bg-white px-10 py-3 text-xs font-bold uppercase tracking-widest text-gray-900 transition-colors duration-200 hover:bg-gray-900 hover:text-white sm:text-sm"
-          >
-            Contáctanos
-          </a>
-        </div>
+        <hr className="mb-4 mt-12 border-gray-200" />
       </div>
     </StoreLayout>
   )

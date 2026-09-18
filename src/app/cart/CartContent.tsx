@@ -39,12 +39,14 @@ export default function CartContent() {
     setUpdating(itemId)
     await supabase.from("cart_items").update({ quantity: newQty }).eq("id", itemId)
     setItems((prev) => prev.map((item) => item.id === itemId ? { ...item, quantity: newQty } : item))
+    window.dispatchEvent(new CustomEvent("cart:updated"))
     setUpdating(null)
   }
 
   const removeItem = async (itemId: string) => {
     await supabase.from("cart_items").delete().eq("id", itemId)
     setItems((prev) => prev.filter((item) => item.id !== itemId))
+    window.dispatchEvent(new CustomEvent("cart:updated"))
   }
 
   const subtotal = items.reduce((sum, item) => {
@@ -89,9 +91,9 @@ export default function CartContent() {
                     <Link href={`/products/${item.products.slug}`} className="font-medium text-gray-900 hover:text-gray-600">{item.products.name}</Link>
                     {item.product_variants && <p className="text-sm text-gray-500">{item.product_variants.name}</p>}
                     <p className="mt-1 text-sm font-medium text-gray-900">
-                      €{unitPrice.toLocaleString("es-CO")}
+                      ${unitPrice.toLocaleString("es-CO")}
                       {item.products.sale_price && item.products.promotion_active && (
-                        <> <span className="text-xs text-gray-400 line-through font-normal">€{Number(item.products.base_price + adjustment).toLocaleString("es-CO")}</span></>
+                        <> <span className="text-xs text-gray-400 line-through font-normal">${Number(item.products.base_price + adjustment).toLocaleString("es-CO")}</span></>
                       )}
                     </p>
                   </div>
@@ -104,7 +106,7 @@ export default function CartContent() {
                         className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:border-gray-900 disabled:opacity-50">+</button>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span className="font-medium text-gray-900">€{(unitPrice * item.quantity).toLocaleString("es-CO")}</span>
+                      <span className="font-medium text-gray-900">${(unitPrice * item.quantity).toLocaleString("es-CO")}</span>
                       <button onClick={() => removeItem(item.id)} className="text-sm text-gray-400 hover:text-red-500">×</button>
                     </div>
                   </div>
@@ -117,9 +119,9 @@ export default function CartContent() {
           <div className="sticky top-24 rounded-xl border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900">Resumen</h2>
             <div className="mt-4 space-y-3">
-              <div className="flex justify-between text-sm"><span className="text-gray-600">Subtotal</span><span className="font-medium">€{subtotal.toLocaleString("es-CO")}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-gray-600">Subtotal</span><span className="font-medium">${subtotal.toLocaleString("es-CO")}</span></div>
               <div className="flex justify-between text-sm"><span className="text-gray-600">Envío</span><span className="text-gray-900">Por calcular</span></div>
-              <div className="border-t border-gray-200 pt-3 flex justify-between"><span className="font-semibold">Total</span><span className="font-semibold">€{subtotal.toLocaleString("es-CO")}</span></div>
+              <div className="border-t border-gray-200 pt-3 flex justify-between"><span className="font-semibold">Total</span><span className="font-semibold">${subtotal.toLocaleString("es-CO")}</span></div>
             </div>
             <Link href="/cart/checkout" className="mt-6 block w-full rounded-full bg-gray-900 px-6 py-3 text-sm font-medium text-white text-center hover:bg-gray-800">Generar proforma</Link>
             <Link href="/products" className="mt-3 block text-center text-sm text-gray-500 hover:text-gray-900">Seguir comprando</Link>
