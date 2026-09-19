@@ -152,8 +152,8 @@ export default function AuthModal() {
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2, duration: 0.5 }}
-                      src="/logoVendingShop.png"
-                      alt="VendingShop"
+                      src="/logoamelattecuadrado.png"
+                      alt="Amelatte"
                       className="h-10 w-10 object-contain brightness-0 invert mb-6"
                     />
                     <motion.h2
@@ -253,8 +253,8 @@ function LoginForm({
       transition={{ duration: 0.3 }}
     >
       <motion.div className="mb-6 flex items-center gap-3 lg:hidden">
-        <img src="/logoVendingShop.png" alt="VendingShop" className="h-8 w-8 object-contain" />
-        <span className="text-lg font-extrabold tracking-tight text-gray-900">VendingShop</span>
+        <img src="/logoamelattecuadrado.png" alt="Amelatte" className="h-8 w-8 object-contain" />
+        <span className="text-lg font-extrabold tracking-tight text-gray-900">Amelatte</span>
       </motion.div>
 
       <motion.div custom={0} variants={stagger} initial="hidden" animate="visible" className="mb-8">
@@ -406,14 +406,14 @@ function RegisterForm({
       transition={{ duration: 0.3 }}
     >
       <motion.div className="mb-6 flex items-center gap-3 lg:hidden">
-        <img src="/logoVendingShop.png" alt="VendingShop" className="h-8 w-8 object-contain" />
-        <span className="text-lg font-extrabold tracking-tight text-gray-900">VendingShop</span>
+        <img src="/logoamelattecuadrado.png" alt="Amelatte" className="h-8 w-8 object-contain" />
+        <span className="text-lg font-extrabold tracking-tight text-gray-900">Amelatte</span>
       </motion.div>
 
       <motion.div custom={0} variants={stagger} initial="hidden" animate="visible" className="mb-8">
         <h1 className="text-[26px] font-bold tracking-tight text-gray-900 mb-1">Crear cuenta</h1>
         <p className="text-[15px] text-gray-500 leading-relaxed">
-          Únete a VendingShop y comienza a comprar repuestos para tus máquinas.
+          Únete a Amelatte y comienza a comprar repuestos para tus máquinas.
         </p>
       </motion.div>
 
@@ -578,8 +578,8 @@ function ForgotPasswordForm({
       ) : (
         <>
           <motion.div className="mb-6 flex items-center gap-3 lg:hidden">
-            <img src="/logoVendingShop.png" alt="VendingShop" className="h-8 w-8 object-contain" />
-            <span className="text-lg font-extrabold tracking-tight text-gray-900">VendingShop</span>
+            <img src="/logoamelattecuadrado.png" alt="Amelatte" className="h-8 w-8 object-contain" />
+            <span className="text-lg font-extrabold tracking-tight text-gray-900">Amelatte</span>
           </motion.div>
 
           <motion.div custom={0} variants={stagger} initial="hidden" animate="visible" className="mb-8">

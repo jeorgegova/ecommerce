@@ -20,8 +20,12 @@ const pacifico = Pacifico({
 })
 
 export const metadata: Metadata = {
-  title: "VendingShop",
-  description: "Tu tienda de confianza",
+  title: "Amelatte",
+  description: "Café Amelatte - Un gusto que late",
+  icons: {
+    icon: "/logoamelattecuadrado.png",
+    apple: "/logoamelattecuadrado.png",
+  },
 }
 
 export const viewport: Viewport = {
@@ -29,7 +33,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: "cover",
-  themeColor: "#111827",
+  themeColor: "#000000",
 }
 
 export default function RootLayout({

@@ -66,7 +66,7 @@ export default function Header() {
   const isActive = (href: string) => href === "/" ? pathname === "/" : pathname.startsWith(href)
 
   return (
-    <header className={`fixed inset-x-0 top-0 z-50 bg-gray-500/40 backdrop-blur-md supports-[backdrop-filter]:bg-gray-500/30 ${menuOpen ? "z-[60]" : ""}`}>
+    <header className={`fixed inset-x-0 top-0 z-50 bg-gray-500/40 bg-[linear-gradient(120deg,rgba(200,16,46,0.28),rgba(200,16,46,0.07)_38%,rgba(107,114,128,0.32))] backdrop-blur-md supports-[backdrop-filter]:bg-gray-500/30 ${menuOpen ? "z-[60]" : ""}`}>
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:h-16 lg:gap-8 lg:px-8">
         <Link href="/" className="flex-shrink-0 hover:opacity-90 transition-opacity">
           <Image

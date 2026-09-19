@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next"
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "VendingShop",
-    short_name: "VendingShop",
-    description: "Tu tienda de confianza",
+    name: "Amelatte",
+    short_name: "Amelatte",
+    description: "Café Amelatte - Un gusto que late",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",

@@ -53,7 +53,7 @@ export function getSettingValue(settings: { key: string; value: unknown }[] | nu
 
 async function loadLogo(): Promise<string | null> {
   try {
-    const response = await fetch("/logoVendingShop.png")
+    const response = await fetch("/logoamelattecuadrado.png")
     const blob = await response.blob()
     return await new Promise((resolve) => {
       const reader = new FileReader()
@@ -88,7 +88,7 @@ export async function downloadProformaPdf(data: ProformaData) {
   doc.setFont("helvetica", "normal")
   if (logo) doc.addImage(logo, "PNG", PAGE.left, PAGE.top, 12, 12)
   const brandX = logo ? PAGE.left + 16 : PAGE.left
-  const storeName = data.storeName?.trim() || "VendingShop"
+  const storeName = data.storeName?.trim() || "Amelatte"
   doc.setFont("helvetica", "bold")
   text(storeName, brandX, 16, 12, colors.black)
   text("PROFORMA", pageWidth - PAGE.right, 16, 19, colors.black, { align: "right" })

@@ -115,6 +115,23 @@ export default function NewBannerPage() {
             </div>
           </div>
 
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">
+              Posición del texto
+            </label>
+            <select
+              name="layout"
+              defaultValue="center"
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 outline-none transition-colors focus:border-gray-900"
+            >
+              <option value="center">Centrado (grande)</option>
+              <option value="right">Derecha (compacto)</option>
+            </select>
+            <p className="mt-1 text-[11px] text-gray-400">
+              Derecha: texto más pequeño alineado a la derecha
+            </p>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">

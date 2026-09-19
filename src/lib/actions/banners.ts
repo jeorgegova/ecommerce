@@ -11,6 +11,7 @@ const bannerSchema = z.object({
   mobile_image_url: z.string().nullable().optional(),
   link_url: z.string().nullable().optional(),
   link_text: z.string().nullable().optional(),
+  layout: z.enum(["center", "right"]).default("center"),
   is_active: z.preprocess((v) => {
     if (v === null || v === undefined) return false
     if (v === "false" || v === false) return false
@@ -68,6 +69,7 @@ export async function createBanner(formData: FormData) {
     mobile_image_url: (formData.get("mobile_image_url") as string)?.trim() || null,
     link_url: (formData.get("link_url") as string)?.trim() || null,
     link_text: (formData.get("link_text") as string)?.trim() || null,
+    layout: (formData.get("layout") as string) === "right" ? "right" : "center",
     is_active: formData.get("is_active"),
     sort_order: formData.get("sort_order") || 0,
     starts_at: (formData.get("starts_at") as string) || null,
@@ -109,6 +111,7 @@ export async function updateBanner(id: string, formData: FormData) {
     mobile_image_url: (formData.get("mobile_image_url") as string)?.trim() || null,
     link_url: (formData.get("link_url") as string)?.trim() || null,
     link_text: (formData.get("link_text") as string)?.trim() || null,
+    layout: (formData.get("layout") as string) === "right" ? "right" : "center",
     is_active: formData.get("is_active"),
     sort_order: formData.get("sort_order") || 0,
     starts_at: (formData.get("starts_at") as string) || null,
