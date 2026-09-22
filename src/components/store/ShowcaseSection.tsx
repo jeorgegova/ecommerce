@@ -2,6 +2,7 @@
 
 import type { StaticImageData } from "next/image"
 import Image from "next/image"
+import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 import TableTopImg from "@/assets/tableTop.jpg"
 import VendingImg from "@/assets/vending.jpg"
@@ -19,21 +20,21 @@ const items: ShowcaseItem[] = [
     titulo: "TABLE TOP",
     descripcion:
       "Nuestra máquina Bunn ofrece un proceso de preparación de café por goteo, una manera sencilla para darte gusto en tu lugar de trabajo y consentirte con nuestro café Amelatte.",
-    href: "/products",
+    href: "/table-top",
     imagen: TableTopImg,
   },
   {
     titulo: "VENDING",
     descripcion:
       "Ofrecemos máquinas expendedoras para ubicar en una empresa o cualquier otro lugar de alto tráfico de personas para el suministro de bebidas calientes a base de café, bebidas frías y snacks.",
-    href: "/products",
+    href: "/vending",
     imagen: VendingImg,
   },
   {
     titulo: "CAFÉ",
     descripcion:
       "Disfruta nuestro café Amelatte molido o en grano, 100% Arábigo seleccionado con presentaciones de 500 gramos.",
-    href: "/products",
+    href: "/cafe",
     imagen: CafeImg,
   },
 ]
@@ -60,7 +61,7 @@ function ShowcaseCard({ item, index }: { item: ShowcaseItem; index: number }) {
   const { ref, inView } = useInView(0.5)
 
   return (
-    <a
+    <Link
       ref={ref}
       href={item.href}
       className="group mx-auto block w-full max-w-md [perspective:1200px] sm:max-w-none"
@@ -74,7 +75,7 @@ function ShowcaseCard({ item, index }: { item: ShowcaseItem; index: number }) {
         style={{ transitionDelay: `${index * 150}ms` }}
       >
         <div className="absolute inset-0 [backface-visibility:hidden]">
-          <div className="h-full w-full overflow-hidden rounded-3xl bg-gray-100">
+          <div className="relative h-full w-full overflow-hidden rounded-3xl bg-gray-100">
             <Image
               src={item.imagen}
               alt={item.titulo}
@@ -99,7 +100,7 @@ function ShowcaseCard({ item, index }: { item: ShowcaseItem; index: number }) {
       <span className="mx-auto mt-5 flex w-fit items-center justify-center rounded-lg border border-gray-200 bg-gray-100 px-10 py-2.5 text-sm uppercase tracking-widest text-gray-700 transition-colors duration-300 group-hover:border-gray-900 group-hover:bg-gray-900 group-hover:text-white">
         {item.titulo}
       </span>
-    </a>
+    </Link>
   )
 }
 

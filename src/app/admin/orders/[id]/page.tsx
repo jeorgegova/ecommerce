@@ -12,9 +12,10 @@ const money = (value: number) => `$${Number(value || 0).toLocaleString("es-CO")}
 interface AdminOrder {
   id: string; order_number: string; status: string; subtotal: number; shipping_cost: number; discount: number; total: number; created_at: string
   coupon_id: string | null
+  guest_name: string | null; guest_email: string | null; guest_phone: string | null
   coupons?: { code: string; type: string; value: number } | null
   shipping_address_id: string | null
-  shipping_address: { full_name: string; phone: string | null; address_line_1: string; address_line_2: string | null; city: string; state: string } | null
+  shipping_address: { full_name?: string; phone?: string | null; address_line_1: string; address_line_2: string | null; city: string; state: string } | null
   order_statuses: { color: string } | null
 }
 interface AdminItem { id: string; product_name: string; product_sku: string | null; variant_name: string | null; quantity: number; unit_price: number; subtotal: number }
@@ -80,6 +81,7 @@ export default function AdminOrderDetailPage() {
           <h1 className="mt-1 text-2xl font-bold text-gray-950">{order.order_number}</h1>
           <p className="mt-1 text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString("es-CO", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
           {couponCode && <p className="mt-1 text-xs font-mono text-emerald-700">Cupón: {couponCode} · descuento {money(order.discount)}</p>}
+          {order.guest_email && <p className="mt-2 text-sm text-amber-700">Compra como invitado · {order.guest_email}</p>}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full px-3 py-1.5 text-sm font-semibold" style={{ backgroundColor: `${color}20`, color }}>{labels[order.status] || order.status}</span>
@@ -133,8 +135,9 @@ export default function AdminOrderDetailPage() {
             <section className="rounded-2xl border border-gray-200 bg-white p-6">
               <h2 className="font-bold">Dirección de entrega</h2>
               <div className="mt-3 space-y-1 text-sm text-gray-600">
-                <p className="font-medium text-gray-950">{addr.full_name}</p>
-                {addr.phone && <p>{addr.phone}</p>}
+                <p className="font-medium text-gray-950">{addr.full_name || order.guest_name || "Cliente invitado"}</p>
+                {(addr.phone || order.guest_phone) && <p>{addr.phone || order.guest_phone}</p>}
+                {order.guest_email && <p>{order.guest_email}</p>}
                 <p>{addr.address_line_1}</p>
                 {addr.address_line_2 && <p>{addr.address_line_2}</p>}
                 <p>{addr.city}, {addr.state}</p>

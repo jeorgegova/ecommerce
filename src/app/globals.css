@@ -9,6 +9,7 @@
   --animate-nav-in: navIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   --animate-card-in: cardIn 0.4s ease-out;
   --animate-shimmer: shimmer 1.5s ease-in-out infinite;
+  --animate-checkout-cta: checkoutCta 2.4s ease-in-out infinite;
   
   --color-brand-gold: #6B7280;
   --color-brand-blue: #374151;
@@ -56,6 +57,11 @@
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+@keyframes checkoutCta {
+  0%, 100% { box-shadow: 0 8px 20px rgba(17, 24, 39, 0.16); }
+  50% { box-shadow: 0 12px 28px rgba(200, 16, 46, 0.28); transform: translateY(-1px); }
 }
 
 @layer base {

@@ -72,7 +72,7 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["products"]["Insert"]>
       }
       addresses: { Row: { id: string; user_id: string; name: string; full_name: string; phone: string | null; address_line_1: string; address_line_2: string | null; city: string; state: string; postal_code: string; country: string; is_default: boolean; created_at: string; updated_at: string }; Insert: any; Update: any }
-      orders: { Row: { id: string; user_id: string; order_number: string; status: string; subtotal: number; shipping_cost: number; discount: number; total: number; notes: string | null; shipping_address_id: string | null; shipping_address: any; billing_address_id: string | null; billing_address: any; coupon_id: string | null; paid_at: string | null; cancelled_at: string | null; cancellation_reason: string | null; created_at: string; updated_at: string }; Insert: any; Update: any }
+      orders: { Row: { id: string; user_id: string | null; order_number: string; status: string; subtotal: number; shipping_cost: number; discount: number; total: number; notes: string | null; shipping_address_id: string | null; shipping_address: any; billing_address_id: string | null; billing_address: any; coupon_id: string | null; guest_name: string | null; guest_email: string | null; guest_phone: string | null; guest_access_token: string | null; paid_at: string | null; cancelled_at: string | null; cancellation_reason: string | null; created_at: string; updated_at: string }; Insert: any; Update: any }
       order_items: { Row: any; Insert: any; Update: any }
     }
     Views: {

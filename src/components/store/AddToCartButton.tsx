@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client"
 import { flyToCart, notifyCartUpdated } from "@/lib/cart/fly"
-import { useAuthModal } from "@/stores/auth-modal"
+import { addGuestCartItem, readGuestCart, updateGuestCartItem } from "@/lib/cart/guest"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
@@ -27,12 +27,14 @@ export default function AddToCartButton({
   const [animating, setAnimating] = useState(false)
   const router = useRouter()
   const supabase = createClient()
-  const { openAuth } = useAuthModal()
 
   useEffect(() => {
     const checkCart = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) {
+        setCartQty(readGuestCart().find((item) => item.productId === productId && item.variantId === (variantId || null))?.quantity || 0)
+        return
+      }
       const { data } = await supabase
         .from("cart_items")
         .select("quantity")
@@ -48,15 +50,20 @@ export default function AddToCartButton({
     const buttonRect = e.currentTarget.getBoundingClientRect()
     setLoading(true)
     setAnimating(false)
+    flyToCart(buttonRect)
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      openAuth("login", window.location.pathname)
+      addGuestCartItem(productId, variantId || null)
+      setCartQty((qty) => qty + 1)
+      setAdded(true)
+      setAnimating(true)
+      notifyCartUpdated(1, unitPrice)
+      setLoading(false)
+      setTimeout(() => { setAdded(false); setAnimating(false) }, 1800)
       setLoading(false)
       return
     }
-
-    flyToCart(buttonRect)
 
     const newItem = {
       user_id: user.id,
@@ -99,7 +106,13 @@ export default function AddToCartButton({
 
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setLoading(false); return }
+    if (!user) {
+      updateGuestCartItem(productId, variantId || null, newQty)
+      setCartQty(newQty)
+      notifyCartUpdated(delta, delta * unitPrice)
+      setLoading(false)
+      return
+    }
 
     const { data: existing } = await supabase
       .from("cart_items")

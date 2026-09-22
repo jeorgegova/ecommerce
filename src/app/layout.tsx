@@ -42,7 +42,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} ${pacifico.variable} antialiased`}>
+    <html lang="es" data-scroll-behavior="smooth" className={`${geistSans.variable} ${geistMono.variable} ${pacifico.variable} antialiased`}>
       <body className="flex flex-col min-h-screen bg-white text-gray-900">
         <Providers>{children}</Providers>
       </body>

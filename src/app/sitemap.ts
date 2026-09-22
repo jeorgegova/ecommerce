@@ -10,6 +10,9 @@ export default async function sitemap() {
     { url: "https://gogi.co", lastModified: new Date(), changeFrequency: "weekly" as const, priority: 1 },
     { url: "https://gogi.co/products", lastModified: new Date(), changeFrequency: "daily" as const, priority: 0.9 },
     { url: "https://gogi.co/categories", lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.8 },
+    { url: "https://gogi.co/table-top", lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
+    { url: "https://gogi.co/vending", lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
+    { url: "https://gogi.co/cafe", lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
   ]
 
   const productPages = (products || []).map((p) => ({

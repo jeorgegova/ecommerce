@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
+import { readGuestCart } from "@/lib/cart/guest"
 
 export default function CartBadge({ className, onClick, showLabel, showTotal }: { className?: string; onClick?: () => void; showLabel?: boolean; showTotal?: boolean }) {
   const [count, setCount] = useState(0)
@@ -18,8 +19,32 @@ export default function CartBadge({ className, onClick, showLabel, showTotal }: 
       const { data: { user } } = await supabase.auth.getUser()
       if (!user || cancelled) {
         if (!user) {
-          setCount(0)
-          setTotal(0)
+          const guestItems = readGuestCart()
+          setCount(guestItems.reduce((sum, item) => sum + item.quantity, 0))
+          if (showTotal && guestItems.length > 0) {
+            const productIds = guestItems.map((item) => item.productId)
+            const variantIds = guestItems.flatMap((item) => item.variantId ? [item.variantId] : [])
+            const [{ data: products }, { data: variants }] = await Promise.all([
+              supabase.from("products").select("id, base_price, sale_price, promotion_active").in("id", productIds),
+              variantIds.length
+                ? supabase.from("product_variants").select("id, price_adjustment").in("id", variantIds)
+                : Promise.resolve({ data: [] }),
+            ])
+            if (cancelled) return
+
+            const productMap = new Map((products || []).map((product) => [product.id, product]))
+            const variantMap = new Map((variants || []).map((variant) => [variant.id, variant]))
+            const guestTotal = guestItems.reduce((sum, item) => {
+              const product = productMap.get(item.productId)
+              if (!product) return sum
+              const price = product.promotion_active && product.sale_price ? product.sale_price : product.base_price
+              const adjustment = item.variantId ? variantMap.get(item.variantId)?.price_adjustment || 0 : 0
+              return sum + (price + adjustment) * item.quantity
+            }, 0)
+            setTotal(guestTotal)
+          } else {
+            setTotal(0)
+          }
         }
         return
       }

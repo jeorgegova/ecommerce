@@ -2,6 +2,7 @@
 
 import StoreLayout from "@/components/layout/StoreLayout"
 import { createClient } from "@/lib/supabase/client"
+import { clearGuestCart, readGuestCart } from "@/lib/cart/guest"
 import { downloadProformaPdf, getSettingValue } from "@/lib/utils/proforma-pdf"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -30,6 +31,32 @@ interface AppliedCoupon {
   discount: number
 }
 
+interface GuestContact {
+  fullName: string
+  email: string
+  phone: string
+  address: string
+  addressLine2: string
+  city: string
+  state: string
+  postalCode: string
+}
+
+interface GuestOrderResult {
+  order_number: string
+  created_at: string
+  status: string
+  subtotal: number
+  shipping_cost: number
+  discount: number
+  total: number
+  guest_name: string
+  guest_email: string
+  guest_phone: string | null
+  shipping_address: { address_line_1: string; city: string; state: string }
+  items: { product_name: string; product_sku: string; variant_name: string | null; quantity: number; unit_price: number; subtotal: number }[]
+}
+
 export default function CheckoutPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [addresses, setAddresses] = useState<Address[]>([])
@@ -37,6 +64,8 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(true)
   const [placing, setPlacing] = useState(false)
   const [error, setError] = useState("")
+  const [isGuest, setIsGuest] = useState(false)
+  const [guest, setGuest] = useState<GuestContact>({ fullName: "", email: "", phone: "", address: "", addressLine2: "", city: "", state: "", postalCode: "" })
 
   // coupon state
   const [couponCode, setCouponCode] = useState("")
@@ -50,7 +79,25 @@ export default function CheckoutPage() {
   useEffect(() => {
     const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push("/login"); return }
+      if (!user) {
+        const guestItems = readGuestCart()
+        const productIds = guestItems.map((item) => item.productId)
+        const variantIds = guestItems.flatMap((item) => item.variantId ? [item.variantId] : [])
+        const [{ data: products }, { data: variants }] = await Promise.all([
+          productIds.length ? supabase.from("products").select("*").in("id", productIds) : Promise.resolve({ data: [] }),
+          variantIds.length ? supabase.from("product_variants").select("*").in("id", variantIds) : Promise.resolve({ data: [] }),
+        ])
+        const productMap = new Map((products || []).map((product) => [product.id, product]))
+        const variantMap = new Map((variants || []).map((variant) => [variant.id, variant]))
+        setCartItems(guestItems.flatMap((item) => {
+          const product = productMap.get(item.productId)
+          if (!product) return []
+          return [{ id: `${item.productId}:${item.variantId || "base"}`, product_id: item.productId, variant_id: item.variantId, quantity: item.quantity, products: product, product_variants: item.variantId ? variantMap.get(item.variantId) || null : null } as CartItem]
+        }))
+        setIsGuest(true)
+        setLoading(false)
+        return
+      }
 
       const { data: items } = await supabase.from("cart_items").select("*, products(*), product_variants(*)").eq("user_id", user.id)
       setCartItems(items || [])
@@ -79,21 +126,29 @@ export default function CheckoutPage() {
     setValidating(true); setCouponError(""); setError("")
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error("Sesión no disponible")
-
-      // use validate_coupon RPC if available, fallback to direct query
-      const { data, error: rpcError } = await supabase.rpc("validate_coupon" as any, {
-        p_code: code,
-        p_user_id: user.id,
-        p_subtotal: subtotal,
-      } as any)
-
       let row: any = null
-      if (!rpcError && data) {
-        row = Array.isArray(data) ? data[0] : data
-        if (row && !row.is_valid) throw new Error(row.error_message || "Cupón no válido")
+      if (user) {
+        // use validate_coupon RPC if available, fallback to direct query
+        const { data, error: rpcError } = await supabase.rpc("validate_coupon" as any, {
+          p_code: code,
+          p_user_id: user.id,
+          p_subtotal: subtotal,
+        } as any)
+        if (!rpcError && data) {
+          row = Array.isArray(data) ? data[0] : data
+          if (row && !row.is_valid) throw new Error(row.error_message || "Cupón no válido")
+        } else {
+          const { data: c, error: qErr } = await supabase.from("coupons").select("*").eq("code", code).maybeSingle()
+          if (qErr) throw new Error(qErr.message)
+          if (!c) throw new Error("Cupón no existe")
+          if (!c.is_active) throw new Error("Cupón inactivo")
+          if (c.starts_at && new Date(c.starts_at) > new Date()) throw new Error("Cupón aún no vigente")
+          if (c.ends_at && new Date(c.ends_at) < new Date()) throw new Error("Cupón expirado")
+          if (c.min_order_amount && subtotal < Number(c.min_order_amount)) throw new Error(`Monto mínimo $${Number(c.min_order_amount).toLocaleString("es-CO")} no alcanzado`)
+          row = c; row.is_valid = true
+        }
       } else {
-        // fallback: direct lookup (for local dev without migration)
+        // Los invitados no tienen user_id: validamos el cupón directamente.
         const { data: c, error: qErr } = await supabase.from("coupons").select("*").eq("code", code).maybeSingle()
         if (qErr) throw new Error(qErr.message)
         if (!c) throw new Error("Cupón no existe")
@@ -125,11 +180,51 @@ export default function CheckoutPage() {
   }
 
   const placeOrder = async () => {
-    if (!selectedAddressId) { setError("Selecciona una dirección de envío"); return }
+    if (isGuest) {
+      if (!guest.fullName || !guest.email || !guest.phone || !guest.address || !guest.city || !guest.state || !guest.postalCode) {
+        setError("Completa todos los datos de contacto y envío")
+        return
+      }
+    } else if (!selectedAddressId) { setError("Selecciona una dirección de envío"); return }
     setPlacing(true); setError("")
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
+      if (!user && isGuest) {
+        const { data: guestOrder, error: guestError } = await supabase.rpc("create_guest_order" as never, {
+          p_items: cartItems.map((item) => ({ product_id: item.product_id, variant_id: item.variant_id, quantity: item.quantity })),
+          p_guest_name: guest.fullName,
+          p_guest_email: guest.email,
+          p_guest_phone: guest.phone,
+          p_shipping_address: { address_line_1: guest.address, address_line_2: guest.addressLine2 || null, city: guest.city, state: guest.state, postal_code: guest.postalCode, country: "CO" },
+          p_coupon_id: coupon?.id || null,
+        } as never)
+        if (guestError) throw new Error(guestError.message)
+
+        const order = guestOrder as unknown as GuestOrderResult
+        const { data: settings } = await supabase.from("settings").select("key, value").in("key", ["banco_consignar", "numero_cuenta_bancaria"])
+        await downloadProformaPdf({
+          orderNumber: order.order_number,
+          createdAt: order.created_at,
+          status: order.status,
+          subtotal: order.subtotal,
+          shipping_cost: order.shipping_cost,
+          discount: order.discount,
+          total: order.total,
+          items: order.items,
+          customerName: order.guest_name,
+          customerEmail: order.guest_email,
+          customerPhone: order.guest_phone,
+          address: order.shipping_address.address_line_1,
+          city: order.shipping_address.city,
+          state: order.shipping_address.state,
+          bankName: getSettingValue(settings, "banco_consignar"),
+          bankAccount: getSettingValue(settings, "numero_cuenta_bancaria"),
+        })
+        clearGuestCart()
+        router.push(`/cart/checkout/success?order=${encodeURIComponent(order.order_number)}`)
+        return
+      }
       if (!user) throw new Error("Sesión no disponible")
       const { data, error: rpcError } = await supabase.rpc("create_order_from_cart", {
         p_user_id: user.id,
@@ -180,8 +275,20 @@ export default function CheckoutPage() {
         <div className="mt-8 grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-8">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">Dirección de Envío</h2>
-              {addresses.length === 0 ? (
+              <h2 className="text-lg font-semibold text-gray-900">{isGuest ? "Datos para tu pedido" : "Dirección de Envío"}</h2>
+              {isGuest ? (
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <input value={guest.fullName} onChange={(e) => setGuest({ ...guest, fullName: e.target.value })} placeholder="Nombre completo" className="rounded-lg border border-gray-300 px-3 py-3 text-sm sm:col-span-2" required />
+                  <input type="email" value={guest.email} onChange={(e) => setGuest({ ...guest, email: e.target.value })} placeholder="Correo electrónico" className="rounded-lg border border-gray-300 px-3 py-3 text-sm" required />
+                  <input value={guest.phone} onChange={(e) => setGuest({ ...guest, phone: e.target.value })} placeholder="Teléfono" className="rounded-lg border border-gray-300 px-3 py-3 text-sm" required />
+                  <input value={guest.address} onChange={(e) => setGuest({ ...guest, address: e.target.value })} placeholder="Dirección de entrega" className="rounded-lg border border-gray-300 px-3 py-3 text-sm sm:col-span-2" required />
+                  <input value={guest.addressLine2} onChange={(e) => setGuest({ ...guest, addressLine2: e.target.value })} placeholder="Apto, oficina (opcional)" className="rounded-lg border border-gray-300 px-3 py-3 text-sm sm:col-span-2" />
+                  <input value={guest.city} onChange={(e) => setGuest({ ...guest, city: e.target.value })} placeholder="Ciudad" className="rounded-lg border border-gray-300 px-3 py-3 text-sm" required />
+                  <input value={guest.state} onChange={(e) => setGuest({ ...guest, state: e.target.value })} placeholder="Departamento" className="rounded-lg border border-gray-300 px-3 py-3 text-sm" required />
+                  <input value={guest.postalCode} onChange={(e) => setGuest({ ...guest, postalCode: e.target.value })} placeholder="Código postal" className="rounded-lg border border-gray-300 px-3 py-3 text-sm" required />
+                  <div className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900 sm:col-span-2"><strong>Compra como invitado.</strong> No necesitas crear una cuenta para completar tu pedido. Si te registras, tendrás mayor control de tus pedidos y podrás estar al tanto de las novedades.</div>
+                </div>
+              ) : addresses.length === 0 ? (
                 <div className="mt-4">
                   <p className="text-sm text-gray-500">No tienes direcciones guardadas.</p>
                   <Link href="/account/addresses" className="mt-2 inline-block text-sm font-medium text-gray-900 underline">Agregar dirección</Link>
@@ -233,6 +340,7 @@ export default function CheckoutPage() {
               {/* cupón */}
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700">Cupón de descuento</label>
+                {isGuest && <p className="mt-2 text-sm text-gray-600">Puedes aplicar un cupón sin registrarte. Si creas una cuenta, tendrás mayor control de tus pedidos y recibirás novedades de Amelatte.</p>}
                 {coupon ? (
                   <div className="mt-2 flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
                     <div>
@@ -259,9 +367,11 @@ export default function CheckoutPage() {
                 {coupon && subtotal !== total && <p className="text-xs text-gray-500">Ahorras ${discount.toLocaleString("es-CO")} con tu cupón</p>}
               </div>
               {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
-              <button onClick={placeOrder} disabled={placing || addresses.length === 0}
-                className="mt-6 w-full rounded-full bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50">
-                {placing ? "Generando proforma..." : "Generar proforma"}
+              <button onClick={placeOrder} disabled={placing || (!isGuest && addresses.length === 0)}
+                aria-label={placing ? "Confirmando compra" : "Confirmar compra"}
+                className="group mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-gray-900 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-gray-900/10 transition-all hover:bg-[#C8102E] hover:shadow-xl hover:shadow-[#C8102E]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8102E] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none motion-reduce:animate-none disabled:animate-none enabled:animate-checkout-cta">
+                {placing ? "Confirmando compra..." : "Confirmar compra"}
+                {!placing && <svg className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14m-6-6 6 6-6 6" /></svg>}
               </button>
             </div>
           </div>

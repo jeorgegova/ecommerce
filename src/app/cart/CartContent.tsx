@@ -2,6 +2,7 @@
 
 import { getDisplayImageUrl, isSupabaseStorageUrl } from "@/lib/utils/image"
 import { createClient } from "@/lib/supabase/client"
+import { readGuestCart, removeGuestCartItem, updateGuestCartItem } from "@/lib/cart/guest"
 import Image from "next/image"
 import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
@@ -20,13 +21,40 @@ export default function CartContent() {
   const [items, setItems] = useState<CartItem[]>([])
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState<string | null>(null)
-  const [userId, setUserId] = useState<string | null>(null)
+  const [isGuest, setIsGuest] = useState(false)
   const supabase = createClient()
 
   const fetchCart = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setLoading(false); return }
-    setUserId(user.id)
+    if (!user) {
+      const guestItems = readGuestCart()
+      if (guestItems.length) {
+        const productIds = guestItems.map((item) => item.productId)
+        const variantIds = guestItems.flatMap((item) => item.variantId ? [item.variantId] : [])
+        const [{ data: products }, { data: variants }] = await Promise.all([
+          supabase.from("products").select("*, product_images(url, is_main)").in("id", productIds),
+          variantIds.length ? supabase.from("product_variants").select("*").in("id", variantIds) : Promise.resolve({ data: [] }),
+        ])
+        const productMap = new Map((products || []).map((product) => [product.id, product]))
+        const variantMap = new Map((variants || []).map((variant) => [variant.id, variant]))
+        setItems(guestItems.flatMap((guestItem) => {
+          const product = productMap.get(guestItem.productId)
+          if (!product) return []
+          return [{
+            id: `${guestItem.productId}:${guestItem.variantId || "base"}`,
+            product_id: guestItem.productId,
+            variant_id: guestItem.variantId,
+            quantity: guestItem.quantity,
+            created_at: "",
+            products: product,
+            product_variants: guestItem.variantId ? variantMap.get(guestItem.variantId) || null : null,
+          } as CartItem]
+        }))
+      }
+      setIsGuest(true)
+      setLoading(false)
+      return
+    }
     const { data } = await supabase.from("cart_items").select("*, products(*, product_images(url, is_main)), product_variants(*)").eq("user_id", user.id).order("created_at")
     setItems(data || [])
     setLoading(false)
@@ -37,6 +65,14 @@ export default function CartContent() {
   const updateQuantity = async (itemId: string, newQty: number) => {
     if (newQty < 1) return
     setUpdating(itemId)
+    const item = items.find((candidate) => candidate.id === itemId)
+    if (isGuest && item) {
+      updateGuestCartItem(item.product_id, item.variant_id, newQty)
+      setItems((prev) => prev.map((candidate) => candidate.id === itemId ? { ...candidate, quantity: newQty } : candidate))
+      window.dispatchEvent(new CustomEvent("cart:updated"))
+      setUpdating(null)
+      return
+    }
     await supabase.from("cart_items").update({ quantity: newQty }).eq("id", itemId)
     setItems((prev) => prev.map((item) => item.id === itemId ? { ...item, quantity: newQty } : item))
     window.dispatchEvent(new CustomEvent("cart:updated"))
@@ -44,7 +80,9 @@ export default function CartContent() {
   }
 
   const removeItem = async (itemId: string) => {
-    await supabase.from("cart_items").delete().eq("id", itemId)
+    const item = items.find((candidate) => candidate.id === itemId)
+    if (isGuest && item) removeGuestCartItem(item.product_id, item.variant_id)
+    else await supabase.from("cart_items").delete().eq("id", itemId)
     setItems((prev) => prev.filter((item) => item.id !== itemId))
     window.dispatchEvent(new CustomEvent("cart:updated"))
   }
@@ -123,7 +161,15 @@ export default function CartContent() {
               <div className="flex justify-between text-sm"><span className="text-gray-600">Envío</span><span className="text-gray-900">Por calcular</span></div>
               <div className="border-t border-gray-200 pt-3 flex justify-between"><span className="font-semibold">Total</span><span className="font-semibold">${subtotal.toLocaleString("es-CO")}</span></div>
             </div>
-            <Link href="/cart/checkout" className="mt-6 block w-full rounded-full bg-gray-900 px-6 py-3 text-sm font-medium text-white text-center hover:bg-gray-800">Generar proforma</Link>
+            <Link
+              href="/cart/checkout"
+              className="group mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-gray-900 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-gray-900/10 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#C8102E] hover:shadow-xl hover:shadow-[#C8102E]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8102E] focus-visible:ring-offset-2"
+            >
+              Ir a comprar
+              <svg className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14m-6-6 6 6-6 6" />
+              </svg>
+            </Link>
             <Link href="/products" className="mt-3 block text-center text-sm text-gray-500 hover:text-gray-900">Seguir comprando</Link>
           </div>
         </div>
