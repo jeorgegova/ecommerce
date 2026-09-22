@@ -1,23 +1,6 @@
 import type { Metadata, Viewport } from "next"
-import { Geist, Geist_Mono, Pacifico } from "next/font/google"
 import Providers from "@/components/providers"
 import "./globals.css"
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-})
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-})
-
-const pacifico = Pacifico({
-  variable: "--font-logo",
-  weight: "400",
-  subsets: ["latin"],
-})
 
 export const metadata: Metadata = {
   title: "Amelatte",
@@ -42,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" data-scroll-behavior="smooth" className={`${geistSans.variable} ${geistMono.variable} ${pacifico.variable} antialiased`}>
+    <html lang="es" data-scroll-behavior="smooth" className="antialiased">
       <body className="flex flex-col min-h-screen bg-white text-gray-900">
         <Providers>{children}</Providers>
       </body>
