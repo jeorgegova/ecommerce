@@ -1,6 +1,8 @@
 "use client"
 
 import StoreLayout from "@/components/layout/StoreLayout"
+import ContactoImg from "@/assets/contacto4.jpg"
+import Image from "next/image"
 import { useState } from "react"
 
 const datos = [
@@ -145,13 +147,14 @@ export default function ContactoPage() {
 
             <div className="hidden lg:block">
               <div className="sticky top-24 rounded-sm border-[6px] border-white bg-white shadow-sm">
-                <div className="flex aspect-[3/4] w-full flex-col items-center justify-center gap-3 bg-gray-100">
-                  <svg className="h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                  </svg>
-                  <p className="px-6 text-center text-xs font-medium text-gray-400">
-                    Espacio reservado para la imagen de contacto
-                  </p>
+                <div className="flex aspect-[3/4] w-full items-center justify-center overflow-hidden bg-gray-100">
+                  <Image
+                    src={ContactoImg}
+                    alt="Café Amelatte"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover"
+                  />
                 </div>
               </div>
             </div>
