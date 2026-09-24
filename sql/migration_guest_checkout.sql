@@ -166,3 +166,6 @@ $$;
 
 REVOKE ALL ON FUNCTION public.create_guest_order(JSONB, TEXT, TEXT, TEXT, JSONB, UUID) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.create_guest_order(JSONB, TEXT, TEXT, TEXT, JSONB, UUID) TO anon, authenticated;
+
+-- Fuerza a PostgREST a recargar el schema cache de inmediato
+NOTIFY pgrst, 'reload schema';

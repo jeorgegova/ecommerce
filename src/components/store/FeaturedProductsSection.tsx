@@ -28,7 +28,7 @@ export default function FeaturedProductsSection() {
         .select("id, name, slug, current_price, avg_rating, main_image, stock, has_variants")
         .eq("is_featured", true)
         .eq("status", "active")
-        .order("sales_count", { ascending: false })
+        .order("current_price", { ascending: true })
         .limit(3)
       setProducts((data || []) as FeaturedProduct[])
       setLoading(false)
