@@ -392,7 +392,10 @@ function RegisterForm({
   const onSubmit = async (data: RegisterForm) => {
     const { error } = await supabase.auth.signUp({
       email: data.email, password: data.password,
-      options: { data: { full_name: data.fullName } },
+      options: {
+        data: { full_name: data.fullName },
+        emailRedirectTo: `${window.location.origin}/verify-email`,
+      },
     })
     if (error) { setError("root", { message: translateAuthError(error.message) }); return }
     onSuccess()
