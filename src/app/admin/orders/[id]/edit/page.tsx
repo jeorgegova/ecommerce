@@ -179,6 +179,13 @@ export default function AdminOrderEditPage() {
       p_shipping_cost: shipping,
     } as any)
     if (rpcErr) { setError(rpcErr.message); setSaving(false); return }
+    try {
+      await supabase.functions.invoke("send-order-email", {
+        body: { mode: "order-updated", orderId: id },
+      })
+    } catch (err) {
+      console.error("No se pudo enviar el correo de actualización:", err)
+    }
     router.push(`/admin/orders/${id}`)
   }
 

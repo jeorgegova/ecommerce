@@ -60,6 +60,15 @@ export default function AdminOrderDetailPage() {
     else {
       const { data: found } = await supabase.from("orders").select("*, coupons(code,type,value), order_statuses(*)").eq("id", id).single()
       if (found) setOrder(found as any)
+      if (newStatus === "confirmed" || newStatus === "delivered") {
+        try {
+          await supabase.functions.invoke("send-order-email", {
+            body: { mode: "status-changed", orderId: id },
+          })
+        } catch (err) {
+          console.error("No se pudo enviar el correo de estado:", err)
+        }
+      }
     }
     setUpdating(false)
   }

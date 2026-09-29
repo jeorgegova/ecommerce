@@ -76,6 +76,14 @@ export default function CheckoutPage() {
   const router = useRouter()
   const supabase = createClient()
 
+  const sendOrderEmail = async (payload: Record<string, unknown>) => {
+    try {
+      await supabase.functions.invoke("send-order-email", { body: payload })
+    } catch (err) {
+      console.error("No se pudo enviar el correo del pedido:", err)
+    }
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
@@ -222,6 +230,23 @@ export default function CheckoutPage() {
           bankAccount: getSettingValue(settings, "numero_cuenta_bancaria"),
         })
         clearGuestCart()
+        await sendOrderEmail({
+          to: order.guest_email,
+          customerName: order.guest_name,
+          orderNumber: order.order_number,
+          createdAt: order.created_at,
+          status: order.status,
+          subtotal: order.subtotal,
+          shipping: order.shipping_cost,
+          discount: order.discount,
+          total: order.total,
+          items: order.items,
+          address: order.shipping_address.address_line_1,
+          city: order.shipping_address.city,
+          state: order.shipping_address.state,
+          bankName: getSettingValue(settings, "banco_consignar"),
+          bankAccount: getSettingValue(settings, "numero_cuenta_bancaria"),
+        })
         router.push(`/cart/checkout/success?order=${encodeURIComponent(order.order_number)}`)
         return
       }
@@ -248,6 +273,23 @@ export default function CheckoutPage() {
           items: orderItems, customerName: address?.full_name, customerEmail: user.email, customerPhone: address?.phone,
           address: address?.address_line_1, city: address?.city, state: address?.state,
           bankName: getSettingValue(settings, "banco_consignar"), bankAccount: getSettingValue(settings, "numero_cuenta_bancaria"),
+        })
+        await sendOrderEmail({
+          to: user.email,
+          customerName: address?.full_name,
+          orderNumber: order.order_number,
+          createdAt: order.created_at,
+          status: order.status,
+          subtotal: order.subtotal,
+          shipping: order.shipping_cost,
+          discount: order.discount,
+          total: order.total,
+          items: orderItems,
+          address: address?.address_line_1,
+          city: address?.city,
+          state: address?.state,
+          bankName: getSettingValue(settings, "banco_consignar"),
+          bankAccount: getSettingValue(settings, "numero_cuenta_bancaria"),
         })
       }
       router.push(`/account/orders/${data}`)
