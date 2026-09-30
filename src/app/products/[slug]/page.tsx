@@ -151,7 +151,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </div>
 
             <div className="mt-6">
-              <AddToCartButton productId={product.id} stock={product.stock} hasVariants={product.has_variants} />
+              <AddToCartButton productId={product.id} stock={product.stock} hasVariants={product.has_variants} productImage={mainImage} productName={product.name} />
             </div>
 
             <dl className="mt-8 grid grid-cols-2 gap-3">

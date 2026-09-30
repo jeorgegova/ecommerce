@@ -44,6 +44,7 @@ CREATE TABLE profiles (
   email           TEXT NOT NULL UNIQUE,
   full_name       TEXT NOT NULL,
   phone           TEXT,
+  identification  TEXT,
   avatar_url      TEXT,
   role            TEXT NOT NULL DEFAULT 'buyer' CHECK (role IN ('buyer', 'admin')),
   is_active       BOOLEAN NOT NULL DEFAULT true,

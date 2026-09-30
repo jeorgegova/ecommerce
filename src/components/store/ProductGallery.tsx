@@ -109,6 +109,7 @@ export default function ProductGallery({ images }: { images: ProductImage[] }) {
       <div className="space-y-4">
         <div
           ref={mainRef}
+          data-fly-origin=""
           className="group/main relative aspect-square overflow-hidden rounded-2xl bg-gray-100"
           onMouseEnter={() => setZoom(true)}
           onMouseLeave={() => {

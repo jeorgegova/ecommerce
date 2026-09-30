@@ -9,6 +9,7 @@ export interface Database {
           email: string
           full_name: string
           phone: string | null
+          identification: string | null
           avatar_url: string | null
           role: "buyer" | "admin"
           is_active: boolean

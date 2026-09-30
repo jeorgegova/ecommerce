@@ -1,6 +1,8 @@
 "use client"
 
 import StoreLayout from "@/components/layout/StoreLayout"
+import ProformaDataModal, { type ProformaProfileData } from "@/components/store/ProformaDataModal"
+import { useCartStore } from "@/stores/cart"
 import { createClient } from "@/lib/supabase/client"
 import { downloadProformaPdf, getSettingValue } from "@/lib/utils/proforma-pdf"
 import Link from "next/link"
@@ -30,6 +32,13 @@ interface AppliedCoupon {
   discount: number
 }
 
+interface BuyerProfile {
+  identification: string | null
+  phone: string | null
+}
+
+const normalizeProfileValue = (value: string | null | undefined) => (value?.trim() ? value.trim() : null)
+
 export default function CheckoutPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [addresses, setAddresses] = useState<Address[]>([])
@@ -37,6 +46,9 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(true)
   const [placing, setPlacing] = useState(false)
   const [error, setError] = useState("")
+  const [profile, setProfile] = useState<BuyerProfile>({ identification: null, phone: null })
+  const [showDataModal, setShowDataModal] = useState(false)
+  const [resumeAfterData, setResumeAfterData] = useState(false)
 
   // coupon state
   const [couponCode, setCouponCode] = useState("")
@@ -46,6 +58,8 @@ export default function CheckoutPage() {
 
   const router = useRouter()
   const supabase = createClient()
+  const resetLocal = useCartStore((state) => state.resetLocal)
+  const syncLines = useCartStore((state) => state.syncLines)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,6 +73,16 @@ export default function CheckoutPage() {
       setAddresses(addr || [])
       const defaultAddr = addr?.find((a) => a.is_default) || addr?.[0]
       if (defaultAddr) setSelectedAddressId(defaultAddr.id)
+
+      const { data: buyer } = await supabase
+        .from("profiles")
+        .select("identification, phone")
+        .eq("id", user.id)
+        .maybeSingle()
+      setProfile({
+        identification: normalizeProfileValue(buyer?.identification),
+        phone: normalizeProfileValue(buyer?.phone),
+      })
 
       setLoading(false)
     }
@@ -131,31 +155,80 @@ export default function CheckoutPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Sesión no disponible")
-      const { data, error: rpcError } = await supabase.rpc("create_order_from_cart", {
-        p_user_id: user.id,
-        p_shipping_address_id: selectedAddressId,
-        p_coupon_id: coupon?.id || null,
-      } as any)
 
-      if (rpcError) throw new Error(rpcError.message)
+      // La proforma exige identificación y teléfono en el perfil
+      const { data: buyer, error: profileError } = await supabase
+        .from("profiles")
+        .select("identification, phone")
+        .eq("id", user.id)
+        .maybeSingle()
+      if (profileError) throw new Error(profileError.message)
 
-      const orderId = data as string
-      const [{ data: order }, { data: orderItems }, { data: settings }] = await Promise.all([
-        supabase.from("orders").select("*").eq("id", orderId).single(),
-        supabase.from("order_items").select("*").eq("order_id", orderId).order("created_at"),
-        supabase.from("settings").select("key, value").in("key", ["banco_consignar", "numero_cuenta_bancaria"]),
-      ])
-      if (order && orderItems) {
-        const address = addresses.find((item) => item.id === selectedAddressId)
-        await downloadProformaPdf({
-          orderNumber: order.order_number, createdAt: order.created_at, status: order.status,
-          subtotal: order.subtotal, shipping_cost: order.shipping_cost, discount: order.discount, total: order.total,
-          items: orderItems, customerName: address?.full_name, customerEmail: user.email, customerPhone: address?.phone,
-          address: address?.address_line_1, city: address?.city, state: address?.state,
-          bankName: getSettingValue(settings, "banco_consignar"), bankAccount: getSettingValue(settings, "numero_cuenta_bancaria"),
-        })
+      const currentProfile: BuyerProfile = {
+        identification: normalizeProfileValue(buyer?.identification),
+        phone: normalizeProfileValue(buyer?.phone),
       }
-      router.push(`/account/orders/${data}`)
+
+      if (!currentProfile.identification || !currentProfile.phone) {
+        setProfile(currentProfile)
+        setResumeAfterData(true)
+        setShowDataModal(true)
+        setPlacing(false)
+        return
+      }
+
+      await createOrder(currentProfile)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "No fue posible crear el pedido")
+      setPlacing(false)
+    }
+  }
+
+  const createOrder = async (buyerProfile: BuyerProfile) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error("Sesión no disponible")
+
+    const { data, error: rpcError } = await supabase.rpc("create_order_from_cart", {
+      p_user_id: user.id,
+      p_shipping_address_id: selectedAddressId,
+      p_coupon_id: coupon?.id || null,
+    } as any)
+
+    if (rpcError) throw new Error(rpcError.message)
+
+    const orderId = data as string
+    const [{ data: order }, { data: orderItems }, { data: settings }] = await Promise.all([
+      supabase.from("orders").select("*").eq("id", orderId).single(),
+      supabase.from("order_items").select("*").eq("order_id", orderId).order("created_at"),
+      supabase.from("settings").select("key, value").in("key", ["banco_consignar", "numero_cuenta_bancaria"]),
+    ])
+    if (order && orderItems) {
+      const address = addresses.find((item) => item.id === selectedAddressId)
+      await downloadProformaPdf({
+        orderNumber: order.order_number, createdAt: order.created_at, status: order.status,
+        subtotal: order.subtotal, shipping_cost: order.shipping_cost, discount: order.discount, total: order.total,
+        items: orderItems, customerName: address?.full_name, customerEmail: user.email,
+        customerIdentification: buyerProfile.identification, customerPhone: buyerProfile.phone || address?.phone,
+        address: address?.address_line_1, city: address?.city, state: address?.state,
+        bankName: getSettingValue(settings, "banco_consignar"), bankAccount: getSettingValue(settings, "numero_cuenta_bancaria"),
+      })
+    }
+    // create_order_from_cart vacia el carrito en el servidor: reflejalo de inmediato
+    resetLocal()
+    void syncLines()
+    router.push(`/account/orders/${orderId}`)
+  }
+
+  const handleProfileSaved = async (data: ProformaProfileData) => {
+    const saved: BuyerProfile = { identification: data.identification, phone: data.phone }
+    setProfile(saved)
+    setShowDataModal(false)
+
+    if (!resumeAfterData) return
+    setResumeAfterData(false)
+    setPlacing(true); setError("")
+    try {
+      await createOrder(saved)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "No fue posible crear el pedido")
       setPlacing(false)
@@ -175,6 +248,13 @@ export default function CheckoutPage() {
 
   return (
     <StoreLayout>
+      <ProformaDataModal
+        isOpen={showDataModal}
+        defaultIdentification={profile.identification || ""}
+        defaultPhone={profile.phone || ""}
+        onClose={() => { setShowDataModal(false); setResumeAfterData(false) }}
+        onSaved={handleProfileSaved}
+      />
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-gray-900">Checkout</h1>
         <div className="mt-8 grid gap-8 lg:grid-cols-3">

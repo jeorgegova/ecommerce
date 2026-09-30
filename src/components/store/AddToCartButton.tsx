@@ -1,15 +1,18 @@
 "use client"
 
-import { createClient } from "@/lib/supabase/client"
+import { resolveFlyOrigin } from "@/lib/utils/cart-fly"
+import { cartLineKey, useCartStore } from "@/stores/cart"
 import { useAuthModal } from "@/stores/auth-modal"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 interface AddToCartButtonProps {
   productId: string
   variantId?: string | null
   stock: number
   hasVariants: boolean
+  productImage?: string | null
+  productName?: string
 }
 
 export default function AddToCartButton({
@@ -17,98 +20,60 @@ export default function AddToCartButton({
   variantId,
   stock,
   hasVariants,
+  productImage,
+  productName,
 }: AddToCartButtonProps) {
-  const [loading, setLoading] = useState(false)
   const [added, setAdded] = useState(false)
-  const [cartQty, setCartQty] = useState(0)
-  const [animating, setAnimating] = useState(false)
   const router = useRouter()
-  const supabase = createClient()
   const { openAuth } = useAuthModal()
 
+  const lines = useCartStore((state) => state.lines)
+  const initCart = useCartStore((state) => state.initCart)
+  const addItem = useCartStore((state) => state.addItem)
+  const setQuantity = useCartStore((state) => state.setQuantity)
+  const cartQty = lines[cartLineKey(productId, variantId)]?.quantity ?? 0
+
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   useEffect(() => {
-    const checkCart = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-      const { data } = await supabase
-        .from("cart_items")
-        .select("quantity")
-        .eq("user_id", user.id)
-        .eq("product_id", productId)
-        .maybeSingle()
-      if (data) setCartQty(data.quantity)
-    }
-    checkCart()
-  }, [supabase, productId])
+    void initCart()
+  }, [initCart])
 
-  const handleAdd = async () => {
-    setLoading(true)
-    setAnimating(false)
+  useEffect(() => () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+  }, [])
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      openAuth("login", window.location.pathname)
-      setLoading(false)
-      return
-    }
+  // Confirmacion visual: el control ya es el selector de cantidad (actualizacion
+  // optimista), asi que el "Agregado" se ve como un destello sobre el contador.
+  const flashAdded = () => {
+    setAdded(true)
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    timeoutRef.current = setTimeout(() => setAdded(false), 1600)
+  }
 
-    const newItem = {
-      user_id: user.id,
+  const handleAdd = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    const origin = resolveFlyOrigin(event.currentTarget)
+    // El store decide si hay sesion: el boton no puede asumirlo, porque al
+    // entrar a la pagina la hidratacion todavia puede estar en curso.
+    const result = await addItem({
       product_id: productId,
       variant_id: variantId || null,
-      quantity: 1,
+      image: productImage,
+      name: productName,
+      origin,
+    })
+
+    if (result === "unauthenticated") {
+      openAuth("login", window.location.pathname)
+      return
     }
-
-    const { data: existing } = await supabase
-      .from("cart_items")
-      .select("id, quantity")
-      .eq("user_id", user.id)
-      .eq("product_id", productId)
-      .maybeSingle()
-
-    if (existing) {
-      await supabase
-        .from("cart_items")
-        .update({ quantity: existing.quantity + 1 })
-        .eq("id", existing.id)
-      setCartQty(existing.quantity + 1)
-    } else {
-      await supabase.from("cart_items").insert(newItem)
-      setCartQty(1)
-    }
-
-    setAdded(true)
-    setAnimating(true)
-    setLoading(false)
-    setTimeout(() => {
-      setAdded(false)
-      setAnimating(false)
-    }, 1800)
+    if (result === "ok") flashAdded()
   }
 
   const handleQtyChange = async (delta: number) => {
-    const newQty = cartQty + delta
-    if (newQty < 0) return
-
-    setLoading(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setLoading(false); return }
-
-    const { data: existing } = await supabase
-      .from("cart_items")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("product_id", productId)
-      .maybeSingle()
-
-    if (newQty === 0 && existing) {
-      await supabase.from("cart_items").delete().eq("id", existing.id)
-      setCartQty(0)
-    } else if (existing) {
-      await supabase.from("cart_items").update({ quantity: newQty }).eq("id", existing.id)
-      setCartQty(newQty)
-    }
-    setLoading(false)
+    const nextQty = cartQty + delta
+    if (nextQty < 0) return
+    await setQuantity({ product_id: productId, variant_id: variantId || null }, nextQty)
   }
 
   if (stock <= 0 && !hasVariants) {
@@ -128,7 +93,6 @@ export default function AddToCartButton({
         <div className="flex items-stretch gap-2">
           <button
             onClick={() => handleQtyChange(-1)}
-            disabled={loading}
             className="flex h-12 w-12 items-center justify-center rounded-xl border-2 border-gray-200 text-gray-600 transition-all hover:border-gray-300 hover:bg-gray-50 active:scale-95 disabled:opacity-50"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -136,15 +100,19 @@ export default function AddToCartButton({
             </svg>
           </button>
 
-          <div className="flex flex-1 items-center justify-center rounded-xl border-2 border-gray-200 bg-gray-50">
-            <span className="text-sm font-semibold text-gray-900">
+          <div
+            className={`flex flex-1 items-center justify-center rounded-xl border-2 transition-colors duration-500 ${
+              added ? "border-green-500 bg-green-50" : "border-gray-200 bg-gray-50"
+            }`}
+          >
+            <span className={`text-sm font-semibold transition-colors duration-500 ${added ? "text-green-700" : "text-gray-900"}`}>
               {cartQty} en el carrito
             </span>
           </div>
 
           <button
             onClick={() => handleQtyChange(1)}
-            disabled={loading || (stock > 0 && cartQty >= stock)}
+            disabled={stock > 0 && cartQty >= stock}
             className="flex h-12 w-12 items-center justify-center rounded-xl border-2 border-gray-200 text-gray-600 transition-all hover:border-gray-300 hover:bg-gray-50 active:scale-95 disabled:opacity-50"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -155,29 +123,13 @@ export default function AddToCartButton({
       ) : (
         <button
           onClick={handleAdd}
-          disabled={loading}
-          className={`group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300 disabled:cursor-not-allowed ${
-            added
-              ? "bg-green-500 shadow-lg shadow-green-200"
-              : "bg-gray-900 shadow-md shadow-gray-200 hover:bg-gray-800 hover:shadow-lg hover:shadow-gray-300 active:scale-[0.98]"
-          }`}
+          className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gray-900 px-6 py-3.5 text-sm font-semibold text-white shadow-md shadow-gray-200 transition-all duration-300 hover:bg-gray-800 hover:shadow-lg hover:shadow-gray-300 active:scale-[0.98]"
         >
-          {loading && !added ? (
-            <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-          ) : added ? (
-            <svg className={`h-5 w-5 ${animating ? "animate-bounce" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-            </svg>
-          ) : (
-            <svg className="h-5 w-5 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 003 3h4.5a3 3 0 003-3l1.5-6.75H5.197m2.303 10.5H7.5m4.5 0a3 3 0 01-3-3m6 0a3 3 0 01-3 3m0 0v1.5a1.5 1.5 0 01-3 0v-1.5" />
-            </svg>
-          )}
+          <svg className="h-5 w-5 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 003 3h4.5a3 3 0 003-3l1.5-6.75H5.197m2.303 10.5H7.5m4.5 0a3 3 0 01-3-3m6 0a3 3 0 01-3 3m0 0v1.5a1.5 1.5 0 01-3 0v-1.5" />
+          </svg>
 
-          <span>{added ? "Agregado" : "Agregar al Carrito"}</span>
+          <span>Agregar al Carrito</span>
         </button>
       )}
 

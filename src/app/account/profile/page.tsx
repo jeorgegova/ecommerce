@@ -7,6 +7,7 @@ import { useEffect, useState } from "react"
 export default function ProfilePage() {
   const [fullName, setFullName] = useState("")
   const [phone, setPhone] = useState("")
+  const [identification, setIdentification] = useState("")
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -23,6 +24,7 @@ export default function ProfilePage() {
       if (data) {
         setFullName(data.full_name)
         setPhone(data.phone || "")
+        setIdentification(data.identification || "")
       }
       setLoading(false)
     }
@@ -38,7 +40,7 @@ export default function ProfilePage() {
 
     const { error: err } = await supabase
       .from("profiles")
-      .update({ full_name: fullName, phone: phone || null })
+      .update({ full_name: fullName, phone: phone || null, identification: identification || null })
       .eq("id", user.id)
 
     if (err) {
@@ -63,13 +65,19 @@ export default function ProfilePage() {
           {success && <div className="rounded-lg bg-green-50 p-3 text-sm text-green-700">Perfil actualizado</div>}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Nombre completo</label>
-            <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} className={inputClass} required />
+            <label htmlFor="profile-full-name" className="block text-sm font-medium text-gray-700">Nombre completo</label>
+            <input id="profile-full-name" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} className={inputClass} required />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Teléfono</label>
-            <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+57 300 000 0000" className={inputClass} />
+            <label htmlFor="profile-identification" className="block text-sm font-medium text-gray-700">Identificación</label>
+            <input id="profile-identification" type="text" value={identification} onChange={(e) => setIdentification(e.target.value)} placeholder="CC 1234567890" className={inputClass} />
+            <p className="mt-1 text-xs text-gray-500">Requerida para generar la proforma de compra.</p>
+          </div>
+
+          <div>
+            <label htmlFor="profile-phone" className="block text-sm font-medium text-gray-700">Teléfono</label>
+            <input id="profile-phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+57 300 000 0000" className={inputClass} />
           </div>
 
           <button type="submit" disabled={saving}

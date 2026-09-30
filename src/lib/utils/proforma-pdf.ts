@@ -22,6 +22,7 @@ export interface ProformaData {
   items: ProformaItem[]
   customerName?: string | null
   customerEmail?: string | null
+  customerIdentification?: string | null
   customerPhone?: string | null
   address?: string | null
   city?: string | null
@@ -112,9 +113,16 @@ export async function downloadProformaPdf(data: ProformaData) {
   text(data.address?.trim() || "", PAGE.left + 19, 55, 8.5, colors.black)
   label("Ciudad:", rightColumn, 55)
   text([data.city, data.state].filter(Boolean).join(", "), rightColumn + 15, 55, 8.5, colors.black)
-  if (data.customerEmail?.trim()) {
-    label("Correo:", PAGE.left, 62)
-    text(data.customerEmail.trim(), PAGE.left + 15, 62, 8.5, colors.black)
+  const identification = data.customerIdentification?.trim() || ""
+  const email = data.customerEmail?.trim() || ""
+  if (identification || email) {
+    if (identification) {
+      label("Identificación:", PAGE.left, 62)
+      text(identification, PAGE.left + 25, 62, 8.5, colors.black)
+    }
+    const emailX = identification ? rightColumn : PAGE.left
+    label("Correo:", emailX, 62)
+    text(email, emailX + 15, 62, 8.5, colors.black)
   }
 
   label("PRODUCTOS", PAGE.left, 68)
