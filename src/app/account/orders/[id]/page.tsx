@@ -1,13 +1,14 @@
 "use client"
 
 import { createClient } from "@/lib/supabase/client"
+import { resolveCustomerIdentification } from "@/lib/identification"
 import { downloadProformaPdf, getSettingValue } from "@/lib/utils/proforma-pdf"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 
 interface Address { full_name: string; phone: string | null; address_line_1: string; address_line_2: string | null; city: string; state: string }
-interface Order { id: string; order_number: string; status: string; subtotal: number; shipping_cost: number; discount: number; total: number; shipping_address: Address | null; shipping_address_id: string | null; created_at: string; order_statuses: { name: string; color: string } | null }
+interface Order { id: string; order_number: string; status: string; subtotal: number; shipping_cost: number; discount: number; total: number; identification: string | null; identification_type: string | null; shipping_address: Address | null; shipping_address_id: string | null; created_at: string; order_statuses: { name: string; color: string } | null }
 interface OrderItem { id: string; product_id: string; product_name: string; product_sku: string; variant_name: string | null; unit_price: number; quantity: number; subtotal: number; product_images?: { url: string; is_main: boolean }[] }
 
 const labels: Record<string, string> = { pending: "Pendiente", confirmed: "Confirmado", paid: "Pagado", processing: "En preparación", shipped: "Enviado", delivered: "Entregado", cancelled: "Cancelado" }
@@ -49,10 +50,27 @@ export default function OrderDetailPage() {
       supabase.auth.getUser(),
     ])
     try {
+      // El snapshot de la orden manda. Solo si viene vacio -- pedidos hechos
+      // antes de que existiera la columna -- se consulta el perfil, y solo
+      // cuando hace falta.
+      let identification = resolveCustomerIdentification(order, null)
+      if (!identification.value && userData.user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("identification, identification_type")
+          .eq("id", userData.user.id)
+          .maybeSingle()
+        identification = resolveCustomerIdentification(order, profile)
+      }
+
       await downloadProformaPdf({
         orderNumber: order.order_number, createdAt: order.created_at, status: order.status,
         subtotal: order.subtotal, shipping_cost: order.shipping_cost, discount: order.discount, total: order.total,
         items, customerName: order.shipping_address?.full_name, customerEmail: userData.user?.email,
+        // Antes esta ruta no pasaba la identificacion y la proforma salia
+        // sin ella.
+        customerIdentification: identification.value,
+        customerIdentificationType: identification.type,
         customerPhone: order.shipping_address?.phone, address: order.shipping_address?.address_line_1,
         city: order.shipping_address?.city, state: order.shipping_address?.state,
         bankName: getSettingValue(settings, "banco_consignar"), bankAccount: getSettingValue(settings, "numero_cuenta_bancaria"),

@@ -1,3 +1,4 @@
+import { formatIdentification, type IdentificationType } from "@/lib/identification"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
 
@@ -23,6 +24,7 @@ export interface ProformaData {
   customerName?: string | null
   customerEmail?: string | null
   customerIdentification?: string | null
+  customerIdentificationType?: IdentificationType | null
   customerPhone?: string | null
   address?: string | null
   city?: string | null
@@ -113,7 +115,12 @@ export async function downloadProformaPdf(data: ProformaData) {
   text(data.address?.trim() || "", PAGE.left + 19, 55, 8.5, colors.black)
   label("Ciudad:", rightColumn, 55)
   text([data.city, data.state].filter(Boolean).join(", "), rightColumn + 15, 55, 8.5, colors.black)
-  const identification = data.customerIdentification?.trim() || ""
+  // "NIT 900.123.456-7" / "CC 1234567890". Sin tipo conocido se imprime el
+  // numero tal cual: es preferible a perder el dato por no saber el tipo.
+  const identification = formatIdentification(
+    data.customerIdentificationType ?? null,
+    data.customerIdentification
+  )
   const email = data.customerEmail?.trim() || ""
   if (identification || email) {
     if (identification) {

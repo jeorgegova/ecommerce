@@ -55,6 +55,38 @@ const typeIcon: Record<string, { bg: string; icon: React.ReactNode }> = {
       </svg>
     ),
   },
+  order_confirmed: {
+    bg: "bg-blue-50 text-blue-600 ring-1 ring-blue-100",
+    icon: (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
+  order_shipped: {
+    bg: "bg-sky-50 text-sky-600 ring-1 ring-sky-100",
+    icon: (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.25V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V14.25" />
+      </svg>
+    ),
+  },
+  order_delivered: {
+    bg: "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100",
+    icon: (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+      </svg>
+    ),
+  },
+  order_cancelled: {
+    bg: "bg-rose-50 text-rose-600 ring-1 ring-rose-100",
+    icon: (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
   system: {
     bg: "bg-gray-100 text-gray-600 ring-1 ring-gray-200",
     icon: (
@@ -64,6 +96,12 @@ const typeIcon: Record<string, { bg: string; icon: React.ReactNode }> = {
       </svg>
     ),
   },
+}
+
+function getIconConfig(type: string) {
+  if (typeIcon[type]) return typeIcon[type]
+  if (type.startsWith("order_")) return typeIcon.order_updated
+  return typeIcon.system
 }
 
 function timeAgo(dateStr: string): string {
@@ -131,6 +169,36 @@ export default function NotificationsPage() {
       setLoading(false)
     }
     fetch()
+
+    let channel: any = null
+    const setupRealtime = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      channel = supabase
+        .channel(`user-notifications-page-${user.id}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "notifications",
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => {
+            fetch()
+          }
+        )
+        .subscribe()
+    }
+
+    setupRealtime()
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel)
+      }
+    }
   }, [supabase])
 
   useEffect(() => {
@@ -143,7 +211,8 @@ export default function NotificationsPage() {
     const c: Record<string, number> = { all: notifications.length, unread: 0 }
     notifications.forEach((n) => {
       if (!n.is_read) c.unread++
-      c[n.type] = (c[n.type] || 0) + 1
+      const key = n.type.startsWith("order_") ? "order_updated" : n.type
+      c[key] = (c[key] || 0) + 1
     })
     return c
   }, [notifications])
@@ -151,6 +220,7 @@ export default function NotificationsPage() {
   const filtered = useMemo(() => {
     if (filter === "all") return notifications
     if (filter === "unread") return notifications.filter((n) => !n.is_read)
+    if (filter === "order_updated") return notifications.filter((n) => n.type.startsWith("order_"))
     return notifications.filter((n) => n.type === filter)
   }, [notifications, filter])
 
@@ -288,7 +358,7 @@ export default function NotificationsPage() {
                   </h2>
                   <div className="overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-sm">
                     {group.items.map((n, idx) => {
-                      const iconConf = typeIcon[n.type] || typeIcon.system
+                      const iconConf = getIconConfig(n.type)
                       return (
                         <div
                           key={n.id}
@@ -386,7 +456,9 @@ export default function NotificationsPage() {
                                     ? "Responder ahora"
                                     : n.type === "question_answered"
                                       ? "Ver respuesta"
-                                      : "Ver detalle"}
+                                      : n.type.startsWith("order_")
+                                        ? "Ver pedido"
+                                        : "Ver detalle"}
                                   <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                                   </svg>

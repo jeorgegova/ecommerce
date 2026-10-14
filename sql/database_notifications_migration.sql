@@ -15,7 +15,7 @@ ALTER TABLE notifications ADD COLUMN IF NOT EXISTS priority TEXT NOT NULL DEFAUL
 ALTER TABLE notifications DROP CONSTRAINT IF EXISTS notifications_type_check;
 ALTER TABLE notifications ADD CONSTRAINT notifications_type_check CHECK (
   type = ANY (ARRAY[
-    'order_confirmed', 'order_shipped', 'order_delivered',
+    'order_confirmed', 'order_shipped', 'order_delivered', 'order_cancelled',
     'question_answered', 'question_created',
     'review_reply', 'price_drop', 'back_in_stock',
     'admin_alert', 'order_updated', 'system'
@@ -107,6 +107,96 @@ CREATE TRIGGER trg_notify_question_answered
   AFTER UPDATE OF answer ON questions
   FOR EACH ROW
   EXECUTE FUNCTION notify_question_answered();
+
+-- 6b. Trigger: notificar al comprador cuando cambia el estado de su pedido
+CREATE OR REPLACE FUNCTION notify_order_status_changed()
+RETURNS trigger
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_title TEXT;
+  v_message TEXT;
+  v_type TEXT;
+  v_status_name TEXT;
+BEGIN
+  IF TG_OP = 'UPDATE' AND OLD.status IS NOT DISTINCT FROM NEW.status THEN
+    RETURN NEW;
+  END IF;
+
+  IF TG_OP = 'INSERT' THEN
+    v_type := 'order_updated';
+    v_title := 'Pedido recibido';
+    v_message := 'Tu pedido #' || NEW.order_number || ' ha sido registrado y está en revisión.';
+  ELSE
+    SELECT name INTO v_status_name FROM order_statuses WHERE code = NEW.status;
+    IF v_status_name IS NULL THEN
+      v_status_name := NEW.status;
+    END IF;
+
+    CASE NEW.status
+      WHEN 'confirmed' THEN
+        v_type := 'order_confirmed';
+        v_title := 'Pedido confirmado';
+        v_message := 'Tu pedido #' || NEW.order_number || ' ha sido confirmado y está listo para ser preparado.';
+      WHEN 'processing' THEN
+        v_type := 'order_updated';
+        v_title := 'Pedido en preparación';
+        v_message := 'Tu pedido #' || NEW.order_number || ' está siendo preparado para su envío.';
+      WHEN 'shipped' THEN
+        v_type := 'order_shipped';
+        v_title := 'Pedido enviado';
+        v_message := '¡Tu pedido #' || NEW.order_number || ' va en camino!';
+      WHEN 'delivered' THEN
+        v_type := 'order_delivered';
+        v_title := 'Pedido entregado';
+        v_message := 'Tu pedido #' || NEW.order_number || ' ha sido entregado con éxito. ¡Gracias por tu compra!';
+      WHEN 'cancelled' THEN
+        v_type := 'order_cancelled';
+        v_title := 'Pedido cancelado';
+        v_message := 'Tu pedido #' || NEW.order_number || ' ha sido cancelado.' ||
+                     CASE WHEN NEW.cancellation_reason IS NOT NULL AND TRIM(NEW.cancellation_reason) <> ''
+                          THEN ' Motivo: ' || TRIM(NEW.cancellation_reason)
+                          ELSE ''
+                     END;
+      ELSE
+        v_type := 'order_updated';
+        v_title := 'Actualización de pedido';
+        v_message := 'Tu pedido #' || NEW.order_number || ' ha cambiado a estado: ' || v_status_name || '.';
+    END CASE;
+  END IF;
+
+  INSERT INTO notifications (
+    user_id,
+    type,
+    title,
+    message,
+    body,
+    reference_type,
+    reference_id,
+    action_url,
+    priority
+  ) VALUES (
+    NEW.user_id,
+    v_type,
+    v_title,
+    v_message,
+    v_message,
+    'order',
+    NEW.id,
+    '/account/orders/' || NEW.id,
+    'high'
+  );
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_notify_order_status_changed ON orders;
+CREATE TRIGGER trg_notify_order_status_changed
+  AFTER INSERT OR UPDATE OF status ON orders
+  FOR EACH ROW
+  EXECUTE FUNCTION notify_order_status_changed();
 
 -- 7. RLS: admin ve todo
 DROP POLICY IF EXISTS "notifications_manage_admin" ON notifications;

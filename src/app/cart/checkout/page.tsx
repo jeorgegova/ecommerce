@@ -5,6 +5,12 @@ import ProformaDataModal, { type ProformaProfileData } from "@/components/store/
 import { useCartStore } from "@/stores/cart"
 import { createClient } from "@/lib/supabase/client"
 import { downloadProformaPdf, getSettingValue } from "@/lib/utils/proforma-pdf"
+import {
+  isIdentificationComplete,
+  parseIdentificationType,
+  resolveCustomerIdentification,
+  type IdentificationType,
+} from "@/lib/identification"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -34,6 +40,7 @@ interface AppliedCoupon {
 
 interface BuyerProfile {
   identification: string | null
+  identificationType: IdentificationType | null
   phone: string | null
 }
 
@@ -46,7 +53,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(true)
   const [placing, setPlacing] = useState(false)
   const [error, setError] = useState("")
-  const [profile, setProfile] = useState<BuyerProfile>({ identification: null, phone: null })
+  const [profile, setProfile] = useState<BuyerProfile>({ identification: null, identificationType: null, phone: null })
   const [showDataModal, setShowDataModal] = useState(false)
   const [resumeAfterData, setResumeAfterData] = useState(false)
 
@@ -76,11 +83,12 @@ export default function CheckoutPage() {
 
       const { data: buyer } = await supabase
         .from("profiles")
-        .select("identification, phone")
+        .select("identification, identification_type, phone")
         .eq("id", user.id)
         .maybeSingle()
       setProfile({
         identification: normalizeProfileValue(buyer?.identification),
+        identificationType: parseIdentificationType(buyer?.identification_type),
         phone: normalizeProfileValue(buyer?.phone),
       })
 
@@ -156,20 +164,21 @@ export default function CheckoutPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Sesión no disponible")
 
-      // La proforma exige identificación y teléfono en el perfil
+      // La proforma exige tipo de documento, número y teléfono en el perfil
       const { data: buyer, error: profileError } = await supabase
         .from("profiles")
-        .select("identification, phone")
+        .select("identification, identification_type, phone")
         .eq("id", user.id)
         .maybeSingle()
       if (profileError) throw new Error(profileError.message)
 
       const currentProfile: BuyerProfile = {
         identification: normalizeProfileValue(buyer?.identification),
+        identificationType: parseIdentificationType(buyer?.identification_type),
         phone: normalizeProfileValue(buyer?.phone),
       }
 
-      if (!currentProfile.identification || !currentProfile.phone) {
+      if (!isIdentificationComplete(currentProfile) || !currentProfile.phone) {
         setProfile(currentProfile)
         setResumeAfterData(true)
         setShowDataModal(true)
@@ -204,11 +213,19 @@ export default function CheckoutPage() {
     ])
     if (order && orderItems) {
       const address = addresses.find((item) => item.id === selectedAddressId)
+      const identification = resolveCustomerIdentification(order, {
+        identification: buyerProfile.identification,
+        identification_type: buyerProfile.identificationType,
+      })
       await downloadProformaPdf({
         orderNumber: order.order_number, createdAt: order.created_at, status: order.status,
         subtotal: order.subtotal, shipping_cost: order.shipping_cost, discount: order.discount, total: order.total,
         items: orderItems, customerName: address?.full_name, customerEmail: user.email,
-        customerIdentification: buyerProfile.identification, customerPhone: buyerProfile.phone || address?.phone,
+        // La orden ya guarda su propio snapshot; el perfil pudo cambiar desde
+        // que se creo. Si el snapshot viniera vacio se usa el perfil actual.
+        customerIdentification: identification.value,
+        customerIdentificationType: identification.type,
+        customerPhone: buyerProfile.phone || address?.phone,
         address: address?.address_line_1, city: address?.city, state: address?.state,
         bankName: getSettingValue(settings, "banco_consignar"), bankAccount: getSettingValue(settings, "numero_cuenta_bancaria"),
       })
@@ -220,7 +237,11 @@ export default function CheckoutPage() {
   }
 
   const handleProfileSaved = async (data: ProformaProfileData) => {
-    const saved: BuyerProfile = { identification: data.identification, phone: data.phone }
+    const saved: BuyerProfile = {
+      identification: data.identification,
+      identificationType: data.identificationType,
+      phone: data.phone,
+    }
     setProfile(saved)
     setShowDataModal(false)
 
@@ -251,6 +272,7 @@ export default function CheckoutPage() {
       <ProformaDataModal
         isOpen={showDataModal}
         defaultIdentification={profile.identification || ""}
+        defaultIdentificationType={profile.identificationType}
         defaultPhone={profile.phone || ""}
         onClose={() => { setShowDataModal(false); setResumeAfterData(false) }}
         onSaved={handleProfileSaved}
@@ -282,6 +304,19 @@ export default function CheckoutPage() {
                   ))}
                 </div>
               )}
+
+              {/* Banner informativo de envíos internacionales y coordinación directa */}
+              <div className="mt-4 flex items-start gap-3 rounded-2xl border border-blue-200/80 bg-blue-50/60 p-4 text-xs text-blue-950">
+                <span className="text-base leading-none">✈️</span>
+                <div className="space-y-1">
+                  <p className="font-semibold text-blue-900">
+                    Envíos internacionales y nacionales coordinados
+                  </p>
+                  <p className="text-blue-800/90 leading-relaxed">
+                    Hacemos envíos a cualquier país y a toda Colombia. Todos los despachos son <strong>coordinados directamente con el comprador</strong> tras generar la orden para convenir la transportadora (DHL, FedEx, UPS, casillero, flete terrestre) y liquidar el flete según tu preferencia.
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div>
@@ -334,7 +369,7 @@ export default function CheckoutPage() {
               <div className="mt-4 space-y-3">
                 <div className="flex justify-between text-sm"><span className="text-gray-600">Subtotal</span><span className="font-medium">€{subtotal.toLocaleString("es-CO")}</span></div>
                 {coupon && <div className="flex justify-between text-sm text-emerald-700"><span>Descuento ({coupon.code})</span><span className="font-medium">-€{discount.toLocaleString("es-CO")}</span></div>}
-                <div className="flex justify-between text-sm"><span className="text-gray-600">Envío</span><span className="text-gray-900">Por calcular</span></div>
+                <div className="flex justify-between text-sm items-center"><span className="text-gray-600">Envío</span><span className="text-blue-700 font-medium text-xs">Coordinado con comprador</span></div>
                 <div className="border-t border-gray-200 pt-3 flex justify-between"><span className="font-semibold">Total</span><span className="font-semibold">€{total.toLocaleString("es-CO")}</span></div>
                 {coupon && subtotal !== total && <p className="text-xs text-gray-500">Ahorras €{discount.toLocaleString("es-CO")} con tu cupón</p>}
               </div>

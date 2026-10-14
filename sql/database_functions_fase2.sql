@@ -198,6 +198,8 @@ DECLARE
   v_item         RECORD;
   v_coupon       RECORD;
   v_used_count   INTEGER;
+  v_identification      TEXT;
+  v_identification_type TEXT;
 BEGIN
   IF auth.uid() IS NULL OR auth.uid() <> p_user_id THEN
     RAISE EXCEPTION 'Unauthorized order creation';
@@ -304,12 +306,21 @@ BEGIN
   v_total := v_subtotal + v_shipping_cost - v_discount;
 
   -- Crear orden
+  -- Snapshot de la identificacion: la proforma debe mostrar los datos que
+  -- tenia el cliente al momento de la venta.
+  SELECT p.identification, p.identification_type
+  INTO v_identification, v_identification_type
+  FROM public.profiles p
+  WHERE p.id = p_user_id;
+
   INSERT INTO orders (
     user_id, order_number, status, subtotal, shipping_cost, discount, total,
-    notes, shipping_address_id, billing_address_id, coupon_id
+    notes, shipping_address_id, billing_address_id, coupon_id,
+    identification, identification_type
   ) VALUES (
     p_user_id, v_order_number, 'pending', v_subtotal, v_shipping_cost, v_discount, v_total,
-    p_notes, p_shipping_address_id, p_billing_address_id, p_coupon_id
+    p_notes, p_shipping_address_id, p_billing_address_id, p_coupon_id,
+    v_identification, v_identification_type
   ) RETURNING id INTO v_order_id;
 
   -- Crear order_items. El inventario se descuenta al confirmar la orden.

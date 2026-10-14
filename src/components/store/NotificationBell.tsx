@@ -53,6 +53,38 @@ const typeIcon: Record<string, { bg: string; icon: React.ReactNode }> = {
       </svg>
     ),
   },
+  order_confirmed: {
+    bg: "bg-blue-100 text-blue-600",
+    icon: (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
+  order_shipped: {
+    bg: "bg-sky-100 text-sky-600",
+    icon: (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.25V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V14.25" />
+      </svg>
+    ),
+  },
+  order_delivered: {
+    bg: "bg-emerald-100 text-emerald-600",
+    icon: (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+      </svg>
+    ),
+  },
+  order_cancelled: {
+    bg: "bg-rose-100 text-rose-600",
+    icon: (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
   system: {
     bg: "bg-gray-100 text-gray-600",
     icon: (
@@ -62,6 +94,12 @@ const typeIcon: Record<string, { bg: string; icon: React.ReactNode }> = {
       </svg>
     ),
   },
+}
+
+function getIconConfig(type: string) {
+  if (typeIcon[type]) return typeIcon[type]
+  if (type.startsWith("order_")) return typeIcon.order_updated
+  return typeIcon.system
 }
 
 export default function NotificationBell() {
@@ -78,23 +116,60 @@ export default function NotificationBell() {
     setAuthUser(user)
     if (!user) { setNotifications([]); setUnreadCount(0); return }
 
-    const { data } = await supabase
-      .from("notifications")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(20)
+    const [{ data }, { count: unread }] = await Promise.all([
+      supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(20),
+      supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("is_read", false),
+    ])
 
     if (data) {
       setNotifications(data)
-      setUnreadCount(data.filter((n) => !n.is_read).length)
+      setUnreadCount(unread !== null ? unread : data.filter((n) => !n.is_read).length)
     }
   }
 
   useEffect(() => {
     fetchNotifications()
     const interval = setInterval(fetchNotifications, 30000)
-    return () => clearInterval(interval)
+
+    let channel: any = null
+    const setupRealtime = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      channel = supabase
+        .channel(`user-notifications-bell-${user.id}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "notifications",
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => {
+            fetchNotifications()
+          }
+        )
+        .subscribe()
+    }
+
+    setupRealtime()
+
+    return () => {
+      clearInterval(interval)
+      if (channel) {
+        supabase.removeChannel(channel)
+      }
+    }
   }, [])
 
   useEffect(() => {
@@ -170,7 +245,7 @@ export default function NotificationBell() {
           ) : (
             <div className="max-h-[420px] overflow-y-auto">
               {notifications.slice(0, 8).map((n) => {
-                const iconConf = typeIcon[n.type] || typeIcon.system
+                const iconConf = getIconConfig(n.type)
                 return (
                   <button
                     key={n.id}

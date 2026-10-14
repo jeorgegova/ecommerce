@@ -32,6 +32,29 @@ BEGIN
 END;
 $$;
 
+-- Impide que un buyer se auto-asigne 'admin'. Va en un trigger y no dentro de
+-- WITH CHECK porque ahi solo se ve la fila nueva; el trigger es el unico sitio
+-- donde OLD y NEW estan disponibles de forma explicita, y ademas falla
+-- cerrado (levanta excepcion) en vez de depender del snapshot.
+-- NO escribir el control como `role = (SELECT role FROM profiles WHERE id = id)`
+-- dentro de una politica: el `id` interno se resolveria a la columna profiles.id,
+-- el predicado seria `id = id` y el subquery escalaria devolveria varias filas
+-- ("more than one row returned by a subquery used as an expression", HTTP 500).
+CREATE OR REPLACE FUNCTION guard_profile_role()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NEW.role IS DISTINCT FROM OLD.role AND NOT is_admin() THEN
+    RAISE EXCEPTION 'No se puede modificar el rol del perfil'
+      USING ERRCODE = '42501';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
 -- =============================================================================
 -- 2. ENABLE RLS
 -- =============================================================================
@@ -86,9 +109,15 @@ CREATE POLICY "profiles_select_own" ON profiles
 CREATE POLICY "profiles_select_admin" ON profiles
   FOR SELECT USING (is_admin());
 
+-- Solo "es mi fila". El rol lo protege el trigger trg_profiles_guard_role.
 CREATE POLICY "profiles_update_own" ON profiles
-  FOR UPDATE USING (is_owner(id))
-  WITH CHECK (is_owner(id) AND role = (SELECT role FROM profiles WHERE id = id));
+  FOR UPDATE USING (is_owner(profiles.id))
+  WITH CHECK (is_owner(profiles.id));
+
+CREATE TRIGGER trg_profiles_guard_role
+  BEFORE UPDATE ON profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION guard_profile_role();
 
 CREATE POLICY "profiles_insert_admin" ON profiles
   FOR INSERT WITH CHECK (is_admin());

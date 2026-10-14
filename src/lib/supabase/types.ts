@@ -1,3 +1,5 @@
+import type { IdentificationType } from "@/lib/identification"
+
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export interface Database {
@@ -10,6 +12,7 @@ export interface Database {
           full_name: string
           phone: string | null
           identification: string | null
+          identification_type: IdentificationType | null
           avatar_url: string | null
           role: "buyer" | "admin"
           is_active: boolean
@@ -73,7 +76,7 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["products"]["Insert"]>
       }
       addresses: { Row: { id: string; user_id: string; name: string; full_name: string; phone: string | null; address_line_1: string; address_line_2: string | null; city: string; state: string; postal_code: string; country: string; is_default: boolean; created_at: string; updated_at: string }; Insert: any; Update: any }
-      orders: { Row: { id: string; user_id: string; order_number: string; status: string; subtotal: number; shipping_cost: number; discount: number; total: number; notes: string | null; shipping_address_id: string | null; shipping_address: any; billing_address_id: string | null; billing_address: any; coupon_id: string | null; paid_at: string | null; cancelled_at: string | null; cancellation_reason: string | null; created_at: string; updated_at: string }; Insert: any; Update: any }
+      orders: { Row: { id: string; user_id: string; order_number: string; status: string; subtotal: number; shipping_cost: number; discount: number; total: number; notes: string | null; identification: string | null; identification_type: IdentificationType | null; shipping_address_id: string | null; shipping_address: any; billing_address_id: string | null; billing_address: any; coupon_id: string | null; paid_at: string | null; cancelled_at: string | null; cancellation_reason: string | null; created_at: string; updated_at: string }; Insert: any; Update: any }
       order_items: { Row: any; Insert: any; Update: any }
     }
     Views: {

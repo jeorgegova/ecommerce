@@ -40,17 +40,18 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- 2.1 profiles (extiende auth.users)
 -- ---------------------------------------------------------------------------
 CREATE TABLE profiles (
-  id              UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  email           TEXT NOT NULL UNIQUE,
-  full_name       TEXT NOT NULL,
-  phone           TEXT,
-  identification  TEXT,
-  avatar_url      TEXT,
-  role            TEXT NOT NULL DEFAULT 'buyer' CHECK (role IN ('buyer', 'admin')),
-  is_active       BOOLEAN NOT NULL DEFAULT true,
-  last_login_at   TIMESTAMPTZ,
-  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+  id                  UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email               TEXT NOT NULL UNIQUE,
+  full_name           TEXT NOT NULL,
+  phone               TEXT,
+  identification      TEXT,
+  identification_type TEXT CHECK (identification_type IN ('cc', 'nit', 'ce', 'passport')),
+  avatar_url          TEXT,
+  role                TEXT NOT NULL DEFAULT 'buyer' CHECK (role IN ('buyer', 'admin')),
+  is_active           BOOLEAN NOT NULL DEFAULT true,
+  last_login_at       TIMESTAMPTZ,
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at          TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TRIGGER trg_profiles_updated_at
@@ -491,6 +492,10 @@ CREATE TABLE orders (
   discount              NUMERIC(12,2) NOT NULL DEFAULT 0 CHECK (discount >= 0),
   total                 NUMERIC(12,2) NOT NULL CHECK (total >= 0),
   notes                 TEXT,
+  -- Snapshot de la identificacion del cliente al momento de la compra: la
+  -- proforma debe mostrar estos datos, no los actuales del perfil.
+  identification        TEXT,
+  identification_type   TEXT CHECK (identification_type IN ('cc', 'nit', 'ce', 'passport')),
   shipping_address_id   UUID REFERENCES addresses(id) ON DELETE SET NULL,
   shipping_address      JSONB,
   billing_address_id    UUID REFERENCES addresses(id) ON DELETE SET NULL,
