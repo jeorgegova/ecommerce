@@ -78,8 +78,11 @@ export default function SearchBar() {
       const sug = suggestions[selectedIndex]
       router.push(sug.suggestion_type === "category" ? `/categories/${sug.slug}` : `/products/${sug.slug}`)
     } else {
-      if (pathname === "/") { submitSearch(query.trim()) }
-      else { router.push(`/?q=${encodeURIComponent(query)}`) }
+      if (pathname === "/" || pathname === "/products") {
+        submitSearch(query.trim())
+      } else {
+        router.push(`/products?q=${encodeURIComponent(query)}`)
+      }
     }
     setOpen(false); setQuery("")
   }

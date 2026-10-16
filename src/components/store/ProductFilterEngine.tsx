@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/client"
 import ProductCard from "@/components/store/ProductCard"
 import { useSearchContext } from "@/components/store/SearchContext"
 import { useEffect, useRef, useState, useCallback, useMemo } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
 
 interface ProductItem {
   id: string; name: string; slug: string; base_price: number
@@ -115,6 +115,7 @@ export default function ProductFilterEngine({
   const supabase = createClient()
   const searchParams = useSearchParams()
   const router = useRouter()
+  const pathname = usePathname()
   const { query: contextQuery, submitSearch } = useSearchContext()
 
   const urlSearch = searchParams.get("q") || ""
@@ -257,7 +258,7 @@ export default function ProductFilterEngine({
     setCategoryId(null); setInStock(false); setOnSale(false)
     setSort("relevance"); setPage(1); setHasUserAction(true)
     submitSearch("")
-    router.replace("/", { scroll: false })
+    router.replace(pathname || "/", { scroll: false })
   }
   const handleSidebarSearch = (e: React.FormEvent) => {
     e.preventDefault()
