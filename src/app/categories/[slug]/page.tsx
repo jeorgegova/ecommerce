@@ -2,8 +2,42 @@ import StoreLayout from "@/components/layout/StoreLayout"
 import ProductCard from "@/components/store/ProductCard"
 import MobileFilterChips from "@/components/store/MobileFilterChips"
 import { createClient } from "@/lib/supabase/server"
+import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const supabase = await createClient()
+
+  const { data: category } = await supabase
+    .from("categories")
+    .select("name, description")
+    .eq("slug", slug)
+    .single()
+
+  if (!category) return { title: "Categoría no encontrada | PARTEX" }
+
+  const desc = category.description || `Repuestos y componentes para máquinas vending en la categoría ${category.name}. Disponibilidad y envíos directos con PARTEX.`
+
+  return {
+    title: `${category.name} | Repuestos Vending`,
+    description: desc,
+    alternates: {
+      canonical: `/categories/${slug}`,
+    },
+    openGraph: {
+      title: `${category.name} | PARTEX`,
+      description: desc,
+      url: `/categories/${slug}`,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${category.name} | PARTEX`,
+      description: desc,
+    },
+  }
+}
 
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -43,8 +77,38 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
     { label: "En oferta", href: "/search?on_sale=true", active: false },
   ]
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://partex.co"
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Inicio",
+        item: siteUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Categorías",
+        item: `${siteUrl}/categories`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: category.name,
+        item: `${siteUrl}/categories/${category.slug}`,
+      },
+    ],
+  }
+
   return (
     <StoreLayout>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <MobileFilterChips chips={mobileChips} />
 
       <div className="mx-auto max-w-7xl px-4 py-4 lg:px-6 lg:py-12 lg:px-8">

@@ -137,17 +137,22 @@ export default function NotificationBell() {
   }
 
   useEffect(() => {
+    let isCancelled = false
+    let activeChannel: any = null
+
     fetchNotifications()
     const interval = setInterval(fetchNotifications, 30000)
 
-    let channel: any = null
     const setupRealtime = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user || isCancelled) return
 
-      channel = supabase
-        .channel(`user-notifications-bell-${user.id}`)
-        .on(
+        // Usar un identificador único para evitar colisiones de canal en React StrictMode o remounts
+        const channelName = `bell-${user.id}-${Math.random().toString(36).slice(2, 9)}`
+        const channel = supabase.channel(channelName)
+
+        channel.on(
           "postgres_changes",
           {
             event: "*",
@@ -159,15 +164,26 @@ export default function NotificationBell() {
             fetchNotifications()
           }
         )
-        .subscribe()
+
+        if (isCancelled) {
+          supabase.removeChannel(channel)
+          return
+        }
+
+        activeChannel = channel
+        channel.subscribe()
+      } catch (err) {
+        console.error("Error setting up NotificationBell realtime:", err)
+      }
     }
 
     setupRealtime()
 
     return () => {
+      isCancelled = true
       clearInterval(interval)
-      if (channel) {
-        supabase.removeChannel(channel)
+      if (activeChannel) {
+        supabase.removeChannel(activeChannel)
       }
     }
   }, [])

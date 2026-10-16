@@ -170,14 +170,18 @@ export default function NotificationsPage() {
     }
     fetch()
 
-    let channel: any = null
-    const setupRealtime = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+    let isCancelled = false
+    let activeChannel: any = null
 
-      channel = supabase
-        .channel(`user-notifications-page-${user.id}`)
-        .on(
+    const setupRealtime = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user || isCancelled) return
+
+        const channelName = `page-${user.id}-${Math.random().toString(36).slice(2, 9)}`
+        const channel = supabase.channel(channelName)
+
+        channel.on(
           "postgres_changes",
           {
             event: "*",
@@ -189,14 +193,25 @@ export default function NotificationsPage() {
             fetch()
           }
         )
-        .subscribe()
+
+        if (isCancelled) {
+          supabase.removeChannel(channel)
+          return
+        }
+
+        activeChannel = channel
+        channel.subscribe()
+      } catch (err) {
+        console.error("Error setting up notifications page realtime:", err)
+      }
     }
 
     setupRealtime()
 
     return () => {
-      if (channel) {
-        supabase.removeChannel(channel)
+      isCancelled = true
+      if (activeChannel) {
+        supabase.removeChannel(activeChannel)
       }
     }
   }, [supabase])

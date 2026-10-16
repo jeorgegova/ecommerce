@@ -26,8 +26,9 @@ interface FieldDefinition {
 
 const KNOWN_FIELDS: FieldDefinition[] = [
   // Tienda & General
-  { key: "store_name", label: "Nombre de la tienda", description: "Nombre comercial que se muestra en toda la aplicación", type: "text", placeholder: "GoGi", category: "store" },
-  { key: "store_description", label: "Descripción corta", description: "Lema o descripción principal para el pie de página y metadatos", type: "textarea", placeholder: "Tu tienda de confianza", category: "store" },
+  { key: "store_name", label: "Nombre de la tienda", description: "Nombre comercial que se muestra en toda la aplicación", type: "text", placeholder: "PARTEX", category: "store" },
+  { key: "store_slogan", label: "Lema oficial", description: "Lema que acompaña el logo y la cabecera", type: "text", placeholder: "Professional parts & components", category: "store" },
+  { key: "store_description", label: "Descripción corta", description: "Descripción principal para pie de página y metadatos SEO", type: "textarea", placeholder: "Professional parts & components", category: "store" },
   { key: "store_email", label: "Correo de contacto", description: "Email oficial donde los clientes pueden comunicarse", type: "text", placeholder: "hola@gogi.co", category: "store" },
   { key: "store_phone", label: "Teléfono de contacto", description: "Línea de atención al cliente", type: "text", placeholder: "+57 300 000 0000", category: "store" },
   { key: "store_currency", label: "Moneda por defecto", description: "Código ISO de la moneda (COP, EUR, USD)", type: "text", placeholder: "COP", category: "store" },

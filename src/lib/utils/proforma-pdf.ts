@@ -56,7 +56,9 @@ export function getSettingValue(settings: { key: string; value: unknown }[] | nu
 
 async function loadLogo(): Promise<string | null> {
   try {
-    const response = await fetch("/logoVendingShop.png")
+    let response = await fetch("/LogoLetraNegra.png")
+    if (!response.ok) response = await fetch("/LogoPartex.png")
+    if (!response.ok) response = await fetch("/logoVendingShop.png")
     const blob = await response.blob()
     return await new Promise((resolve) => {
       const reader = new FileReader()
@@ -88,12 +90,17 @@ export async function downloadProformaPdf(data: ProformaData) {
     doc.setFont("helvetica", "normal")
   }
 
+  const storeName = data.storeName?.trim() || "PARTEX"
+
   doc.setFont("helvetica", "normal")
-  if (logo) doc.addImage(logo, "PNG", PAGE.left, PAGE.top, 12, 12)
-  const brandX = logo ? PAGE.left + 16 : PAGE.left
-  const storeName = data.storeName?.trim() || "VendingShop"
-  doc.setFont("helvetica", "bold")
-  text(storeName, brandX, 16, 12, colors.black)
+  if (logo) {
+    doc.addImage(logo, "PNG", PAGE.left, PAGE.top, 38, 12)
+  } else {
+    doc.setFont("helvetica", "bold")
+    text(storeName, PAGE.left, 15, 12, colors.black)
+    doc.setFont("helvetica", "normal")
+    text("Professional parts & components", PAGE.left, 19, 7, colors.gray)
+  }
   text("PROFORMA", pageWidth - PAGE.right, 16, 19, colors.black, { align: "right" })
   doc.setFont("helvetica", "normal")
   text(`Pedido #${data.orderNumber}  ·  ${new Date(data.createdAt).toLocaleDateString("es-CO")}  ·  Estado: ${statusLabel(data.status)}`, PAGE.left, 28, 8.5, colors.black)

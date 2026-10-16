@@ -18,7 +18,7 @@ const FAQ_DATA: FaqItem[] = [
     id: "p1",
     category: "pedidos",
     question: "¿Cómo funcionan las compras y pagos por transferencia bancaria?",
-    answer: "Al realizar tu pedido en VendingShop, el sistema reserva tus piezas y genera de manera inmediata una proforma oficial descargable en PDF con los datos bancarios exactos (Bancolombia) y el desglose de IVA. Solo debes realizar la transferencia, enviar el comprobante a nuestro canal de WhatsApp o correo y tu orden pasará de inmediato a preparación.",
+    answer: "Al realizar tu pedido en PARTEX, el sistema reserva tus piezas y genera de manera inmediata una proforma oficial descargable en PDF con los datos bancarios exactos (Bancolombia) y el desglose de IVA. Solo debes realizar la transferencia, enviar el comprobante a nuestro canal de WhatsApp o correo y tu orden pasará de inmediato a preparación.",
   },
   {
     id: "p2",
@@ -164,8 +164,26 @@ export default function FaqPage() {
     })
   }, [selectedCat, search])
 
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQ_DATA.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  }
+
   return (
     <StoreLayout showBanner={false}>
+      {/* Schema.org FAQPage para Google Rich Snippets y Motores IA */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <div className="bg-[#FBFBFD] min-h-screen text-[#1D1D1F] selection:bg-neutral-900 selection:text-white">
         {/* Subtle Ambient Radial */}
         <div className="relative overflow-hidden pt-12 pb-24 sm:pt-16 sm:pb-32">

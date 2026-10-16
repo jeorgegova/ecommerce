@@ -18,7 +18,7 @@ export default function ContactPage() {
   const [phone, setPhone] = useState("+57 300 000 0000")
   const [email, setEmail] = useState("hola@gogi.co")
   const [whatsapp, setWhatsapp] = useState("")
-  const [storeName, setStoreName] = useState("VendingShop")
+  const [storeName, setStoreName] = useState("PARTEX")
 
   const [form, setForm] = useState({
     name: "",
@@ -88,7 +88,7 @@ export default function ContactPage() {
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             {/* Minimal Eyebrow Navigation */}
             <div className="flex items-center justify-between text-xs font-mono tracking-wider text-neutral-400 uppercase">
-              <span>Soporte · VendingShop</span>
+              <span>Soporte · {storeName}</span>
               <div className="flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />

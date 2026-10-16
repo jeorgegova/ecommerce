@@ -26,10 +26,32 @@ export default function Header() {
   const { openAuth } = useAuthModal()
 
   const [mounted, setMounted] = useState(false)
+  const [storeName, setStoreName] = useState("PARTEX")
+  const [storeSlogan, setStoreSlogan] = useState("Professional parts & components")
 
   useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const { data } = await supabase
+          .from("settings")
+          .select("key, value")
+          .in("key", ["store_name", "store_slogan"])
+        if (data) {
+          data.forEach((row) => {
+            let val = row.value
+            if (typeof val === "string" && val.startsWith('"') && val.endsWith('"')) {
+              try { val = JSON.parse(val) } catch { }
+            }
+            if (row.key === "store_name" && val) setStoreName(String(val))
+            if (row.key === "store_slogan" && val) setStoreSlogan(String(val))
+          })
+        }
+      } catch { }
+    }
+    loadSettings()
+
     const loadUser = async (authUser: User | null) => {
       setUser(authUser)
       if (authUser) {
@@ -69,16 +91,13 @@ export default function Header() {
   return (
     <header className={`sticky top-0 border-b border-gray-100 bg-white/90 backdrop-blur-xl supports-[backdrop-filter]:bg-white/80 ${menuOpen ? "z-50" : "z-40"}`}>
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:h-16 lg:gap-5 lg:px-8">
-        <Link href="/" className="group flex-shrink-0 flex items-center gap-2 hover:opacity-90 transition-opacity">
-          <div className="relative flex items-center justify-center p-1.5 bg-gray-50 rounded-xl border border-gray-100 shadow-xs">
-            <img src="/logoVendingShop.png" alt="VendingShop" className="h-7 w-7 object-contain transition-transform group-hover:scale-110 duration-300" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-base font-extrabold tracking-tight text-gray-900 leading-none lg:text-lg flex items-center gap-1">
-              VendingShop <span className="text-[10px] font-semibold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">Shop</span>
-            </span>
-            <span className="text-[8px] font-bold text-gray-500 uppercase tracking-wider leading-none mt-1">Repuestos para Máquinas Vending</span>
-          </div>
+        <Link href="/" className="group flex-shrink-0 flex items-center hover:opacity-90 transition-opacity">
+          <img
+            src="/LogoLetraNegra.png"
+            alt={storeName || "PARTEX"}
+            className="h-10 sm:h-12 lg:h-14 w-auto object-contain transition-transform group-hover:scale-[1.02] duration-300"
+            onError={(e) => { e.currentTarget.src = "/logoVendingShop.png" }}
+          />
         </Link>
 
         <div className="flex-1 max-w-xl mx-auto">

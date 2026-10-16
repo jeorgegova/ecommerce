@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next"
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "VendingShop",
-    short_name: "VendingShop",
-    description: "Tu tienda de confianza",
+    name: "PARTEX",
+    short_name: "PARTEX",
+    description: "Professional parts & components",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",

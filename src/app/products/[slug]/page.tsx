@@ -5,10 +5,66 @@ import AddToCartButton from "@/components/store/AddToCartButton"
 import FavoriteButton from "@/components/store/FavoriteButton"
 import QuestionSection from "@/components/store/QuestionSection"
 import { createClient } from "@/lib/supabase/server"
+import type { Metadata } from "next"
 import { headers } from "next/headers"
 import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const supabase = await createClient()
+
+  const { data: product } = await supabase
+    .from("products")
+    .select("id, name, description, base_price, sale_price, promotion_active, categories(name, slug)")
+    .eq("slug", slug)
+    .eq("status", "active")
+    .single()
+
+  if (!product) {
+    return {
+      title: "Producto no encontrado | PARTEX",
+    }
+  }
+
+  const { data: images } = await supabase
+    .from("product_images")
+    .select("url")
+    .eq("product_id", product.id)
+    .order("sort_order")
+
+  const mainImage = images?.[0]?.url || "/LogoLetraNegra.png"
+  const categoryName = (product.categories as any)?.name ? ` · ${(product.categories as any).name}` : ""
+  const desc = product.description
+    ? product.description.slice(0, 155)
+    : `Compra repuesto ${product.name}${categoryName} en PARTEX. Disponibilidad inmediata y envíos coordinados nacionales e internacionales.`
+
+  return {
+    title: `${product.name} | Repuestos Vending`,
+    description: desc,
+    alternates: {
+      canonical: `/products/${slug}`,
+    },
+    openGraph: {
+      title: `${product.name} | PARTEX`,
+      description: desc,
+      url: `/products/${slug}`,
+      images: [
+        {
+          url: mainImage,
+          alt: product.name,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.name} | PARTEX`,
+      description: desc,
+      images: [mainImage],
+    },
+  }
+}
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -58,13 +114,86 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const categoryName = product.categories?.name || ""
   const categorySlug = product.categories?.slug || ""
   const mainImage = images?.find((img: any) => img.is_main)?.url || images?.[0]?.url || null
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://partex.co"
 
   const headersList = await headers()
   const referer = headersList.get("referer") || ""
   const cameFromProducts = referer.includes("/products") || referer.endsWith("/")
 
+  // Datos estructurados Schema.org para Google Rich Results y Agentes IA
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: mainImage ? [mainImage] : [],
+    description: product.description || `Repuesto original ${product.name} garantizado por PARTEX.`,
+    sku: product.sku || product.id,
+    brand: {
+      "@type": "Brand",
+      name: "PARTEX",
+    },
+    offers: {
+      "@type": "Offer",
+      url: `${siteUrl}/products/${product.slug}`,
+      priceCurrency: "COP",
+      price: currentPrice,
+      availability: (product.stock_quantity ?? 1) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
+      seller: {
+        "@type": "Organization",
+        name: "PARTEX",
+      },
+    },
+    category: categoryName || undefined,
+  }
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Inicio",
+        item: siteUrl,
+      },
+      ...(categorySlug
+        ? [
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: categoryName,
+              item: `${siteUrl}/categories/${categorySlug}`,
+            },
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: product.name,
+              item: `${siteUrl}/products/${product.slug}`,
+            },
+          ]
+        : [
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: product.name,
+              item: `${siteUrl}/products/${product.slug}`,
+            },
+          ]),
+    ],
+  }
+
   return (
-    <StoreLayout>
+    <StoreLayout showBanner={false}>
+      {/* Schema.org Product & Breadcrumbs */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <ViewTracker
         productId={product.id}
         productName={product.name}

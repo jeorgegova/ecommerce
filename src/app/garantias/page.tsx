@@ -48,7 +48,7 @@ export default function GarantiasPage() {
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             {/* Eyebrow Navigation */}
             <div className="flex items-center justify-between text-xs font-mono tracking-wider text-neutral-400 uppercase">
-              <span>Compromiso de Calidad · VendingShop</span>
+              <span>Compromiso de Calidad · PARTEX</span>
               <span className="text-neutral-500 font-sans normal-case tracking-normal text-xs font-medium">
                 Repuestos probados en banco
               </span>
@@ -120,7 +120,7 @@ export default function GarantiasPage() {
                   <span className="font-mono text-xs font-bold text-neutral-400">01</span>
                   <h5 className="text-base font-semibold text-neutral-900">Número de Pedido</h5>
                   <p className="text-xs sm:text-sm text-neutral-500 leading-relaxed">
-                    Ubica tu código de orden #ORD-XXXX generado en tu compra en VendingShop.
+                    Ubica tu código de orden #ORD-XXXX generado en tu compra en PARTEX.
                   </p>
                 </div>
 

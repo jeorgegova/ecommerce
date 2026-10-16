@@ -43,7 +43,8 @@ export default function Footer() {
   const [phone, setPhone] = useState("+57 300 000 0000")
   const [email, setEmail] = useState("hola@gogi.co")
   const [whatsapp, setWhatsapp] = useState("")
-  const [storeName, setStoreName] = useState("VendingShop")
+  const [storeName, setStoreName] = useState("PARTEX")
+  const [storeSlogan, setStoreSlogan] = useState("Professional parts & components")
 
   useEffect(() => {
     const fetchContact = async () => {
@@ -52,7 +53,7 @@ export default function Footer() {
         const { data } = await supabase
           .from("settings")
           .select("key, value")
-          .in("key", ["store_phone", "store_email", "social_whatsapp", "store_name"])
+          .in("key", ["store_phone", "store_email", "social_whatsapp", "store_name", "store_slogan"])
 
         if (data) {
           data.forEach((row) => {
@@ -61,6 +62,7 @@ export default function Footer() {
             if (row.key === "store_email" && val) setEmail(val)
             if (row.key === "social_whatsapp" && val) setWhatsapp(val)
             if (row.key === "store_name" && val) setStoreName(val)
+            if (row.key === "store_slogan" && val) setStoreSlogan(val)
           })
         }
       } catch {}
@@ -78,16 +80,16 @@ export default function Footer() {
         <div className="hidden md:grid grid-cols-4 gap-10 py-10">
           {/* Info Tienda y Contacto */}
           <div className="space-y-4">
-            <Link href="/" className="group flex items-center gap-2 hover:opacity-90 transition-opacity">
-              <div className="relative flex items-center justify-center p-1 bg-gray-900 rounded-lg border border-gray-800 shadow-xs">
-                <img src="/logoVendingShop.png" alt={storeName} className="h-6 w-6 object-contain" />
-              </div>
-              <span className="text-base font-extrabold tracking-tight text-white leading-none">
-                vending<span className="text-xs font-semibold text-gray-400">Shop</span>
-              </span>
+            <Link href="/" className="group inline-flex items-center hover:opacity-90 transition-opacity">
+              <img
+                src="/LogoBlancoSinFondo.png"
+                alt={storeName || "PARTEX"}
+                className="h-10 sm:h-12 w-auto object-contain transition-transform group-hover:scale-[1.02] duration-300"
+                onError={(e) => { e.currentTarget.src = "/logoBlanco.png" }}
+              />
             </Link>
             <p className="text-xs text-gray-400 leading-relaxed">
-              Tu proveedor de confianza de repuestos para máquinas vending. Calidad garantizada para mantener tu negocio en marcha.
+              {storeSlogan}. Calidad certificada y repuestos garantizados para mantener tu operación en marcha.
             </p>
 
             {/* Bloque de Contacto Directo */}
@@ -163,13 +165,17 @@ export default function Footer() {
 
         {/* Vista Móvil (compacta, funcional con teléfono directo) */}
         <div className="md:hidden flex flex-col items-center text-center gap-4 py-4">
-          <div className="flex items-center gap-2">
-            <img src="/logoVendingShop.png" alt={storeName} className="h-6 w-6 object-contain" />
-            <span className="text-base font-extrabold text-white">vendingShop</span>
+          <div className="flex items-center justify-center">
+            <img
+              src="/LogoBlancoSinFondo.png"
+              alt={storeName || "PARTEX"}
+              className="h-9 sm:h-10 w-auto object-contain"
+              onError={(e) => { e.currentTarget.src = "/logoBlanco.png" }}
+            />
           </div>
 
           <p className="text-xs text-gray-400 max-w-[290px] leading-relaxed">
-            Tu proveedor de repuestos para máquinas vending.
+            {storeSlogan}
           </p>
 
           {/* Botón de llamada directa en móvil */}
@@ -218,7 +224,7 @@ export default function Footer() {
         {/* Borde inferior para Desktop */}
         <div className="hidden md:flex mt-10 border-t border-gray-900 pt-6 items-center justify-between">
           <p className="text-[13px] text-gray-500">
-            &copy; {new Date().getFullYear()} {storeName}. Todos los derechos reservados. Repuestos de calidad para máquinas vending.
+            &copy; {new Date().getFullYear()} {storeName}. Todos los derechos reservados. {storeSlogan}.
           </p>
           <div className="flex items-center gap-4 text-xs text-gray-500">
             <Link href="/envios" className="hover:text-gray-300 transition-colors">Envíos internacionales y nacionales coordinados</Link>
