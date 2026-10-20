@@ -4,7 +4,7 @@
 ## Información de la Empresa
 - **Nombre**: PARTEX
 - **Lema**: Professional parts & components
-- **Sitio Web Oficial**: https://partex.co
+- **Sitio Web Oficial**: https://partexlatam.com
 - **Cobertura**: Colombia y Envíos Internacionales (América Latina y el mundo)
 - **Canales de Atención**: Teléfono y WhatsApp directo disponible en la tienda
 
@@ -41,9 +41,9 @@ Repuestos compatibles y originales para las principales marcas del mercado vendi
 - Plazo de 5 días hábiles para cambio de referencia si la pieza no ha sido instalada ni manipulada.
 
 ## Enlaces Canónicos
-- Catálogo de Productos: https://partex.co/products
-- Categorías: https://partex.co/categories
-- Términos de Envío y Logística: https://partex.co/envios
-- Garantías y Calidad: https://partex.co/garantias
-- Preguntas Frecuentes: https://partex.co/faq
-- Contacto Directo: https://partex.co/contacto
+- Catálogo de Productos: https://partexlatam.com/products
+- Categorías: https://partexlatam.com/categories
+- Términos de Envío y Logística: https://partexlatam.com/envios
+- Garantías y Calidad: https://partexlatam.com/garantias
+- Preguntas Frecuentes: https://partexlatam.com/faq
+- Contacto Directo: https://partexlatam.com/contacto

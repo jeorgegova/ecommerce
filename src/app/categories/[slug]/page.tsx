@@ -18,22 +18,22 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   if (!category) return { title: "Categoría no encontrada | PARTEX" }
 
-  const desc = category.description || `Repuestos y componentes para máquinas vending en la categoría ${category.name}. Disponibilidad y envíos directos con PARTEX.`
+  const desc = category.description || `Compra repuestos de ${category.name} para máquinas vending en Colombia. Envíos nacionales inmediatos y asesoría técnica especializada con PARTEX.`
 
   return {
-    title: `${category.name} | Repuestos Vending`,
+    title: `${category.name} | Repuestos para Máquinas Vending Colombia | PARTEX`,
     description: desc,
     alternates: {
       canonical: `/categories/${slug}`,
     },
     openGraph: {
-      title: `${category.name} | PARTEX`,
+      title: `${category.name} | Repuestos Vending Colombia | PARTEX`,
       description: desc,
       url: `/categories/${slug}`,
     },
     twitter: {
       card: "summary_large_image",
-      title: `${category.name} | PARTEX`,
+      title: `${category.name} | Repuestos Vending Colombia | PARTEX`,
       description: desc,
     },
   }
@@ -77,7 +77,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
     { label: "En oferta", href: "/search?on_sale=true", active: false },
   ]
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://partex.co"
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://partexlatam.com"
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

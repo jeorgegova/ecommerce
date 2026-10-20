@@ -2,6 +2,15 @@ import ProductFilterEngine from "@/components/store/ProductFilterEngine"
 import RecentlyViewed from "@/components/store/RecentlyViewed"
 import StoreLayout from "@/components/layout/StoreLayout"
 import { createClient } from "@/lib/supabase/server"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Repuestos para Máquinas Vending en Colombia | PARTEX",
+  description: "Distribuidor especializado de repuestos para máquinas vending y expendedoras en Colombia. Bombas Ulka, motores de espiral, validadores, monederos y componentes con envíos nacionales.",
+  alternates: {
+    canonical: "/",
+  },
+}
 
 export default async function HomePage({
   searchParams,
@@ -61,6 +70,52 @@ export default async function HomePage({
           <RecentlyViewed />
         </aside>
       </div>
+
+      {/* Sección SEO: Relevancia temática y semántica para Google en Colombia */}
+      <section aria-labelledby="seo-heading" className="mx-auto max-w-7xl mt-16 border-t border-gray-100 pt-12 pb-8 px-4 sm:px-6">
+        <div className="max-w-3xl">
+          <h2 id="seo-heading" className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900">
+            Especialistas en Repuestos para Máquinas Vending en Colombia
+          </h2>
+          <p className="mt-3 text-sm sm:text-base leading-relaxed text-gray-600">
+            En <strong>PARTEX</strong> somos distribuidores especializados de <strong>repuestos para máquinas vending</strong> y café en Colombia. Proveemos componentes originales y compatibles certificados para operadores de máquinas expendedoras de snacks, bebidas frías y café en grano o soluble.
+          </p>
+        </div>
+
+        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-5">
+            <h3 className="text-sm font-semibold text-gray-900">Bombas y Sistema Hidráulico</h3>
+            <p className="mt-2 text-xs leading-relaxed text-gray-500">
+              Bombas vibratorias Ulka EP5 (120V / 230V), electroválvulas ODE, racores rápidos, mangueras de teflón y calderas para máquinas de café vending.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-5">
+            <h3 className="text-sm font-semibold text-gray-900">Motores y Mecanismos</h3>
+            <p className="mt-2 text-xs leading-relaxed text-gray-500">
+              Motores de espiral a 24V, motorreductores de paletas, piñones, espirales metálicas y resortes de caída para máquinas expendedoras de snacks.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-5">
+            <h3 className="text-sm font-semibold text-gray-900">Sistemas de Pago MDB</h3>
+            <p className="mt-2 text-xs leading-relaxed text-gray-500">
+              Validadores de billetes ICT / Currenza, monederos de cambio con protocolo MDB / Executive y lectores de tarjeta contactless.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-5">
+            <h3 className="text-sm font-semibold text-gray-900">Envíos a toda Colombia</h3>
+            <p className="mt-2 text-xs leading-relaxed text-gray-500">
+              Despachos coordinados a Bogotá, Medellín, Cali, Barranquilla, Bucaramanga, Pereira y todas las ciudades del país, con proforma inmediata.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-6 rounded-2xl bg-gray-50 p-5 text-xs text-gray-500 leading-relaxed">
+          <strong className="text-gray-700">Marcas compatibles en nuestro catálogo:</strong> Repuestos y consumibles para máquinas Saeco, Necta, FAS International, Bianchi Vending, Jofemar, Azkoyen, Crane National y Rheavendors.
+        </div>
+      </section>
     </StoreLayout>
   )
 }

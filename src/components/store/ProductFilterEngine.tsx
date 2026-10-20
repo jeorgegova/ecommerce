@@ -542,7 +542,7 @@ export default function ProductFilterEngine({
           <div className="mb-4 flex items-center justify-between gap-2 lg:mb-6">
             <div className="min-w-0">
               <h1 className="text-base sm:text-xl font-bold tracking-tight text-gray-900 truncate lg:text-2xl">
-                {effectiveSearch ? `"${effectiveSearch}"` : "Productos"}
+                {effectiveSearch ? `Repuestos para "${effectiveSearch}"` : "Repuestos para Máquinas Vending"}
               </h1>
               <p className="text-[10px] sm:text-[13px] text-gray-400 tabular-nums">
                 {totalCount.toLocaleString("es-CO")} resultado{totalCount !== 1 ? "s" : ""}

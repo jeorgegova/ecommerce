@@ -1,6 +1,20 @@
 import StoreLayout from "@/components/layout/StoreLayout"
 import { createClient } from "@/lib/supabase/server"
+import type { Metadata } from "next"
 import Link from "next/link"
+
+export const metadata: Metadata = {
+  title: "Categorías de Repuestos para Máquinas Vending | PARTEX Colombia",
+  description: "Explora repuestos para máquinas vending por categoría: bombas hidráulicas, motores de espiral, validadores de billetes, tarjetas electrónicas y accesorios en Colombia.",
+  alternates: {
+    canonical: "/categories",
+  },
+  openGraph: {
+    title: "Categorías de Repuestos para Máquinas Vending | PARTEX Colombia",
+    description: "Componentes organizados por categoría para máquinas expendedoras y café vending en Colombia.",
+    url: "/categories",
+  },
+}
 
 export default async function CategoriesPage() {
   const supabase = await createClient()

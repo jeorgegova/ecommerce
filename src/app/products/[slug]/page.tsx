@@ -38,28 +38,28 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const categoryName = (product.categories as any)?.name ? ` · ${(product.categories as any).name}` : ""
   const desc = product.description
     ? product.description.slice(0, 155)
-    : `Compra repuesto ${product.name}${categoryName} en PARTEX. Disponibilidad inmediata y envíos coordinados nacionales e internacionales.`
+    : `Compra repuesto ${product.name}${categoryName} en Colombia. Partes certificadas para máquinas vending y café con despacho rápido en PARTEX.`
 
   return {
-    title: `${product.name} | Repuestos Vending`,
+    title: `${product.name} | Repuesto para Máquina Vending | PARTEX Colombia`,
     description: desc,
     alternates: {
       canonical: `/products/${slug}`,
     },
     openGraph: {
-      title: `${product.name} | PARTEX`,
+      title: `${product.name} | Repuesto Máquina Vending | PARTEX Colombia`,
       description: desc,
       url: `/products/${slug}`,
       images: [
         {
           url: mainImage,
-          alt: product.name,
+          alt: `${product.name} - Repuesto para máquina vending en Colombia`,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${product.name} | PARTEX`,
+      title: `${product.name} | PARTEX Vending Colombia`,
       description: desc,
       images: [mainImage],
     },
@@ -114,7 +114,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const categoryName = product.categories?.name || ""
   const categorySlug = product.categories?.slug || ""
   const mainImage = images?.find((img: any) => img.is_main)?.url || images?.[0]?.url || null
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://partex.co"
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://partexlatam.com"
 
   const headersList = await headers()
   const referer = headersList.get("referer") || ""

@@ -14,38 +14,48 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 })
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://partex.co"
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://partexlatam.com"
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "PARTEX | Professional parts & components",
-    template: "%s | PARTEX",
+    default: "Repuestos para Máquinas Vending en Colombia | PARTEX",
+    template: "%s | Repuestos Vending Colombia | PARTEX",
   },
-  description: "Catálogo especializado de repuestos, bombas, motores y componentes para máquinas expendedoras y café vending. Envíos nacionales e internacionales coordinados.",
+  description: "Especialistas en repuestos para máquinas vending en Colombia. Bombas Ulka, motores de espiral, validadores de billetes, monederos, electroválvulas y partes para máquinas expendedoras y café vending. Envíos nacionales e internacionales.",
   keywords: [
-    "repuestos vending",
     "repuestos para maquinas vending",
+    "repuestos para máquinas vending",
+    "repuestos vending",
+    "vending colombia",
+    "repuestos vending colombia",
+    "repuestos maquinas expendedoras",
     "partes vending colombia",
-    "motores vending",
-    "bombas ep5 ulka",
+    "repuestos maquinas de cafe vending",
+    "bombas ep5 ulka colombia",
+    "bomba ulka vending",
+    "motores de espiral vending",
     "validador de billetes vending",
-    "saeco repuestos",
-    "necta repuestos",
+    "monederos mdb colombia",
+    "repuestos saeco vending colombia",
+    "repuestos necta colombia",
+    "repuestos bianchi vending",
+    "repuestos jofemar colombia",
+    "insumos vending colombia",
     "PARTEX",
     "professional parts and components",
   ],
-  authors: [{ name: "PARTEX" }],
+  authors: [{ name: "PARTEX", url: siteUrl }],
   creator: "PARTEX",
   publisher: "PARTEX",
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "PARTEX | Professional parts & components",
-    description: "Repuestos y componentes garantizados para máquinas vending e industriales. Envíos nacionales e internacionales.",
+    title: "Repuestos para Máquinas Vending en Colombia | PARTEX",
+    description: "Catálogo especializado de repuestos originales y compatibles para máquinas expendedoras y café vending en Colombia. Envíos nacionales inmediatos.",
     url: siteUrl,
-    siteName: "PARTEX",
+    siteName: "PARTEX Vending Colombia",
     locale: "es_CO",
     type: "website",
     images: [
@@ -53,14 +63,14 @@ export const metadata: Metadata = {
         url: "/LogoLetraNegra.png",
         width: 1580,
         height: 504,
-        alt: "PARTEX - Professional parts & components",
+        alt: "PARTEX - Repuestos para Máquinas Vending en Colombia",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "PARTEX | Professional parts & components",
-    description: "Repuestos y componentes certificados para máquinas vending con envíos nacionales e internacionales.",
+    title: "Repuestos para Máquinas Vending en Colombia | PARTEX",
+    description: "Repuestos, componentes y accesorios para máquinas expendedoras y café vending en Colombia.",
     images: ["/LogoLetraNegra.png"],
   },
   robots: {
@@ -73,6 +83,14 @@ export const metadata: Metadata = {
       "max-image-preview": "large",
       "max-snippet": -1,
     },
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/apple-icon.png",
   },
 }
 
@@ -92,24 +110,56 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
       <body className="flex flex-col min-h-screen bg-white text-gray-900">
-        {/* Structured Data: Organization para Google Knowledge Graph y Motores IA */}
+        {/* Structured Data: WebSite con Sitelinks Searchbox y Store/Organization para Google Search */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              name: "PARTEX",
-              alternateName: "PARTEX - Professional parts & components",
-              url: siteUrl,
-              logo: `${siteUrl}/LogoLetraNegra.png`,
-              description: "Especialistas en repuestos, partes mecánicas, componentes electrónicos y accesorios para máquinas expendedoras y café vending.",
-              contactPoint: {
-                "@type": "ContactPoint",
-                contactType: "customer service",
-                availableLanguage: ["Spanish", "English"],
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                name: "PARTEX - Repuestos para Máquinas Vending Colombia",
+                alternateName: ["PARTEX", "PARTEX Vending"],
+                url: siteUrl,
+                potentialAction: {
+                  "@type": "SearchAction",
+                  target: `${siteUrl}/products?q={search_term_string}`,
+                  "query-input": "required name=search_term_string",
+                },
+                inLanguage: "es-CO",
               },
-            }),
+              {
+                "@context": "https://schema.org",
+                "@type": ["Store", "Organization"],
+                name: "PARTEX",
+                alternateName: [
+                  "PARTEX - Repuestos para Máquinas Vending",
+                  "PARTEX Vending Colombia",
+                  "PARTEX Professional parts & components",
+                ],
+                url: siteUrl,
+                logo: `${siteUrl}/LogoLetraNegra.png`,
+                image: `${siteUrl}/LogoLetraNegra.png`,
+                description:
+                  "Distribuidor y comercializador de repuestos, bombas Ulka, motores de espiral, validadores, monederos y componentes electrónicos para máquinas expendedoras y café vending en Colombia.",
+                priceRange: "$$",
+                currenciesAccepted: "COP",
+                paymentAccepted: "Transferencia Bancolombia, Consignación, Efectivo",
+                areaServed: {
+                  "@type": "Country",
+                  name: "Colombia",
+                },
+                address: {
+                  "@type": "PostalAddress",
+                  addressCountry: "CO",
+                },
+                contactPoint: {
+                  "@type": "ContactPoint",
+                  contactType: "customer service",
+                  availableLanguage: ["Spanish"],
+                },
+              },
+            ]),
           }}
         />
         <BackgroundPattern />

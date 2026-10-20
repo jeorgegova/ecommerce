@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next"
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "PARTEX",
+    name: "PARTEX - Repuestos para Máquinas Vending Colombia",
     short_name: "PARTEX",
-    description: "Professional parts & components",
+    description: "Repuestos, bombas y componentes para máquinas expendedoras y café vending en Colombia.",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",

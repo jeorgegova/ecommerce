@@ -5,10 +5,15 @@ import { createClient } from "@/lib/supabase/server"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Catálogo de Productos | PARTEX",
-  description: "Explora nuestro catálogo completo de repuestos y componentes para máquinas vending. Filtra por categorías, disponibilidad, precio y relevancia.",
+  title: "Catálogo de Repuestos para Máquinas Vending | PARTEX Colombia",
+  description: "Catálogo completo de repuestos para máquinas vending y café en Colombia. Bombas Ulka, motores de espiral, validadores, monederos y tarjetas electrónicas con envíos nacionales.",
   alternates: {
     canonical: "/products",
+  },
+  openGraph: {
+    title: "Catálogo de Repuestos para Máquinas Vending | PARTEX Colombia",
+    description: "Repuestos certificados y compatibles para máquinas vending y café con envíos a toda Colombia.",
+    url: "/products",
   },
 }
 

@@ -229,6 +229,37 @@ export default function CheckoutPage() {
         address: address?.address_line_1, city: address?.city, state: address?.state,
         bankName: getSettingValue(settings, "banco_consignar"), bankAccount: getSettingValue(settings, "numero_cuenta_bancaria"),
       })
+
+      try {
+        await supabase.functions.invoke("send-order-email", {
+          body: {
+            to: user.email,
+            customerName: address?.full_name || user.email,
+            orderNumber: order.order_number,
+            createdAt: order.created_at,
+            status: order.status,
+            subtotal: Number(order.subtotal),
+            shipping: Number(order.shipping_cost),
+            discount: Number(order.discount),
+            total: Number(order.total),
+            items: orderItems.map((it: any) => ({
+              product_name: it.product_name,
+              variant_name: it.variant_name,
+              quantity: it.quantity,
+              unit_price: Number(it.unit_price),
+              subtotal: Number(it.subtotal),
+            })),
+            address: address?.address_line_1,
+            city: address?.city,
+            state: address?.state,
+            bankName: getSettingValue(settings, "banco_consignar"),
+            bankAccount: getSettingValue(settings, "numero_cuenta_bancaria"),
+            orderUrl: `${window.location.origin}/account/orders/${orderId}`,
+          },
+        })
+      } catch (err) {
+        console.error("No se pudo enviar el correo de confirmación de pedido:", err)
+      }
     }
     // create_order_from_cart vacia el carrito en el servidor: reflejalo de inmediato
     resetLocal()
