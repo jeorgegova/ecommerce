@@ -15,6 +15,7 @@ const pathLabels: Record<string, string> = {
   questions: "Preguntas",
   import: "Importar",
   banners: "Carrusel",
+  settings: "Configuración",
   new: "Nuevo",
 }
 

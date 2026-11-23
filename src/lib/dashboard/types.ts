@@ -56,8 +56,8 @@ export interface LowStockProduct {
 export interface RecentOrder {
   order_id: string
   order_number: string
-  customer_name: string
-  customer_email: string
+  customer_name: string | null
+  customer_email: string | null
   total: number
   status: string
   status_name: string
@@ -68,7 +68,7 @@ export interface RecentOrder {
 
 export interface TopCustomer {
   user_id: string
-  full_name: string
+  full_name: string | null
   email: string
   avatar_url: string | null
   total_orders: number

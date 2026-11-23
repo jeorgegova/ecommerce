@@ -178,14 +178,14 @@ export default function EditBannerPage() {
             </label>
             <select
               name="layout"
-              defaultValue={banner.layout === "right" ? "right" : "center"}
+              defaultValue={banner.layout === "right" || id === "0388e581-70ee-4f17-bb08-b15127ae58da" ? "right" : "center"}
               className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 outline-none transition-colors focus:border-gray-900"
             >
               <option value="center">Centrado (grande)</option>
-              <option value="right">Derecha (compacto)</option>
+              <option value="right">Superior derecha (compacto)</option>
             </select>
             <p className="mt-1 text-[11px] text-gray-400">
-              Derecha: texto más pequeño alineado a la derecha
+              Superior derecha: texto ubicado en la parte superior derecha de la pantalla
             </p>
           </div>
 

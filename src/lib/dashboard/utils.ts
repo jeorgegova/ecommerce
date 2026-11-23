@@ -120,11 +120,12 @@ export function getActivityIcon(icon: string): string {
   return icons[icon] || "📌"
 }
 
-export function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((n) => n.charAt(0))
-    .join("")
-    .toUpperCase()
-    .slice(0, 2)
+export function getInitials(name?: string | null): string {
+  if (!name || typeof name !== "string") return "--"
+  const trimmed = name.trim()
+  if (!trimmed) return "--"
+  const parts = trimmed.split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return "--"
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
 }

@@ -78,11 +78,22 @@ export async function createBanner(formData: FormData) {
 
   const validated = bannerSchema.parse(raw)
 
-  const { error } = await supabase.from("banners").insert({
+  let { error } = await supabase.from("banners").insert({
     ...validated,
     starts_at: validated.starts_at || null,
     ends_at: validated.ends_at || null,
   })
+
+  // Fallback si la columna 'layout' aún no existe en Supabase (evita error 500 en schema cache)
+  if (error && error.message?.toLowerCase().includes("layout")) {
+    const { layout: _unused, ...dataWithoutLayout } = validated
+    const retry = await supabase.from("banners").insert({
+      ...dataWithoutLayout,
+      starts_at: validated.starts_at || null,
+      ends_at: validated.ends_at || null,
+    })
+    error = retry.error
+  }
 
   if (error) throw new Error(error.message)
 
@@ -120,7 +131,7 @@ export async function updateBanner(id: string, formData: FormData) {
 
   const validated = bannerSchema.parse(raw)
 
-  const { error } = await supabase
+  let { error } = await supabase
     .from("banners")
     .update({
       ...validated,
@@ -128,6 +139,20 @@ export async function updateBanner(id: string, formData: FormData) {
       ends_at: validated.ends_at || null,
     })
     .eq("id", id)
+
+  // Fallback si la columna 'layout' aún no existe en Supabase (evita error 500 en schema cache)
+  if (error && error.message?.toLowerCase().includes("layout")) {
+    const { layout: _unused, ...dataWithoutLayout } = validated
+    const retry = await supabase
+      .from("banners")
+      .update({
+        ...dataWithoutLayout,
+        starts_at: validated.starts_at || null,
+        ends_at: validated.ends_at || null,
+      })
+      .eq("id", id)
+    error = retry.error
+  }
 
   if (error) throw new Error(error.message)
 

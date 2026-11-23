@@ -125,10 +125,10 @@ export default function NewBannerPage() {
               className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 outline-none transition-colors focus:border-gray-900"
             >
               <option value="center">Centrado (grande)</option>
-              <option value="right">Derecha (compacto)</option>
+              <option value="right">Superior derecha (compacto)</option>
             </select>
             <p className="mt-1 text-[11px] text-gray-400">
-              Derecha: texto más pequeño alineado a la derecha
+              Superior derecha: texto ubicado en la parte superior derecha de la pantalla
             </p>
           </div>
 

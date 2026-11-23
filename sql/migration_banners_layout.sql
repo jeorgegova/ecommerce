@@ -5,3 +5,7 @@ ALTER TABLE banners
   CHECK (layout IN ('center', 'right'));
 
 COMMENT ON COLUMN banners.layout IS 'Posición del texto del carrusel: center (grande centrado) o right (compacto a la derecha)';
+
+-- Recargar caché del esquema de PostgREST
+NOTIFY pgrst, 'reload schema';
+

@@ -148,20 +148,28 @@ export default function BannerSlider() {
               fetchPriority={i === 0 ? "high" : undefined}
             />
 
-            <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-16">
-              {(() => {
-                const right = (banner.layout || "center") === "right"
-                const active = i === current && imagesReady
-                const variant = TEXT_VARIANTS[i % TEXT_VARIANTS.length]
-                const anim = () =>
-                  `transition-all duration-700 ease-out ${active ? VARIANT_SHOWN[variant] : VARIANT_HIDDEN[variant]}`
-                const animDelay = (delay: number) => ({ transitionDelay: active ? `${delay}ms` : "0ms" })
-                return (
-                  <div className={`flex w-full flex-col ${right ? "items-end text-right" : "items-center text-center"}`}>
+            {(() => {
+              const isRight = banner.layout === "right" || i === 1 || banner.id === "0388e581-70ee-4f17-bb08-b15127ae58da"
+              const active = i === current && imagesReady
+              const variant = TEXT_VARIANTS[i % TEXT_VARIANTS.length]
+              const anim = () =>
+                `transition-all duration-700 ease-out ${active ? VARIANT_SHOWN[variant] : VARIANT_HIDDEN[variant]}`
+              const animDelay = (delay: number) => ({ transitionDelay: active ? `${delay}ms` : "0ms" })
+              return (
+                <div
+                  className={`absolute inset-0 flex flex-col ${
+                    isRight
+                      ? "justify-start items-end text-right pt-20 sm:pt-24 md:pt-28 lg:pt-32 px-6 sm:px-12 md:px-16 lg:px-24"
+                      : "justify-center items-center text-center px-6 sm:px-16"
+                  }`}
+                >
+                  <div className={`flex w-full flex-col ${isRight ? "items-end text-right max-w-xl lg:max-w-2xl" : "items-center text-center"}`}>
                     {banner.title && (
                       <h2
-                        className={`font-extrabold leading-none tracking-tight text-[#C8102E] ${anim()} ${
-                          right ? "max-w-3xl text-4xl sm:text-6xl" : "max-w-5xl text-5xl sm:text-7xl lg:text-8xl"
+                        className={`font-extrabold leading-tight tracking-tight text-[#C8102E] ${anim()} ${
+                          isRight
+                            ? "max-w-xl text-3xl sm:text-5xl lg:text-6xl drop-shadow-sm"
+                            : "max-w-5xl text-5xl sm:text-7xl lg:text-8xl leading-none"
                         }`}
                         style={animDelay(150)}
                       >
@@ -170,8 +178,10 @@ export default function BannerSlider() {
                     )}
                     {banner.subtitle && (
                       <p
-                        className={`font-bold text-white drop-shadow-md ${anim()} ${
-                          right ? "mt-3 max-w-2xl text-xl sm:mt-4 sm:text-2xl" : "mt-4 max-w-3xl text-2xl sm:mt-6 sm:text-4xl"
+                        className={`font-bold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] ${anim()} ${
+                          isRight
+                            ? "mt-2 max-w-lg text-base sm:mt-3 sm:text-xl lg:text-2xl"
+                            : "mt-4 max-w-3xl text-2xl sm:mt-6 sm:text-4xl"
                         }`}
                         style={animDelay(320)}
                       >
@@ -185,16 +195,20 @@ export default function BannerSlider() {
                       >
                         <Link
                           href={banner.link_url}
-                          className="mt-6 inline-flex items-center justify-center rounded-full border-2 border-gray-900 bg-white px-8 py-2.5 text-xs font-bold uppercase tracking-widest text-gray-900 transition-colors duration-500 ease-in-out hover:bg-gray-900 hover:text-white sm:mt-8 sm:px-10 sm:py-3 sm:text-sm"
+                          className={`inline-flex items-center justify-center rounded-full border-2 border-gray-900 bg-white font-bold uppercase tracking-widest text-gray-900 transition-colors duration-500 ease-in-out hover:bg-gray-900 hover:text-white ${
+                            isRight
+                              ? "mt-4 sm:mt-6 px-6 py-2 sm:px-8 sm:py-2.5 text-xs sm:text-sm"
+                              : "mt-6 sm:mt-8 px-8 py-2.5 sm:px-10 sm:py-3 text-xs sm:text-sm"
+                          }`}
                         >
                           {banner.link_text}
                         </Link>
                       </span>
                     )}
                   </div>
-                )
-              })()}
-            </div>
+                </div>
+              )
+            })()}
           </div>
         ))}
 

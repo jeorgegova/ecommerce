@@ -83,10 +83,10 @@ export default function RecentOrders() {
                 <td className="px-5 py-2.5">
                   <div className="flex items-center gap-2">
                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-[10px] font-medium text-gray-500">
-                      {getInitials(order.customer_name)}
+                      {getInitials(order.customer_name || order.customer_email || "Cliente")}
                     </div>
                     <span className="text-sm text-gray-700 truncate max-w-[120px]">
-                      {order.customer_name}
+                      {order.customer_name || order.customer_email || "Cliente"}
                     </span>
                   </div>
                 </td>

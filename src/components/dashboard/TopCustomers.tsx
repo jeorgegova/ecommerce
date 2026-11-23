@@ -51,16 +51,16 @@ export default function TopCustomers() {
               {customer.avatar_url ? (
                 <img
                   src={customer.avatar_url}
-                  alt={customer.full_name}
+                  alt={customer.full_name || "Cliente"}
                   className="h-full w-full object-cover"
                 />
               ) : (
-                getInitials(customer.full_name)
+                getInitials(customer.full_name || "Cliente")
               )}
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-gray-900 truncate">
-                {customer.full_name}
+                {customer.full_name || "Cliente"}
               </p>
               <p className="text-xs text-gray-500">
                 {formatNumber(customer.total_orders)} compras · {formatCompactCurrency(customer.total_spent)}
