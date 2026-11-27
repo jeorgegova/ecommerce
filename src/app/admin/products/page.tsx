@@ -1,5 +1,6 @@
 "use client"
 
+import { exportCatalogExcel } from "@/lib/dashboard/exports"
 import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -26,6 +27,7 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
   const [toggling, setToggling] = useState<string | null>(null)
+  const [exporting, setExporting] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -74,6 +76,17 @@ export default function AdminProductsPage() {
     setToggling(null)
   }
 
+  const handleExportCatalog = async () => {
+    setExporting(true)
+    try {
+      await exportCatalogExcel()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error al exportar el catálogo")
+    } finally {
+      setExporting(false)
+    }
+  }
+
   const filtered = products.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -94,16 +107,29 @@ export default function AdminProductsPage() {
 
   return (
     <div className="mx-auto max-w-7xl">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm text-gray-500">{products.length} productos</p>
         </div>
-        <Link
-          href="/admin/products/new"
-          className="rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
-        >
-          Nuevo Producto
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleExportCatalog}
+            disabled={exporting}
+            className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            {exporting ? "Exportando..." : "Descargar Catálogo Excel"}
+          </button>
+          <Link
+            href="/admin/products/new"
+            className="rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+          >
+            Nuevo Producto
+          </Link>
+        </div>
       </div>
 
       <div className="mt-6">

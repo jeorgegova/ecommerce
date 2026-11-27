@@ -217,3 +217,167 @@ export async function exportInventoryExcel() {
   XLSX.utils.book_append_sheet(wb, ws, "Inventario")
   XLSX.writeFile(wb, `inventario-${localeDate()}.xlsx`)
 }
+
+function chunkArray<T>(items: T[], size: number): T[][] {
+  const chunks: T[][] = []
+  for (let i = 0; i < items.length; i += size) {
+    chunks.push(items.slice(i, i + size))
+  }
+  return chunks
+}
+
+function normalizeAttrKey(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+}
+
+interface CatalogProductRow {
+  id: string
+  sku: string | null
+  name: string | null
+  slug: string | null
+  short_description: string | null
+  long_description: string | null
+  internal_code: string | null
+  categories: { name: string | null } | { name: string | null }[] | null
+}
+
+interface CatalogAttributeRow {
+  product_id: string
+  value: string | null
+  attributes: { name: string | null; slug: string | null } | { name: string | null; slug: string | null }[] | null
+}
+
+export async function exportCatalogExcel() {
+  const XLSX = await import("xlsx")
+  const supabase = getSupabase()
+  const siteUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (typeof window !== "undefined" ? window.location.origin : "https://partexlatam.com")
+  ).replace(/\/$/, "")
+
+  // Paginate to ensure all active products are exported even if > 1000
+  const pageSize = 1000
+  const allProducts: CatalogProductRow[] = []
+  let from = 0
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("products")
+      .select("id, sku, name, slug, short_description, long_description, internal_code, categories(name)")
+      .eq("status", "active")
+      .order("name", { ascending: true })
+      .range(from, from + pageSize - 1)
+
+    if (error) throw new Error(error.message)
+    if (!data || data.length === 0) break
+
+    allProducts.push(...(data as CatalogProductRow[]))
+    if (data.length < pageSize) break
+    from += pageSize
+  }
+
+  const productIds = allProducts.map((p) => p.id)
+  const imageMap: Record<string, string> = {}
+  const brandMap: Record<string, string> = {}
+  const altRefMap: Record<string, string[]> = {}
+
+  for (const batch of chunkArray(productIds, 100)) {
+    const [{ data: images }, { data: attrValues }] = await Promise.all([
+      supabase
+        .from("product_images")
+        .select("product_id, url, is_main, sort_order")
+        .in("product_id", batch)
+        .order("is_main", { ascending: false })
+        .order("sort_order", { ascending: true }),
+      supabase
+        .from("product_attribute_values")
+        .select("product_id, value, attributes(name, slug)")
+        .in("product_id", batch),
+    ])
+
+    for (const img of images || []) {
+      if (!imageMap[img.product_id] && img.url) {
+        imageMap[img.product_id] = img.url
+      }
+    }
+
+    for (const av of (attrValues || []) as CatalogAttributeRow[]) {
+      const attr = Array.isArray(av.attributes) ? av.attributes[0] : av.attributes
+      const key = normalizeAttrKey(attr?.slug || attr?.name || "")
+      const val = (av.value || "").trim()
+      if (!val) continue
+
+      if (key === "marca" || key === "brand") {
+        if (!brandMap[av.product_id]) brandMap[av.product_id] = val
+      } else if (
+        key.includes("referencia") ||
+        key.includes("alternative") ||
+        key === "oem" ||
+        key === "equivalencia" ||
+        key === "equivalencias"
+      ) {
+        if (!altRefMap[av.product_id]) altRefMap[av.product_id] = []
+        if (!altRefMap[av.product_id].includes(val)) {
+          altRefMap[av.product_id].push(val)
+        }
+      }
+    }
+  }
+
+  const headers = [
+    "SKU",
+    "Nombre",
+    "Descripción",
+    "Categoría",
+    "URL del producto",
+    "URL o archivo de fotografía",
+    "Referencias alternativas",
+    "Marca",
+  ]
+
+  const rows = allProducts.map((p) => {
+    const shortDesc = (p.short_description || "").trim()
+    const longDesc = (p.long_description || "").trim()
+    const description =
+      shortDesc && longDesc && shortDesc !== longDesc
+        ? `${shortDesc}\n\n${longDesc}`
+        : shortDesc || longDesc || ""
+
+    const categoryObj = Array.isArray(p.categories) ? p.categories[0] : p.categories
+
+    const altRefs = [...(altRefMap[p.id] || [])]
+    if (p.internal_code && !altRefs.includes(p.internal_code.trim())) {
+      altRefs.unshift(p.internal_code.trim())
+    }
+
+    return {
+      SKU: p.sku || "",
+      Nombre: p.name || "",
+      Descripción: description,
+      Categoría: categoryObj?.name || "",
+      "URL del producto": p.slug ? `${siteUrl}/products/${p.slug}` : "",
+      "URL o archivo de fotografía": imageMap[p.id] || "",
+      "Referencias alternativas": altRefs.join(", "),
+      Marca: brandMap[p.id] || "",
+    }
+  })
+
+  const wb = XLSX.utils.book_new()
+  const ws = XLSX.utils.json_to_sheet(rows, { header: headers })
+  ws["!cols"] = [
+    { wch: 18 },
+    { wch: 36 },
+    { wch: 50 },
+    { wch: 24 },
+    { wch: 45 },
+    { wch: 45 },
+    { wch: 28 },
+    { wch: 20 },
+  ]
+  XLSX.utils.book_append_sheet(wb, ws, "Catálogo")
+  XLSX.writeFile(wb, `catalogo-productos-${localeDate()}.xlsx`)
+}
